@@ -178,7 +178,7 @@ let auth=null,db=null,me=null,rows=[];
 const EVENT_LABEL={open_chapter:'Opened chapter',open_calculator:'Opened calculator',reveal_answer:'Revealed model answer',answer_attempt:'Wrote an answer',mark_done:'Marked exercise done',unmark_done:'Unmarked exercise',open_ai_panel:'Opened AI assistant',open_ai_section:'Opened AI section',login:'Signed in'};
 
 function err(m){const e=document.getElementById('loginErr');e.textContent=m;e.classList.add('show');}
-function gIn(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>err(e.message));}
+function gIn(){auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());}
 function eIn(){const a=em.value.trim(),p=pw.value;if(!a||!p)return err('Enter email and password.');auth.signInWithEmailAndPassword(a,p).catch(e=>err(e.message));}
 function eUp(){const a=em.value.trim(),p=pw.value;if(!a||p.length<6)return err('Enter email and a 6+ char password.');auth.createUserWithEmailAndPassword(a,p).catch(e=>err(e.message));}
 function signOut(){auth.signOut();}
