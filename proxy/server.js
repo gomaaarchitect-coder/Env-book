@@ -40,8 +40,8 @@ app.use((req, res, next) => {
 /* ---------- Rate limiting (protects the shared key) ----------
    In-memory token buckets keyed by IP. Resets if the dyno restarts,
    which is fine for classroom-scale abuse protection.            */
-const PER_MIN = 12;          // max requests per IP per minute
-const PER_DAY = 250;         // max requests per IP per day
+const PER_MIN = 12;          // max requests per IP per minute (burst abuse)
+const PER_DAY = 1000;        // max requests per IP per day (shared campus IPs)
 const minBuckets = new Map();
 const dayBuckets = new Map();
 
@@ -63,6 +63,39 @@ setInterval(() => {
   for (const [k, b] of minBuckets) if (now - b.start > 60 * 1000) minBuckets.delete(k);
   for (const [k, b] of dayBuckets) if (now - b.start > 24 * 60 * 60 * 1000) dayBuckets.delete(k);
 }, 5 * 60 * 1000);
+
+/* ---------- Per-student daily message limit (server-side gate) ----------
+   The client UI also enforces this, but that can be bypassed by editing the
+   page, so we enforce the real cap here too. Counts are keyed by the student's
+   Firebase uid (sent as `userId`) and reset at local midnight in the course's
+   timezone. Note: storage is in-memory, so a dyno restart resets the day's
+   counts early — acceptable for classroom scale. For a hard guarantee across
+   restarts, back this with Firebase Admin / a database.                    */
+const DAILY_PER_STUDENT = Number(process.env.DAILY_PER_STUDENT || 12);
+const TZ_OFFSET_MIN     = Number(process.env.TZ_OFFSET_MIN || 120); // Egypt = UTC+2
+const studentDay = new Map(); // userId -> { day:'YYYY-MM-DD', n }
+
+function courseDayKey() {
+  return new Date(Date.now() + TZ_OFFSET_MIN * 60 * 1000).toISOString().slice(0, 10);
+}
+// returns { allowed, used, left } and increments when allowed
+function takeStudentToken(userId) {
+  const day = courseDayKey();
+  let b = studentDay.get(userId);
+  if (!b || b.day !== day) { b = { day, n: 0 }; studentDay.set(userId, b); }
+  if (b.n >= DAILY_PER_STUDENT) return { allowed: false, used: b.n, left: 0 };
+  b.n++;
+  return { allowed: true, used: b.n, left: DAILY_PER_STUDENT - b.n };
+}
+function refundStudentToken(userId) {
+  const b = studentDay.get(userId);
+  if (b && b.day === courseDayKey() && b.n > 0) b.n--;
+}
+// daily sweep so the map doesn't grow without bound
+setInterval(() => {
+  const day = courseDayKey();
+  for (const [k, b] of studentDay) if (b.day !== day) studentDay.delete(k);
+}, 60 * 60 * 1000);
 
 /* ---------- Socratic system prompt + grounding ---------- */
 function buildSystem(context) {
@@ -107,9 +140,23 @@ app.post('/chat', async (req, res) => {
       return res.status(429).json({ error: 'You are sending messages too quickly. Please wait a moment and try again.' });
     }
 
-    const { messages, context } = req.body || {};
+    const { messages, context, userId } = req.body || {};
     if (!Array.isArray(messages) || !messages.length) {
       return res.status(400).json({ error: 'No messages provided.' });
+    }
+
+    // Per-student daily cap. Key by Firebase uid; fall back to IP if the
+    // client didn't send one (keeps anonymous/local-mode use limited too).
+    const studentKey = (typeof userId === 'string' && userId.trim())
+      ? 'u:' + userId.trim().slice(0, 128)
+      : 'ip:' + ip;
+    const gate = takeStudentToken(studentKey);
+    if (!gate.allowed) {
+      return res.status(429).json({
+        error: `You've reached today's limit of ${DAILY_PER_STUDENT} messages. The assistant resets at midnight.`,
+        limit: 'daily',
+        left: 0
+      });
     }
 
     // sanitise: keep only role + string content, cap history length and size
@@ -141,6 +188,7 @@ app.post('/chat', async (req, res) => {
     if (!r.ok) {
       const detail = await r.text();
       console.error('Anthropic error', r.status, detail);
+      refundStudentToken(studentKey); // don't burn a daily message on an upstream failure
       return res.status(502).json({ error: 'The assistant is unavailable right now. Please try again shortly.' });
     }
 
@@ -151,7 +199,7 @@ app.post('/chat', async (req, res) => {
       .join('\n')
       .trim() || '…';
 
-    res.json({ reply });
+    res.json({ reply, left: gate.left });
   } catch (err) {
     console.error('Proxy error', err);
     res.status(500).json({ error: 'Unexpected server error.' });

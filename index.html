@@ -169,6 +169,8 @@ h2.sec::before{content:"";width:10px;height:26px;border-radius:4px;background:va
 .drawer header h3{margin:0;font-size:1.2rem}
 .drawer header button{background:rgba(255,255,255,.2);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:1.1rem;cursor:pointer}
 .drawer header .newchat-btn{margin-left:auto;width:auto;padding:0 14px;font-size:.9rem;font-weight:700;white-space:nowrap}
+.quota-count{display:inline-block;font-weight:700;color:var(--accent);white-space:nowrap}
+.quota-msg{background:#FEF3C7;color:#92400E;border-radius:10px;padding:11px 14px;font-size:.85rem;font-weight:600;margin-top:6px}
 .drawer .body{padding:22px;overflow-y:auto;flex:1}
 .drawer .body p{color:var(--ink-soft)}
 .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
@@ -1082,7 +1084,7 @@ header.topbar{position:static;top:auto;box-shadow:none}
     <button onclick="closeAI()" aria-label="Close assistant">✕</button>
   </header>
   <div class="chat-scroll" id="chatScroll" role="log" aria-live="polite" aria-label="Conversation"></div>
-  <p class="chat-note">Coaches your reasoning with questions — it won't hand you final answers. Your chats are saved and visible to your instructor.</p>
+  <p class="chat-note">Coaches your reasoning with questions — it won't hand you final answers. Your chats are saved and visible to your instructor. <span id="quotaCount" class="quota-count"></span></p>
   <form class="chat-inputrow" id="chatForm" onsubmit="return sendChat(event)">
     <textarea id="chatInput" rows="1" aria-label="Type your message" placeholder="Ask about a concept, calculation, or exercise…" oninput="autoGrow(this)" onkeydown="chatKey(event)"></textarea>
     <button type="submit" class="chat-send" id="chatSend" aria-label="Send message">➤</button>
@@ -1114,6 +1116,15 @@ const APP_KEY='iedbook';
    ============================================================ */
 const ASSISTANT_PROXY_URL = "https://env-book.onrender.com";
 const ASSISTANT_READY = !!(ASSISTANT_PROXY_URL && !ASSISTANT_PROXY_URL.startsWith('PASTE'));
+
+/* Daily message limit per student (resets at local midnight). */
+const DAILY_MSG_LIMIT = 12;
+function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function quota(){
+  if(!appData.aiQuota || appData.aiQuota.date!==todayKey()) appData.aiQuota={date:todayKey(),count:0};
+  return appData.aiQuota;
+}
+function messagesLeft(){ return Math.max(0, DAILY_MSG_LIMIT - quota().count); }
 
 const FIREBASE_READY = !!(firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('PASTE'));
 let auth=null, db=null, currentUid=null;
@@ -1314,14 +1325,19 @@ function openAI(){
 function closeAI(){document.getElementById('overlay').classList.remove('show');const d=document.getElementById('drawer');d.classList.remove('show');d.setAttribute('aria-hidden','true');lastFocus&&lastFocus.focus();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAI();});
 
-function newConversation(){
+function chatTranscript(){
+  const msgs=(appData.chat&&appData.chat.messages)||[];
+  return msgs.map(m=>(m.role==='user'?'You: ':'Live Assistant: ')+m.content).join('\n\n');
+}
+async function newConversation(){
   if(!ASSISTANT_READY)return;
   const msgs=(appData.chat&&appData.chat.messages)||[];
   if(msgs.length){
-    if(!confirm('Start a new conversation? Your current chat will be saved and a fresh one will begin.'))return;
-    // archive the current conversation so the instructor's record is preserved
-    if(!appData.chatArchive) appData.chatArchive=[];
-    appData.chatArchive.push({started:appData.chat.started||Date.now(),ended:Date.now(),messages:msgs});
+    if(!confirm('Start a new conversation?\n\nThis clears the current chat from your view — you won’t be able to read it here again. (It stays saved in your instructor dashboard.)\n\nTip: click OK on the next prompt to copy this chat to your clipboard first.'))return;
+    if(confirm('Copy the current chat to your clipboard before clearing it?')){
+      try{ await navigator.clipboard.writeText(chatTranscript()); alert('Chat copied to your clipboard.'); }
+      catch(e){ alert('Could not access the clipboard. The conversation will still be cleared.'); }
+    }
   }
   appData.chat={started:Date.now(),messages:[]};
   chatBusy=false;
@@ -1368,12 +1384,20 @@ function renderChat(){
     else html+=`<div class="bubble a">${renderAssistantText(m.content)}</div>`;
   });
   if(chatBusy) html+='<div class="bubble a typing" aria-label="Assistant is typing"><i></i><i></i><i></i></div>';
+  const left=messagesLeft();
+  if(left<=0){
+    html+='<p class="quota-msg">You’ve used all '+DAILY_MSG_LIMIT+' of today’s messages. The Live Assistant resets at midnight — meanwhile, keep working through the chapters and your saved progress.</p>';
+  }
   box.innerHTML=html;
   box.scrollTop=box.scrollHeight;
+  const q=document.getElementById('quotaCount');
+  if(q) q.textContent=left+' message'+(left===1?'':'s')+' left today';
+  setChatEnabled(left>0);
 }
 function setChatEnabled(on){
   const inp=document.getElementById('chatInput'), btn=document.getElementById('chatSend');
-  if(inp) inp.disabled=!on; if(btn) btn.disabled=!on||chatBusy;
+  if(inp){ inp.disabled=!on; inp.placeholder = on ? 'Ask about a concept, calculation, or exercise…' : 'Daily limit reached — resets at midnight'; }
+  if(btn) btn.disabled=!on||chatBusy;
 }
 function useSuggestion(s){const inp=document.getElementById('chatInput');if(inp){inp.value=s;inp.focus();}}
 
@@ -1395,9 +1419,11 @@ async function sendChat(e){
   const inp=document.getElementById('chatInput');
   const text=(inp.value||'').trim();
   if(!text)return false;
+  if(messagesLeft()<=0){ renderChat(); return false; }
   if(!appData.chat) appData.chat={started:Date.now(),messages:[]};
   if(!appData.chat.started) appData.chat.started=Date.now();
   appData.chat.messages.push({role:'user',content:text,ts:Date.now()});
+  quota().count++;
   if(appData.chat.messages.length===1) logEvent('chat_started','');
   logEvent('chat_message','');
   inp.value=''; autoGrow(inp);
@@ -1408,10 +1434,17 @@ async function sendChat(e){
     const history=appData.chat.messages.map(m=>({role:m.role,content:m.content}));
     const res=await fetch(ASSISTANT_PROXY_URL.replace(/\/$/,'')+'/chat',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages:history,context:currentContext()})
+      body:JSON.stringify({messages:history,context:currentContext(),userId:(typeof currentUid!=='undefined'&&currentUid)||(appData.profile&&appData.profile.studentId)||null})
     });
     const data=await res.json().catch(()=>({}));
+    if(res.status===429 && data.limit==='daily'){
+      // server says the daily cap is reached — sync local count and stop
+      quota().count=DAILY_MSG_LIMIT;
+      throw new Error(data.error||'You’ve reached today’s message limit.');
+    }
     if(!res.ok) throw new Error(data.error||('Server error '+res.status));
+    // reconcile local counter with the server's authoritative remaining count
+    if(typeof data.left==='number') quota().count=Math.max(quota().count, DAILY_MSG_LIMIT-data.left);
     const reply=(data.reply||'').trim()||'…';
     appData.chat.messages.push({role:'assistant',content:reply,ts:Date.now()});
   }catch(err){
