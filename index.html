@@ -175,6 +175,24 @@ h2.sec::before{content:"";width:10px;height:26px;border-radius:4px;background:va
 .bubble.u{background:#2563EB;color:#fff;margin-left:auto;border-bottom-right-radius:4px}
 .bubble.a{background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
 .drawer .soon{background:#FEF3C7;color:#92400E;border-radius:10px;padding:10px 14px;font-size:.85rem;font-weight:600;margin-top:14px;text-align:center}
+/* Live chat */
+.chat-scroll{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:2px}
+.chat-scroll .intro{color:var(--ink-soft);font-size:.92rem;margin:0 0 6px}
+.bubble.a a.booklink{display:inline-flex;align-items:center;gap:4px;background:var(--accent-soft);color:var(--accent);padding:2px 9px;border-radius:99px;font-size:.82rem;font-weight:600;text-decoration:none;margin:1px 2px}
+.bubble.a a.booklink:hover{text-decoration:underline}
+.bubble p{margin:0 0 8px}.bubble p:last-child{margin:0}
+.typing{display:inline-flex;gap:4px;padding:13px 16px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink-soft);opacity:.5;animation:tdot 1s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+.chat-error{background:#FEF2F2;color:#B91C1C;border:1px solid #FCA5A5;border-radius:10px;padding:9px 13px;font-size:.85rem;margin:6px 0}
+.chat-inputrow{border-top:1px solid var(--line);padding:12px;display:flex;gap:8px;align-items:flex-end;background:var(--panel)}
+.chat-inputrow textarea{flex:1;resize:none;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-family:inherit;font-size:.92rem;line-height:1.4;max-height:120px;background:var(--bg);color:var(--ink)}
+.chat-send{background:linear-gradient(135deg,#7C3AED,#2563EB);color:#fff;border:0;border-radius:12px;min-width:44px;height:44px;padding:0 14px;font-weight:700;cursor:pointer;font-size:1rem}
+.chat-send:disabled{opacity:.5;cursor:not-allowed}
+.chip-row span.clickable{cursor:pointer}
+.chip-row span.clickable:hover{filter:brightness(.96)}
+.chat-note{font-size:.74rem;color:var(--ink-soft);text-align:center;padding:0 12px 8px}
 
 @media (max-width:880px){
   .shell{grid-template-columns:1fr}
@@ -327,7 +345,7 @@ header.topbar{position:static;top:auto;box-shadow:none}
     <a data-go="ch10" onclick="navTo('ch10')" style="--chip:#CA8A04"><span class="num">10</span> Daylighting &amp; ADF <span class="tick">✓</span></a>
     <a data-go="ch11" onclick="navTo('ch11')" style="--chip:#0891B2"><span class="num">11</span> Natural Ventilation <span class="tick">✓</span></a>
     <h2>Support</h2>
-    <a data-go="ai" onclick="navTo('ai')"><span class="num" style="background:linear-gradient(135deg,#7C3AED,#2563EB)">✦</span> AI Teaching Assistant</a>
+    <a data-go="ai" onclick="navTo('ai')"><span class="num" style="background:linear-gradient(135deg,#7C3AED,#2563EB)">✦</span> Live Assistant</a>
   </nav>
 
   <main id="main">
@@ -556,7 +574,7 @@ header.topbar{position:static;top:auto;box-shadow:none}
           <li>A 60-second opening statement.</li>
         </ol>
         <p>Then a second prompt makes the LLM <b>simulate the three opponents</b>, one at a time, challenging you and giving coaching feedback after each exchange.</p>
-        <p class="note">This is the same retrieval-and-rehearsal logic the AI Teaching Assistant in this book is built around.</p>
+        <p class="note">This is the same retrieval-and-rehearsal logic the Live Assistant in this book is built around.</p>
       </div></section>
 
     <section class="block"><span class="tag read">◆ Further Readings</span>
@@ -968,22 +986,18 @@ header.topbar{position:static;top:auto;box-shadow:none}
   <!-- ================= AI ASSISTANT VIEW ================= -->
   <div class="view" id="view-ai" data-accent="#7C3AED">
     <div class="chead" style="--accent:#7C3AED;background:linear-gradient(135deg,#7C3AED,#2563EB)">
-      <div class="lbl">Always available</div>
-      <h1>✦ AI Teaching Assistant</h1>
+      <div class="lbl">Always available · powered by Claude Sonnet 4.6</div>
+      <h1>✦ Live Assistant</h1>
       <p>Your study companion for this course — available on every page through the floating button.</p>
     </div>
     <div class="panel" style="border-left:6px solid #7C3AED">
       <h4>What this assistant is for</h4>
-      <p>The assistant is here to help you <b>learn the way this course teaches</b>: it explains concepts in plain language, walks you through the calculations step by step (OTTV, ADF, ACH, shading geometry), quizzes you with retrieval practice, and coaches you for the biodiversity debate — without simply handing you final answers.</p>
+      <p>The Live Assistant helps you <b>learn the way this course teaches</b>. It uses the <b>Socratic method</b> — guiding your reasoning with questions rather than handing you final answers — and bases everything on this book's material, linking you straight to the relevant chapters. Use it to think through concepts, calculations (OTTV, ADF, ACH, shading geometry), retrieval practice, and the biodiversity debate.</p>
       <div class="chip-row">
         <span>Explain a concept</span><span>Walk me through a calculation</span><span>Quiz me</span><span>Debate coach</span><span>Check my reasoning</span>
       </div>
-      <div class="mockchat" aria-hidden="true">
-        <div class="bubble u">Why does a west window overheat more than a south one in summer?</div>
-        <div class="bubble a">Great retrieval question — let's reason it out together. Think about the sun's <b>altitude</b> in the late afternoon…</div>
-      </div>
-      <p class="note">Open the assistant from the ✦ button on any page to start a conversation.</p>
-      <div style="margin-top:18px"><button class="ai-btn" onclick="openAI()">Open the assistant panel ✦</button></div>
+      <p class="note">It answers with guiding questions and links to the book, and your conversations are saved for your instructor to review. Open it from the ✦ button on any page.</p>
+      <div style="margin-top:18px"><button class="ai-btn" onclick="openAI()">Open the Live Assistant ✦</button></div>
     </div>
     <div class="pager"><button onclick="navTo('home')"><div class="dir">← Back</div><div class="ttl">Cover &amp; Contents</div></button></div>
   </div>
@@ -991,25 +1005,22 @@ header.topbar{position:static;top:auto;box-shadow:none}
   </main>
 </div>
 
-<!-- Floating AI button (available throughout) -->
-<button class="fab" onclick="openAI()" aria-haspopup="dialog">✦ Ask the AI Assistant</button>
+<!-- Floating Live Assistant button (available throughout) -->
+<button class="fab" onclick="openAI()" aria-haspopup="dialog">✦ Ask the Live Assistant</button>
 <div class="overlay" id="overlay" onclick="closeAI()"></div>
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="AI Teaching Assistant" aria-hidden="true">
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Live Assistant" aria-hidden="true">
   <header>
     <span style="font-size:1.5rem">✦</span>
-    <h3>AI Teaching Assistant</h3>
+    <h3>Live Assistant</h3>
     <button onclick="closeAI()" aria-label="Close assistant">✕</button>
   </header>
-  <div class="body">
-    <p>Ask about any concept, calculation or exercise in the book. The assistant coaches your reasoning instead of just giving answers.</p>
-    <div class="chip-row">
-      <span>Explain OTTV</span><span>Quiz me on Ch.5</span><span>Debate prep</span><span>Check my ADF</span>
-    </div>
-    <div class="mockchat">
-      <div class="bubble u">Quiz me on natural ventilation.</div>
-      <div class="bubble a">Sure! First: what are the <b>two</b> driving forces of natural ventilation? (Take a guess — I'll give feedback.)</div>
-    </div>
-  </div>
+  <div class="chat-scroll" id="chatScroll" role="log" aria-live="polite" aria-label="Conversation"></div>
+  <p class="chat-note">Coaches your reasoning with questions — it won't hand you final answers. Your chats are saved and visible to your instructor.</p>
+  <form class="chat-inputrow" id="chatForm" onsubmit="return sendChat(event)">
+    <label for="chatInput" class="skip">Type your message</label>
+    <textarea id="chatInput" rows="1" placeholder="Ask about a concept, calculation, or exercise…" oninput="autoGrow(this)" onkeydown="chatKey(event)"></textarea>
+    <button type="submit" class="chat-send" id="chatSend" aria-label="Send message">➤</button>
+  </form>
 </aside>
 
 <script>
@@ -1028,6 +1039,16 @@ const firebaseConfig={
   appId:"1:736516478397:web:382a9979572c23a26c6ed4"
 };
 const APP_KEY='iedbook';
+
+/* ============================================================
+   Live Assistant proxy URL — PASTE YOUR RENDER URL BELOW.
+   The Anthropic key lives ONLY on that server, never here.
+   Example: https://ear3301-proxy.onrender.com  (no trailing slash)
+   Until set, the assistant shows a friendly "not configured" note.
+   ============================================================ */
+const ASSISTANT_PROXY_URL = "https://env-book.onrender.com";
+const ASSISTANT_READY = !!(ASSISTANT_PROXY_URL && !ASSISTANT_PROXY_URL.startsWith('PASTE'));
+
 const FIREBASE_READY = !!(firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('PASTE'));
 let auth=null, db=null, currentUid=null;
 
@@ -1048,7 +1069,7 @@ const CH=[
 const ORDER=['home',...CH.map(c=>c.id),'ai'];
 
 /* ---------- App data model ---------- */
-function defaultData(){return{profile:null,visited:{},done:{},answers:{},reveals:{},chapterStats:{},events:[]};}
+function defaultData(){return{profile:null,visited:{},done:{},answers:{},reveals:{},chapterStats:{},events:[],chat:{started:0,messages:[]}};}
 let appData=defaultData();
 const sessionLogged=new Set();
 
@@ -1105,7 +1126,7 @@ document.getElementById('homeCards').innerHTML=CH.map(c=>
  `<div class="ccard" onclick="navTo('${c.id}')"><div class="num" style="background:${c.c}">${c.n}</div><h3>${c.t}</h3><p>${c.d}</p></div>`).join('');
 CH.forEach(c=>{
   const i=ORDER.indexOf(c.id), prev=ORDER[i-1], next=ORDER[i+1];
-  const meta=id=>id==='home'?{t:'Cover & Contents'}:id==='ai'?{t:'AI Teaching Assistant'}:CH.find(x=>x.id===id);
+  const meta=id=>id==='home'?{t:'Cover & Contents'}:id==='ai'?{t:'Live Assistant'}:CH.find(x=>x.id===id);
   const p=document.getElementById('pager-'+c.id); if(!p)return;
   const pm=meta(prev), nm=meta(next);
   p.innerHTML=
@@ -1210,11 +1231,119 @@ document.addEventListener('input',e=>{
   }
 });
 
-/* ---------- AI drawer ---------- */
-let lastFocus=null;
-function openAI(){lastFocus=document.activeElement;document.getElementById('overlay').classList.add('show');const d=document.getElementById('drawer');d.classList.add('show');d.setAttribute('aria-hidden','false');d.querySelector('button').focus();logEvent('open_ai_panel','');}
+/* ---------- Live Assistant (drawer + chat) ---------- */
+let lastFocus=null, chatBusy=false;
+const SUGGESTIONS=['Explain OTTV','Quiz me on natural ventilation','Help me with my ADF','Debate prep'];
+
+function openAI(){
+  lastFocus=document.activeElement;
+  document.getElementById('overlay').classList.add('show');
+  const d=document.getElementById('drawer');
+  d.classList.add('show');d.setAttribute('aria-hidden','false');
+  logEvent('open_ai_panel','');
+  renderChat();
+  const inp=document.getElementById('chatInput'); if(inp&&ASSISTANT_READY) setTimeout(()=>inp.focus(),120);
+  else d.querySelector('header button').focus();
+}
 function closeAI(){document.getElementById('overlay').classList.remove('show');const d=document.getElementById('drawer');d.classList.remove('show');d.setAttribute('aria-hidden','true');lastFocus&&lastFocus.focus();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAI();});
+
+function autoGrow(t){t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';}
+function chatKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(e); } }
+
+/* turn [[chId|label]] tokens into clickable links; escape everything else */
+function renderAssistantText(raw){
+  let out=esc(raw);
+  out=out.replace(/\[\[\s*(ch\d+|ai|home)\s*(?:\|([^\]]+))?\]\]/g,(m,id,label)=>{
+    const ch=CH.find(c=>c.id===id);
+    const txt=esc((label&&label.trim())|| (ch?('Ch.'+ch.n+' '+ch.t):id));
+    return `<a class="booklink" href="#" role="button" onclick="gotoFromChat('${id}');return false;">✦ ${txt}</a>`;
+  });
+  // **bold** and paragraph breaks
+  out=out.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+  return out.split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+}
+function gotoFromChat(id){ closeAI(); navTo(id); }
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function renderChat(){
+  const box=document.getElementById('chatScroll'); if(!box)return;
+  const msgs=(appData.chat&&appData.chat.messages)||[];
+  let html='';
+  if(!ASSISTANT_READY){
+    html='<p class="intro">The Live Assistant isn’t connected yet. Your instructor needs to add the assistant server URL. In the meantime, keep working through the chapters — your progress is saved.</p>';
+    box.innerHTML=html;
+    setChatEnabled(false);
+    return;
+  }
+  setChatEnabled(true);
+  if(!msgs.length){
+    html+='<p class="intro">Hi! I’m your Live Assistant. I won’t just give you answers — I’ll help you reason your way to them, and point you to the right part of the book. What are you working on?</p>';
+    html+='<div class="chip-row">'+SUGGESTIONS.map(s=>`<span class="clickable" role="button" tabindex="0" onclick="useSuggestion('${esc(s).replace(/'/g,"\\'")}')">${esc(s)}</span>`).join('')+'</div>';
+  }
+  msgs.forEach(m=>{
+    if(m.role==='user') html+=`<div class="bubble u">${esc(m.content)}</div>`;
+    else html+=`<div class="bubble a">${renderAssistantText(m.content)}</div>`;
+  });
+  if(chatBusy) html+='<div class="bubble a typing" aria-label="Assistant is typing"><i></i><i></i><i></i></div>';
+  box.innerHTML=html;
+  box.scrollTop=box.scrollHeight;
+}
+function setChatEnabled(on){
+  const inp=document.getElementById('chatInput'), btn=document.getElementById('chatSend');
+  if(inp) inp.disabled=!on; if(btn) btn.disabled=!on||chatBusy;
+}
+function useSuggestion(s){const inp=document.getElementById('chatInput');if(inp){inp.value=s;inp.focus();}}
+
+/* gather grounding context: current chapter text + chapter map */
+function currentContext(){
+  const courseMap=CH.map(c=>({id:c.id,title:'Ch.'+c.n+' '+c.t,desc:c.d}));
+  let currentChapter=null;
+  if(curChapter&&CH.some(c=>c.id===curChapter)){
+    const v=document.getElementById('view-'+curChapter);
+    if(v){ const t=(v.innerText||v.textContent||'').replace(/\s+/g,' ').trim(); const ch=CH.find(c=>c.id===curChapter);
+      currentChapter={id:curChapter,title:'Ch.'+ch.n+' '+ch.t,text:t.slice(0,7000)}; }
+  }
+  return {courseMap,currentChapter};
+}
+
+async function sendChat(e){
+  if(e&&e.preventDefault)e.preventDefault();
+  if(chatBusy||!ASSISTANT_READY)return false;
+  const inp=document.getElementById('chatInput');
+  const text=(inp.value||'').trim();
+  if(!text)return false;
+  if(!appData.chat) appData.chat={started:Date.now(),messages:[]};
+  if(!appData.chat.started) appData.chat.started=Date.now();
+  appData.chat.messages.push({role:'user',content:text,ts:Date.now()});
+  if(appData.chat.messages.length===1) logEvent('chat_started','');
+  logEvent('chat_message','');
+  inp.value=''; autoGrow(inp);
+  chatBusy=true; setChatEnabled(false); renderChat(); scheduleSave();
+
+  // remove any stale error
+  try{
+    const history=appData.chat.messages.map(m=>({role:m.role,content:m.content}));
+    const res=await fetch(ASSISTANT_PROXY_URL.replace(/\/$/,'')+'/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages:history,context:currentContext()})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error||('Server error '+res.status));
+    const reply=(data.reply||'').trim()||'…';
+    appData.chat.messages.push({role:'assistant',content:reply,ts:Date.now()});
+  }catch(err){
+    chatBusy=false; setChatEnabled(true); renderChat();
+    const box=document.getElementById('chatScroll');
+    if(box){ const d=document.createElement('div'); d.className='chat-error'; d.textContent='⚠️ '+(err.message||'Could not reach the assistant. Please try again.'); box.appendChild(d); box.scrollTop=box.scrollHeight; }
+    scheduleSave();
+    return false;
+  }
+  chatBusy=false; setChatEnabled(true); renderChat(); scheduleSave();
+  const inp2=document.getElementById('chatInput'); if(inp2) inp2.focus();
+  return false;
+}
 
 /* ---------- Mobile menu ---------- */
 document.getElementById('menuBtn').addEventListener('click',()=>{
