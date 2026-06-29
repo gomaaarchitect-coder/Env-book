@@ -17,6 +17,8 @@
   --error:#b91c1c;--warn:#92400E;
 }
 *{box-sizing:border-box}
+/* Ensure the hidden attribute always wins over author display rules (e.g. .login{display:grid}) */
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:15px}
 h1,h2,h3,.ff{font-family:'Space Grotesk',sans-serif;letter-spacing:-.02em}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
@@ -171,14 +173,14 @@ const firebaseConfig={
   appId:"1:736516478397:web:382a9979572c23a26c6ed4"
 };
 const APP_KEY='iedbook';
-const N_CHAPTERS=11, N_EXERCISES=24;
+const N_CHAPTERS=11, N_EXERCISES=25;
 const FIREBASE_READY=!!(firebaseConfig.apiKey&&!firebaseConfig.apiKey.startsWith('PASTE'));
 let auth=null,db=null,me=null,rows=[];
 
 const EVENT_LABEL={open_chapter:'Opened chapter',open_calculator:'Opened calculator',reveal_answer:'Revealed model answer',answer_attempt:'Wrote an answer',mark_done:'Marked exercise done',unmark_done:'Unmarked exercise',open_ai_panel:'Opened AI assistant',open_ai_section:'Opened AI section',login:'Signed in'};
 
 function err(m){const e=document.getElementById('loginErr');e.textContent=m;e.classList.add('show');}
-function gIn(){auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());}
+function gIn(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>err(e.message));}
 function eIn(){const a=em.value.trim(),p=pw.value;if(!a||!p)return err('Enter email and password.');auth.signInWithEmailAndPassword(a,p).catch(e=>err(e.message));}
 function eUp(){const a=em.value.trim(),p=pw.value;if(!a||p.length<6)return err('Enter email and a 6+ char password.');auth.createUserWithEmailAndPassword(a,p).catch(e=>err(e.message));}
 function signOut(){auth.signOut();}
@@ -298,10 +300,7 @@ document.querySelectorAll('th[data-s]').forEach(th=>th.addEventListener('click',
 /* ===== Boot ===== */
 if(FIREBASE_READY){
   firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.database();
-  auth.getRedirectResult().then(result=>{
-    // redirect sign-in completed — onAuthStateChanged will fire next with the user
-  }).catch(e=>{if(e.code!=='auth/no-auth-event')err(e.message);});
-  auth.onAuthStateChanged(u=>{
+auth.onAuthStateChanged(u=>{
     if(u){me=u;document.getElementById('login').hidden=true;document.getElementById('app').hidden=false;
       document.getElementById('who').textContent=u.email||u.displayName||'Instructor';load();}
     else{document.getElementById('login').hidden=false;document.getElementById('app').hidden=true;}

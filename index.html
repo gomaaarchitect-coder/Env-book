@@ -20,6 +20,8 @@
   --radius:18px;
 }
 *{box-sizing:border-box}
+/* Ensure the hidden attribute always wins over author display rules (e.g. .login-screen{display:grid}) */
+[hidden]{display:none!important}
 html{scroll-behavior:smooth}
 body{
   margin:0; background:var(--bg); color:var(--ink);
