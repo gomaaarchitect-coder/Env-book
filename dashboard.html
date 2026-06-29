@@ -90,6 +90,11 @@ tbody tr:hover{background:#F8FBF9}
 .ans p{margin:6px 0 0;white-space:pre-wrap;font-size:.86rem}
 .tl{font-size:.8rem;max-height:280px;overflow:auto}
 .tl .row{display:flex;gap:8px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.chatlog{max-height:340px;overflow:auto;display:flex;flex-direction:column;gap:6px;padding-right:4px}
+.chatlog .bubble{padding:8px 12px;border-radius:12px;font-size:.84rem;max-width:90%;white-space:pre-wrap}
+.chatlog .bubble.u{background:#2563EB;color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.chatlog .bubble.a{background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
+.chatlog .who{font-size:.68rem;opacity:.7;margin-bottom:3px;font-weight:600}
 .tl .t{color:var(--ink-soft);min-width:120px}
 .muted{color:var(--ink-soft);font-style:italic}
 .loading{padding:40px;text-align:center;color:var(--ink-soft)}
@@ -177,7 +182,7 @@ const N_CHAPTERS=11, N_EXERCISES=25;
 const FIREBASE_READY=!!(firebaseConfig.apiKey&&!firebaseConfig.apiKey.startsWith('PASTE'));
 let auth=null,db=null,me=null,rows=[];
 
-const EVENT_LABEL={open_chapter:'Opened chapter',open_calculator:'Opened calculator',reveal_answer:'Revealed model answer',answer_attempt:'Wrote an answer',mark_done:'Marked exercise done',unmark_done:'Unmarked exercise',open_ai_panel:'Opened AI assistant',open_ai_section:'Opened AI section',login:'Signed in'};
+const EVENT_LABEL={open_chapter:'Opened chapter',open_calculator:'Opened calculator',reveal_answer:'Revealed model answer',answer_attempt:'Wrote an answer',mark_done:'Marked exercise done',unmark_done:'Unmarked exercise',open_ai_panel:'Opened Live Assistant',open_ai_section:'Opened Live Assistant section',chat_started:'Started a chat',chat_message:'Sent a chat message',login:'Signed in'};
 
 function err(m){const e=document.getElementById('loginErr');e.textContent=m;e.classList.add('show');}
 function gIn(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>err(e.message));}
@@ -259,9 +264,13 @@ function detailHtml(r){
   const evs=(d.events||[]).slice(-60).reverse();
   const evHtml=evs.length?evs.map(e=>`<div class="row"><span class="t">${fmtDate(e.ts)}</span><span>${EVENT_LABEL[e.t]||e.t}${e.x?' · <b>'+esc(e.x)+'</b>':''}</span></div>`).join(''):'<p class="muted">No activity logged.</p>';
   const cs=Object.entries(d.chapterStats||{}).map(([k,c])=>`${k}: ${c.opens||0} opens, ${mins(c.seconds)}m`).join(' · ')||'—';
+  const msgs=(d.chat&&d.chat.messages)||[];
+  const userCount=msgs.filter(m=>m.role==='user').length;
+  const chatHtml=msgs.length?msgs.map(m=>`<div class="bubble ${m.role==='user'?'u':'a'}"><div class="who">${m.role==='user'?'Student':'Assistant'} · ${fmtDate(m.ts)}</div>${esc(m.content)}</div>`).join(''):'<p class="muted">No conversations yet.</p>';
   return `<div class="detail-inner">
     <div><h3>✍ Written answers (${ans.length})</h3>${ansHtml}<h3 style="margin-top:14px">Chapter activity</h3><p class="muted" style="font-size:.8rem">${cs}</p></div>
-    <div><h3>🕑 Activity timeline</h3><div class="tl">${evHtml}</div></div>
+    <div><h3>✦ Live Assistant chat (${userCount} student message${userCount===1?'':'s'})</h3><div class="chatlog">${chatHtml}</div>
+    <h3 style="margin-top:14px">🕑 Activity timeline</h3><div class="tl">${evHtml}</div></div>
   </div>`;
 }
 function toggleDetail(uid){const el=document.getElementById('d-'+uid);if(el)el.hidden=!el.hidden;}
@@ -290,6 +299,10 @@ function exportExcel(){
   const cstats=[];
   rows.forEach(r=>Object.entries(r.data.chapterStats||{}).forEach(([k,c])=>cstats.push({Name:r.name,'Student ID':r.studentId,Chapter:k,Opens:c.opens||0,'Active minutes':mins(c.seconds),'First open':c.firstOpen?new Date(c.firstOpen).toLocaleString():'','Last open':c.lastOpen?new Date(c.lastOpen).toLocaleString():''})));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cstats.length?cstats:[{Note:'No data yet'}]),'ChapterStats');
+  // Sheet 5: Live Assistant chats
+  const chats=[];
+  rows.forEach(r=>{const ms=(r.data.chat&&r.data.chat.messages)||[];ms.forEach(m=>chats.push({Name:r.name,'Student ID':r.studentId,Role:m.role==='user'?'Student':'Assistant',Message:m.content,Time:m.ts?new Date(m.ts).toLocaleString():''}));});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(chats.length?chats:[{Note:'No chats yet'}]),'Chats');
   const stamp=new Date().toISOString().slice(0,10);
   XLSX.writeFile(wb,`EAR3301_book_usage_${stamp}.xlsx`);
 }
