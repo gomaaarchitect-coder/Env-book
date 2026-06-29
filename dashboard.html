@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IED Book — Instructor Usage Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#FFFDF7;--panel:#fff;--ink:#16202B;--ink-soft:#475569;--line:#E8E3D5;
+  --accent:#0E7C5A;--accent2:#16A34A;--shadow:0 10px 30px -12px rgba(20,32,43,.18);
+  --error:#b91c1c;--warn:#92400E;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:15px}
+h1,h2,h3,.ff{font-family:'Space Grotesk',sans-serif;letter-spacing:-.02em}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button{font-family:'Space Grotesk';cursor:pointer}
+.masthead{display:flex;gap:14px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#FFFDF7);position:sticky;top:0;z-index:30}
+.crest{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#0E7C5A,#16A34A);color:#fff;display:grid;place-items:center;font-weight:700;font-size:1.1rem;flex:none}
+.mast-lines{line-height:1.28;flex:1;min-width:0}
+.mast-lines .l1{font-weight:700;font-size:.98rem}
+.mast-lines .l2{font-size:.78rem;color:var(--ink-soft)}
+.mast-lines .l4{font-size:.82rem;color:var(--accent);font-weight:700}
+.top-actions{display:flex;align-items:center;gap:10px}
+.top-actions .who{font-size:.8rem;color:var(--ink-soft);font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn{border:0;border-radius:11px;padding:10px 16px;font-weight:700;font-size:.86rem}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-excel{background:#1D6F42;color:#fff;display:inline-flex;align-items:center;gap:8px}
+.wrap{max-width:1280px;margin:0 auto;padding:22px clamp(14px,3vw,30px) 80px}
+
+/* Login */
+.login{position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,#0E7C5A,#0d3b2e);display:grid;place-items:center;padding:20px}
+.login-card{background:#fff;border-radius:22px;padding:30px;width:min(440px,100%);box-shadow:0 30px 70px -20px rgba(0,0,0,.5)}
+.login-card h2{margin:6px 0 4px;font-size:1.4rem}
+.login-card p{color:var(--ink-soft);font-size:.9rem;margin:0 0 14px}
+.login-card label{display:block;font-weight:600;font-size:.84rem;margin:12px 0 5px}
+.login-card input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:11px;font-size:1rem}
+.login-actions{display:flex;gap:10px;margin-top:16px}
+.login-actions button{flex:1;padding:12px;border-radius:12px;border:0;font-weight:700}
+.login-actions .p{background:var(--accent);color:#fff}.login-actions .g{background:#fff;border:1px solid var(--line)}
+.btn-google{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px}
+.err{background:#FEE2E2;color:var(--error);border-radius:10px;padding:10px 14px;font-size:.85rem;font-weight:600;margin:12px 0;display:none}
+.err.show{display:block}
+.notice{background:#FEF3C7;color:var(--warn);border-radius:12px;padding:16px 18px;font-weight:600;margin:16px 0}
+.notice code{background:#fff;padding:2px 8px;border-radius:6px;border:1px solid var(--line);font-size:.9em}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:18px 0}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+.kpi .v{font-family:'Space Grotesk';font-weight:700;font-size:1.9rem;line-height:1}
+.kpi .l{font-size:.78rem;color:var(--ink-soft);font-weight:600;margin-top:6px}
+
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 14px}
+.controls input,.controls select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:.9rem;font-family:'Inter'}
+.controls input[type=search]{flex:1;min-width:200px}
+.spacer{flex:1}
+
+/* Table */
+.tablecard{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:880px}
+th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:#F4F8F5;font-family:'Space Grotesk';font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;cursor:pointer;user-select:none}
+th .ar{opacity:.5;font-size:.7rem}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:#F8FBF9}
+.namecell b{font-family:'Space Grotesk'}
+.namecell .sid{color:var(--ink-soft);font-size:.78rem}
+.pill{display:inline-block;padding:3px 9px;border-radius:99px;font-weight:700;font-size:.74rem}
+.pill.g{background:#E6F7F0;color:#0E7C5A}.pill.y{background:#FEF3C7;color:#92400E}.pill.r{background:#FEE2E2;color:#b91c1c}.pill.n{background:#EEF2F6;color:#64748B}
+.bar{height:8px;background:var(--line);border-radius:99px;width:90px;overflow:hidden;display:inline-block;vertical-align:middle}
+.bar>i{display:block;height:100%;background:var(--accent2)}
+.detail{background:#FAFCFB}
+.detail td{white-space:normal;padding:0}
+.detail-inner{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.detail-inner{grid-template-columns:1fr}}
+.detail h3{margin:0 0 8px;font-size:1rem}
+.ans{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;background:#fff}
+.ans .k{font-weight:700;font-size:.78rem;color:var(--accent)}
+.ans .meta{font-size:.72rem;color:var(--ink-soft)}
+.ans p{margin:6px 0 0;white-space:pre-wrap;font-size:.86rem}
+.tl{font-size:.8rem;max-height:280px;overflow:auto}
+.tl .row{display:flex;gap:8px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.tl .t{color:var(--ink-soft);min-width:120px}
+.muted{color:var(--ink-soft);font-style:italic}
+.loading{padding:40px;text-align:center;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<!-- ===== Login ===== -->
+<div id="login" class="login">
+  <div class="login-card">
+    <div style="text-align:center"><div class="ff" style="font-weight:700">Arab Academy — AEED Department</div><div style="color:var(--accent);font-weight:700;font-size:.85rem">EAR3301 · Instructor Dashboard</div></div>
+    <h2>Instructor sign-in</h2>
+    <p>Sign in with your instructor account to view student usage.</p>
+    <div id="loginErr" class="err" role="alert"></div>
+    <button class="btn-google" onclick="gIn()"><span>G</span> Continue with Google</button>
+    <label for="em">Email</label><input id="em" type="email" autocomplete="email">
+    <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+    <div class="login-actions"><button class="p" onclick="eIn()">Sign in</button><button class="g" onclick="eUp()">Create account</button></div>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <div class="masthead">
+    <div class="crest">AAST</div>
+    <div class="mast-lines">
+      <div class="l1">Arab Academy for Science, Technology and Maritime Transport</div>
+      <div class="l2">College of Engineering and Technology — Abu Qier Campus · Architectural Engineering and Environmental Design Department</div>
+      <div class="l4">Introduction to Environmental Design — EAR3301 · Student Usage Dashboard</div>
+    </div>
+    <div class="top-actions">
+      <span class="who" id="who"></span>
+      <button class="btn btn-ghost" onclick="load()">↻ Refresh</button>
+      <button class="btn btn-ghost" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="authNotice"></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search by name or student ID…" oninput="render()">
+      <select id="sortby" onchange="render()">
+        <option value="lastSeen">Sort: Last active</option>
+        <option value="name">Sort: Name</option>
+        <option value="completion">Sort: Completion %</option>
+        <option value="answers">Sort: Answers written</option>
+        <option value="chapters">Sort: Chapters opened</option>
+        <option value="time">Sort: Time spent</option>
+      </select>
+      <div class="spacer"></div>
+      <button class="btn btn-excel" onclick="exportExcel()">⬇ Export to Excel</button>
+    </div>
+    <div class="tablecard">
+      <table id="tbl"><thead><tr>
+        <th data-s="name">Student <span class="ar">⇅</span></th>
+        <th data-s="email">Email</th>
+        <th data-s="lastSeen">Last active <span class="ar">⇅</span></th>
+        <th data-s="chapters">Chapters <span class="ar">⇅</span></th>
+        <th data-s="completion">Completion <span class="ar">⇅</span></th>
+        <th data-s="done">Exercises done</th>
+        <th data-s="answers">Answers <span class="ar">⇅</span></th>
+        <th data-s="reveals">Reveals</th>
+        <th data-s="time">Time <span class="ar">⇅</span></th>
+      </tr></thead>
+      <tbody id="tbody"><tr><td colspan="9" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <p class="muted" style="margin-top:14px;font-size:.8rem">“Last active” and event timeline come from each student’s logged actions. Click any row to see their written answers and a detailed activity timeline. Times are approximate active reading time per chapter.</p>
+  </div>
+</div>
+
+<script>
+/* ===== PASTE THE SAME Firebase config you used in the book index.html ===== */
+const firebaseConfig={
+  apiKey:"AIzaSyAnq1eAw9s-U9uMqngC810j2aGGJBBBrfU",
+  authDomain:"env-book-ear3301.firebaseapp.com",
+  databaseURL:"https://env-book-ear3301-default-rtdb.firebaseio.com",
+  projectId:"env-book-ear3301",
+  storageBucket:"env-book-ear3301.firebasestorage.app",
+  messagingSenderId:"736516478397",
+  appId:"1:736516478397:web:382a9979572c23a26c6ed4"
+};
+const APP_KEY='iedbook';
+const N_CHAPTERS=11, N_EXERCISES=24;
+const FIREBASE_READY=!!(firebaseConfig.apiKey&&!firebaseConfig.apiKey.startsWith('PASTE'));
+let auth=null,db=null,me=null,rows=[];
+
+const EVENT_LABEL={open_chapter:'Opened chapter',open_calculator:'Opened calculator',reveal_answer:'Revealed model answer',answer_attempt:'Wrote an answer',mark_done:'Marked exercise done',unmark_done:'Unmarked exercise',open_ai_panel:'Opened AI assistant',open_ai_section:'Opened AI section',login:'Signed in'};
+
+function err(m){const e=document.getElementById('loginErr');e.textContent=m;e.classList.add('show');}
+function gIn(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{if(e.code&&e.code.indexOf('popup')>-1){auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());}else err(e.message);});}
+function eIn(){const a=em.value.trim(),p=pw.value;if(!a||!p)return err('Enter email and password.');auth.signInWithEmailAndPassword(a,p).catch(e=>err(e.message));}
+function eUp(){const a=em.value.trim(),p=pw.value;if(!a||p.length<6)return err('Enter email and a 6+ char password.');auth.createUserWithEmailAndPassword(a,p).catch(e=>err(e.message));}
+function signOut(){auth.signOut();}
+
+function fmtDate(ts){if(!ts)return '—';const d=new Date(ts);return d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function ago(ts){if(!ts)return '—';const s=(Date.now()-ts)/1000;if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function mins(sec){return Math.round((sec||0)/60);}
+
+/* derive a flat summary per student */
+function summarize(uid,data){
+  const p=data.profile||{};
+  const visited=Object.keys(data.visited||{}).length;
+  const done=Object.keys(data.done||{}).length;
+  const answers=Object.values(data.answers||{}).filter(a=>a&&(a.text||'').trim().length).length;
+  const reveals=Object.values(data.reveals||{}).reduce((s,n)=>s+(n||0),0);
+  const time=Object.values(data.chapterStats||{}).reduce((s,c)=>s+(c.seconds||0),0);
+  const completion=Math.round((visited+done)/(N_CHAPTERS+N_EXERCISES)*100);
+  return {uid,name:p.name||'(no name)',studentId:p.studentId||'—',email:p.email||'—',
+    lastSeen:p.lastSeen||0,firstSeen:p.firstSeen||0,chapters:visited,done,answers,reveals,time,completion,data};
+}
+
+async function load(){
+  document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="loading">Loading…</td></tr>';
+  document.getElementById('authNotice').innerHTML='';
+  try{
+    const snap=await db.ref(`${APP_KEY}/users`).get();
+    rows=[];
+    snap.forEach(ch=>{const v=ch.val();if(v&&v.data)rows.push(summarize(ch.key,v.data));});
+    render();
+  }catch(e){
+    document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="loading">No access.</td></tr>';
+    document.getElementById('authNotice').innerHTML=
+     `<div class="notice">⚠️ This account can’t read student data yet (<b>${e.message}</b>).<br>Add your instructor UID to the admin list in Firebase to grant access:<br><code>${APP_KEY}/admins/${me?me.uid:'YOUR_UID'} = true</code></div>`;
+  }
+}
+
+function kpis(){
+  const day=Date.now()-86400000, week=Date.now()-7*86400000;
+  const activeToday=rows.filter(r=>r.lastSeen>day).length;
+  const activeWeek=rows.filter(r=>r.lastSeen>week).length;
+  const totalAns=rows.reduce((s,r)=>s+r.answers,0);
+  const avgComp=rows.length?Math.round(rows.reduce((s,r)=>s+r.completion,0)/rows.length):0;
+  const totalMin=mins(rows.reduce((s,r)=>s+r.time,0));
+  const K=[['Students',rows.length],['Active today',activeToday],['Active this week',activeWeek],['Answers written',totalAns],['Avg completion',avgComp+'%'],['Total time',totalMin+' min']];
+  document.getElementById('kpis').innerHTML=K.map(k=>`<div class="kpi"><div class="v">${k[1]}</div><div class="l">${k[0]}</div></div>`).join('');
+}
+
+function pill(pct){const c=pct>=70?'g':pct>=35?'y':pct>0?'r':'n';return `<span class="pill ${c}">${pct}%</span>`;}
+
+function render(){
+  if(!rows.length){document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="loading">No students have used the book yet.</td></tr>';kpis();return;}
+  kpis();
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const sb=document.getElementById('sortby').value;
+  let list=rows.filter(r=>!q||r.name.toLowerCase().includes(q)||String(r.studentId).toLowerCase().includes(q)||r.email.toLowerCase().includes(q));
+  list.sort((a,b)=> sb==='name'? a.name.localeCompare(b.name) : (b[sb]||0)-(a[sb]||0));
+  document.getElementById('tbody').innerHTML=list.map((r,i)=>`
+    <tr onclick="toggleDetail('${r.uid}')">
+      <td class="namecell"><b>${esc(r.name)}</b><div class="sid">ID: ${esc(r.studentId)}</div></td>
+      <td>${esc(r.email)}</td>
+      <td title="${fmtDate(r.lastSeen)}">${ago(r.lastSeen)}</td>
+      <td>${r.chapters}/${N_CHAPTERS}</td>
+      <td><span class="bar"><i style="width:${r.completion}%"></i></span> ${pill(r.completion)}</td>
+      <td>${r.done}/${N_EXERCISES}</td>
+      <td>${r.answers}</td>
+      <td>${r.reveals}</td>
+      <td>${mins(r.time)} min</td>
+    </tr>
+    <tr class="detail" id="d-${r.uid}" hidden><td colspan="9">${detailHtml(r)}</td></tr>`).join('');
+}
+
+function detailHtml(r){
+  const d=r.data;
+  const ans=Object.entries(d.answers||{}).filter(([k,v])=>v&&(v.text||'').trim());
+  const ansHtml=ans.length?ans.map(([k,v])=>`<div class="ans"><div class="k">${esc(k)}</div><div class="meta">edited ${fmtDate(v.updated)}</div><p>${esc(v.text)}</p></div>`).join(''):'<p class="muted">No written answers yet.</p>';
+  const evs=(d.events||[]).slice(-60).reverse();
+  const evHtml=evs.length?evs.map(e=>`<div class="row"><span class="t">${fmtDate(e.ts)}</span><span>${EVENT_LABEL[e.t]||e.t}${e.x?' · <b>'+esc(e.x)+'</b>':''}</span></div>`).join(''):'<p class="muted">No activity logged.</p>';
+  const cs=Object.entries(d.chapterStats||{}).map(([k,c])=>`${k}: ${c.opens||0} opens, ${mins(c.seconds)}m`).join(' · ')||'—';
+  return `<div class="detail-inner">
+    <div><h3>✍ Written answers (${ans.length})</h3>${ansHtml}<h3 style="margin-top:14px">Chapter activity</h3><p class="muted" style="font-size:.8rem">${cs}</p></div>
+    <div><h3>🕑 Activity timeline</h3><div class="tl">${evHtml}</div></div>
+  </div>`;
+}
+function toggleDetail(uid){const el=document.getElementById('d-'+uid);if(el)el.hidden=!el.hidden;}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ===== Export to Excel (multi-sheet) ===== */
+function exportExcel(){
+  if(!rows.length){alert('No data to export yet.');return;}
+  const wb=XLSX.utils.book_new();
+  // Sheet 1: Students summary
+  const students=rows.map(r=>({Name:r.name,'Student ID':r.studentId,Email:r.email,
+    'Last active':r.lastSeen?new Date(r.lastSeen).toLocaleString():'',
+    'First seen':r.firstSeen?new Date(r.firstSeen).toLocaleString():'',
+    'Chapters opened':r.chapters,'Completion %':r.completion,
+    'Exercises done':r.done,'Answers written':r.answers,'Reveals':r.reveals,'Active minutes':mins(r.time)}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(students),'Students');
+  // Sheet 2: Answers
+  const answers=[];
+  rows.forEach(r=>Object.entries(r.data.answers||{}).forEach(([k,v])=>{if(v&&(v.text||'').trim())answers.push({Name:r.name,'Student ID':r.studentId,Exercise:k,Answer:v.text,'Edited':v.updated?new Date(v.updated).toLocaleString():''});}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(answers.length?answers:[{Note:'No answers yet'}]),'Answers');
+  // Sheet 3: Events
+  const events=[];
+  rows.forEach(r=>(r.data.events||[]).forEach(e=>events.push({Name:r.name,'Student ID':r.studentId,Action:EVENT_LABEL[e.t]||e.t,Target:e.x||'',Time:e.ts?new Date(e.ts).toLocaleString():''})));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(events.length?events:[{Note:'No events yet'}]),'Events');
+  // Sheet 4: Chapter stats
+  const cstats=[];
+  rows.forEach(r=>Object.entries(r.data.chapterStats||{}).forEach(([k,c])=>cstats.push({Name:r.name,'Student ID':r.studentId,Chapter:k,Opens:c.opens||0,'Active minutes':mins(c.seconds),'First open':c.firstOpen?new Date(c.firstOpen).toLocaleString():'','Last open':c.lastOpen?new Date(c.lastOpen).toLocaleString():''})));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cstats.length?cstats:[{Note:'No data yet'}]),'ChapterStats');
+  const stamp=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb,`EAR3301_book_usage_${stamp}.xlsx`);
+}
+
+/* table header sort */
+document.querySelectorAll('th[data-s]').forEach(th=>th.addEventListener('click',()=>{document.getElementById('sortby').value=th.dataset.s;render();}));
+
+/* ===== Boot ===== */
+if(FIREBASE_READY){
+  firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.database();
+  auth.getRedirectResult().catch(e=>err(e.message));
+  auth.onAuthStateChanged(u=>{
+    if(u){me=u;document.getElementById('login').hidden=true;document.getElementById('app').hidden=false;
+      document.getElementById('who').textContent=u.email||u.displayName||'Instructor';load();}
+    else{document.getElementById('login').hidden=false;document.getElementById('app').hidden=true;}
+  });
+}else{
+  document.getElementById('login').hidden=true;document.getElementById('app').hidden=false;
+  document.getElementById('authNotice').innerHTML='<div class="notice">⚙️ Firebase is not configured yet. Paste the same Firebase config used in the book into this file’s <code>firebaseConfig</code>, then reload. Until then, no live data can be shown.</div>';
+  document.getElementById('kpis').innerHTML='';document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="loading">Configure Firebase to load data.</td></tr>';
+}
+</script>
+</body>
+</html>

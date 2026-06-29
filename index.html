@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introduction to Environmental Design — Interactive Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Firebase (compat SDK, loaded from CDN — no build step) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --bg:#FFFDF7; --panel:#FFFFFF; --ink:#16202B; --ink-soft:#475569;
+  --line:#E8E3D5; --accent:#16A34A; --accent-soft:#16A34A1a;
+  --inclass:#0E7C5A; --inclass-bg:#E6F7F0; --read:#7C3AED; --read-bg:#F2ECFE;
+  --shadow:0 10px 30px -12px rgba(20,32,43,.18);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Inter',system-ui,sans-serif; font-size:17px; line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.brand{font-family:'Space Grotesk',sans-serif;letter-spacing:-.02em}
+a{color:var(--accent)}
+.skip{position:absolute;left:-999px;top:0;background:var(--ink);color:#fff;padding:10px 16px;z-index:200;border-radius:0 0 10px 0}
+.skip:focus{left:0}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* ---------- Header ---------- */
+header.topbar{
+  position:sticky;top:0;z-index:90;background:rgba(255,253,247,.9);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:16px;padding:12px 20px;
+}
+.brand{font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:10px}
+.brand .dot{width:14px;height:14px;border-radius:5px;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);transition:background .3s}
+.menu-btn{display:none;background:var(--ink);color:#fff;border:0;border-radius:12px;width:44px;height:44px;font-size:1.2rem;cursor:pointer}
+.progress-wrap{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--ink-soft);font-weight:600}
+.bar{width:120px;height:9px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar > i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s,background .3s}
+.ai-btn{
+  background:var(--ink);color:#fff;border:0;border-radius:14px;padding:10px 16px;
+  font-weight:700;font-family:'Space Grotesk';cursor:pointer;display:flex;align-items:center;gap:8px;font-size:.9rem;
+}
+.ai-btn:hover{transform:translateY(-1px)}
+
+/* ---------- Layout ---------- */
+.shell{display:grid;grid-template-columns:288px 1fr;min-height:calc(100vh - 69px)}
+nav.toc{
+  border-right:1px solid var(--line);padding:22px 16px;position:sticky;top:69px;
+  height:calc(100vh - 69px);overflow-y:auto;background:#FFFDF7;
+}
+.toc h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);margin:18px 8px 8px}
+.toc a{
+  display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);
+  padding:10px 12px;border-radius:12px;font-weight:600;font-size:.92rem;cursor:pointer;border:1px solid transparent;
+}
+.toc a:hover{background:#fff;border-color:var(--line)}
+.toc a.active{background:#fff;border-color:var(--line);box-shadow:var(--shadow)}
+.toc a .num{
+  width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;
+  font-family:'Space Grotesk';font-weight:700;font-size:.85rem;color:#fff;background:var(--chip,#16A34A);
+}
+.toc a .tick{margin-left:auto;color:var(--inclass);font-weight:700;opacity:0;transition:.2s}
+.toc a.done .tick{opacity:1}
+main{padding:38px clamp(20px,5vw,72px) 90px;max-width:980px;width:100%}
+
+/* ---------- Views ---------- */
+.view{display:none;animation:fade .35s ease}
+.view.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Cover */
+.cover{text-align:center;padding:40px 0 10px}
+.cover .kicker{display:inline-block;background:var(--accent-soft);color:var(--accent);font-weight:700;padding:7px 16px;border-radius:99px;font-size:.85rem;text-transform:uppercase;letter-spacing:.08em}
+.cover h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.04;margin:18px 0 10px}
+.cover p.sub{font-size:1.2rem;color:var(--ink-soft);max-width:620px;margin:0 auto 8px}
+.cover .by{color:var(--ink-soft);font-weight:600;margin-top:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:34px;text-align:left}
+.ccard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.18s;box-shadow:var(--shadow)}
+.ccard:hover{transform:translateY(-3px)}
+.ccard .num{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;color:#fff;font-family:'Space Grotesk';font-weight:700;margin-bottom:12px}
+.ccard h3{margin:0 0 4px;font-size:1.05rem}
+.ccard p{margin:0;font-size:.85rem;color:var(--ink-soft)}
+
+/* Chapter header */
+.chead{border-radius:24px;padding:34px 32px;color:#fff;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 65%,#000));margin-bottom:30px;box-shadow:var(--shadow)}
+.chead .lbl{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem;opacity:.9}
+.chead h1{font-size:clamp(1.9rem,4.5vw,2.8rem);margin:8px 0 6px;line-height:1.08}
+.chead p{margin:0;font-size:1.05rem;opacity:.95;max-width:680px}
+.obj{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:14px;padding:18px 22px;margin:0 0 28px}
+.obj h3{margin:0 0 8px;font-size:1rem}
+.obj ul{margin:0;padding-left:20px}
+.obj li{margin:4px 0}
+
+/* Content blocks */
+section.block{margin:0 0 26px}
+h2.sec{font-size:1.5rem;margin:34px 0 14px;display:flex;align-items:center;gap:12px}
+h2.sec::before{content:"";width:10px;height:26px;border-radius:4px;background:var(--accent)}
+.tag{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;padding:5px 12px;border-radius:99px;margin-bottom:10px}
+.tag.class{background:var(--inclass-bg);color:var(--inclass)}
+.tag.read{background:var(--read-bg);color:var(--read)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow)}
+.panel.class{border-left:6px solid var(--inclass)}
+.panel.read{border-left:6px solid var(--read);background:#FCFAFF}
+.panel h4{margin:0 0 8px;font-size:1.12rem}
+.panel p{margin:0 0 12px}
+.panel p:last-child{margin-bottom:0}
+.panel ul,.panel ol{margin:8px 0;padding-left:22px}
+.panel li{margin:6px 0}
+.formula{background:#0F1A22;color:#EAF6EF;font-family:'Space Grotesk';border-radius:14px;padding:16px 20px;margin:14px 0;font-size:1.05rem;overflow-x:auto}
+.formula b{color:var(--accent)}
+.keytake{display:flex;gap:14px;align-items:flex-start;background:var(--accent-soft);border-radius:14px;padding:14px 18px;margin:12px 0}
+.keytake .k{font-family:'Space Grotesk';font-weight:700;color:var(--accent);font-size:1.4rem;line-height:1}
+.ex-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.92rem}
+.ex-table th,.ex-table td{border:1px solid var(--line);padding:9px 12px;text-align:left}
+.ex-table th{background:var(--accent-soft);font-family:'Space Grotesk'}
+.note{font-size:.9rem;color:var(--ink-soft);font-style:italic}
+
+/* Calculator embed */
+.calc-wrap{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin:14px 0;background:#fff}
+.calc-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--accent);color:#fff;font-family:'Space Grotesk';font-weight:700}
+.calc-bar a{margin-left:auto;color:#fff;font-size:.82rem;background:rgba(255,255,255,.2);padding:6px 12px;border-radius:9px;text-decoration:none}
+.calc-wrap iframe{width:100%;height:680px;border:0;display:block;background:#fff}
+
+/* Exercises */
+.exwrap{margin-top:34px;border-top:3px dashed var(--line);padding-top:24px}
+.exwrap > h2{font-size:1.5rem;display:flex;align-items:center;gap:10px}
+.ex{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:14px 0;box-shadow:var(--shadow)}
+.ex .q{display:flex;gap:12px;align-items:flex-start}
+.ex .qn{font-family:'Space Grotesk';font-weight:700;color:#fff;background:var(--accent);min-width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none}
+.ex .qt{font-weight:600}
+.reveal{margin:12px 0 0 42px}
+.reveal button{background:var(--accent-soft);color:var(--accent);border:0;font-weight:700;padding:9px 16px;border-radius:10px;cursor:pointer;font-family:'Space Grotesk';font-size:.85rem}
+.reveal button:hover{background:var(--accent);color:#fff}
+.answer{display:none;margin-top:12px;background:var(--inclass-bg);border-radius:12px;padding:14px 18px;font-size:.95rem}
+.answer.show{display:block;animation:fade .25s}
+.answer b{color:var(--inclass)}
+.done-row{display:flex;align-items:center;gap:10px;margin:18px 0 0 42px;font-weight:600;color:var(--ink-soft);font-size:.9rem}
+.done-row input{width:22px;height:22px;accent-color:var(--accent);cursor:pointer}
+
+/* Prev / Next */
+.pager{display:flex;justify-content:space-between;gap:14px;margin-top:46px}
+.pager button{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px;text-align:left;cursor:pointer;font-family:'Inter';box-shadow:var(--shadow);transition:.16s}
+.pager button:hover{transform:translateY(-2px);border-color:var(--accent)}
+.pager button[disabled]{opacity:.35;cursor:default;transform:none}
+.pager .dir{font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:700}
+.pager .ttl{font-weight:700;font-family:'Space Grotesk'}
+.pager .next{text-align:right}
+
+/* AI drawer */
+.fab{position:fixed;right:22px;bottom:22px;z-index:120;background:linear-gradient(135deg,#7C3AED,#2563EB);color:#fff;border:0;border-radius:18px;padding:14px 20px;font-family:'Space Grotesk';font-weight:700;cursor:pointer;box-shadow:0 12px 30px -8px rgba(124,58,237,.6);display:flex;align-items:center;gap:9px}
+.fab:hover{transform:translateY(-2px)}
+.overlay{position:fixed;inset:0;background:rgba(15,26,34,.45);z-index:130;opacity:0;pointer-events:none;transition:.25s}
+.overlay.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,92vw);background:var(--panel);z-index:140;box-shadow:-20px 0 50px -20px rgba(0,0,0,.4);transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column}
+.drawer.show{transform:none}
+.drawer header{background:linear-gradient(135deg,#7C3AED,#2563EB);color:#fff;padding:22px;display:flex;align-items:center;gap:12px}
+.drawer header h3{margin:0;font-size:1.2rem}
+.drawer header button{margin-left:auto;background:rgba(255,255,255,.2);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:1.1rem;cursor:pointer}
+.drawer .body{padding:22px;overflow-y:auto;flex:1}
+.drawer .body p{color:var(--ink-soft)}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.chip-row span{background:var(--accent-soft);color:var(--accent);padding:7px 13px;border-radius:99px;font-size:.82rem;font-weight:600}
+.mockchat{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px}
+.bubble{padding:11px 15px;border-radius:14px;margin:8px 0;font-size:.92rem;max-width:88%}
+.bubble.u{background:#2563EB;color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.bubble.a{background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
+.drawer .soon{background:#FEF3C7;color:#92400E;border-radius:10px;padding:10px 14px;font-size:.85rem;font-weight:600;margin-top:14px;text-align:center}
+
+@media (max-width:880px){
+  .shell{grid-template-columns:1fr}
+  nav.toc{position:fixed;left:0;top:69px;width:300px;z-index:80;transform:translateX(-105%);transition:.28s;box-shadow:var(--shadow);height:calc(100vh - 69px)}
+  nav.toc.open{transform:none}
+  .menu-btn{display:block}
+  .progress-wrap .bar{display:none}
+  main{padding:26px 18px 90px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto}}
+
+/* ---------- Institutional masthead ---------- */
+.topwrap{position:sticky;top:0;z-index:90;background:var(--bg);box-shadow:0 1px 0 var(--line)}
+header.topbar{position:static;top:auto;box-shadow:none}
+.masthead{display:flex;align-items:center;gap:16px;padding:10px 22px 8px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#FFFFFF,#FFFDF7)}
+.crest{width:46px;height:46px;flex:none;border-radius:12px;background:linear-gradient(135deg,#0E7C5A,#16A34A);color:#fff;display:grid;place-items:center;font-family:'Space Grotesk';font-weight:700;font-size:1.15rem;box-shadow:var(--shadow)}
+.mast-lines{line-height:1.28;min-width:0}
+.mast-lines .l1{font-family:'Space Grotesk';font-weight:700;font-size:1rem;color:var(--ink)}
+.mast-lines .l2,.mast-lines .l3{font-size:.8rem;color:var(--ink-soft);font-weight:500}
+.mast-lines .l4{font-size:.82rem;color:var(--accent);font-weight:700;margin-top:1px}
+@media (max-width:880px){.masthead{padding:8px 14px}.mast-lines .l1{font-size:.86rem}.mast-lines .l2,.mast-lines .l3{font-size:.7rem}.mast-lines .l4{font-size:.72rem}.crest{width:38px;height:38px}}
+
+/* ---------- Sync status + user chip ---------- */
+.sync-status{font-size:.74rem;font-weight:600;padding:4px 9px;border-radius:8px;color:var(--ink-soft);white-space:nowrap}
+.sync-synced{background:#E6F7F0;color:var(--inclass)}
+.sync-loading{background:#FEF3C7;color:#92400E}
+.sync-error{background:#FEE2E2;color:#b91c1c}
+.sync-offline{background:#E5E7EB;color:#374151}
+.user-chip{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;color:var(--ink)}
+.user-chip .uname{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-chip button{background:transparent;border:1px solid var(--line);border-radius:9px;padding:6px 10px;cursor:pointer;font-weight:600;font-size:.78rem}
+.user-chip button:hover{border-color:var(--accent);color:var(--accent)}
+.local-banner{background:#FEF3C7;color:#92400E;text-align:center;font-size:.82rem;font-weight:600;padding:7px 12px}
+
+/* ---------- Login / profile gate ---------- */
+.login-screen{position:fixed;inset:0;z-index:300;background:linear-gradient(135deg,#0E7C5A,#0d3b2e);display:grid;place-items:center;padding:20px;overflow:auto}
+.login-card{background:#fff;border-radius:22px;padding:30px 30px 26px;width:min(440px,100%);box-shadow:0 30px 70px -20px rgba(0,0,0,.5)}
+.login-mast{text-align:center;margin-bottom:14px}
+.login-mast .lm1{font-family:'Space Grotesk';font-weight:700;font-size:.98rem;color:var(--ink)}
+.login-mast .lm2{font-size:.78rem;color:var(--ink-soft)}
+.login-mast .lm3{font-size:.82rem;color:var(--accent);font-weight:700;margin-top:3px}
+.login-card h2{margin:14px 0 4px;font-size:1.4rem}
+.login-card p.lp{color:var(--ink-soft);margin:0 0 16px;font-size:.92rem}
+.login-card label{display:block;font-weight:600;font-size:.84rem;margin:12px 0 5px}
+.login-card input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:11px;font-size:1rem;font-family:'Inter'}
+.btn-google{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:700;font-family:'Space Grotesk';cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-size:.95rem}
+.btn-google:hover{background:#F8FAFC;border-color:var(--accent)}
+.btn-google .g{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:conic-gradient(from -45deg,#EA4335 0 25%,#FBBC05 0 50%,#34A853 0 75%,#4285F4 0);font-size:0}
+.divider{text-align:center;color:var(--ink-soft);font-size:.8rem;margin:16px 0;position:relative}
+.divider::before,.divider::after{content:"";position:absolute;top:50%;width:42%;height:1px;background:var(--line)}
+.divider::before{left:0}.divider::after{right:0}
+.login-actions{display:flex;gap:10px;margin-top:16px}
+.login-actions button{flex:1;padding:12px;border-radius:12px;border:0;font-weight:700;font-family:'Space Grotesk';cursor:pointer;font-size:.92rem}
+.login-actions button:first-child{background:var(--accent);color:#fff}
+.login-actions button.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.login-error{background:#FEE2E2;color:#b91c1c;border-radius:10px;padding:10px 14px;font-size:.85rem;font-weight:600;margin:12px 0;display:none}
+.login-error.show{display:block}
+.login-note{font-size:.78rem;color:var(--ink-soft);text-align:center;margin:16px 0 0}
+
+/* ---------- Student answer box ---------- */
+.your-answer{margin:14px 0 0 42px}
+.your-answer label{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.9rem;margin-bottom:7px;color:var(--ink)}
+.your-answer .saved{font-weight:600;font-size:.76rem;color:var(--inclass)}
+.your-answer textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-family:'Inter';font-size:.95rem;line-height:1.5;resize:vertical;background:#fff;min-height:90px}
+.your-answer textarea:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+@media (max-width:880px){.your-answer,.reveal,.done-row{margin-left:0}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+
+<!-- ===== Login gate ===== -->
+<div id="loginScreen" class="login-screen" role="dialog" aria-modal="true" aria-label="Sign in">
+  <div class="login-card">
+    <div class="login-mast">
+      <div class="lm1">Arab Academy for Science, Technology and Maritime Transport</div>
+      <div class="lm2">College of Engineering and Technology — Abu Qier Campus</div>
+      <div class="lm2">Architectural Engineering and Environmental Design Department</div>
+      <div class="lm3">Introduction to Environmental Design — EAR3301 (and Equivalent Courses)</div>
+    </div>
+    <h2>Sign in to your course book</h2>
+    <p class="lp">Your reading progress and your written answers are saved to your account.</p>
+    <div id="loginError" class="login-error" role="alert" aria-live="assertive"></div>
+    <button class="btn-google" onclick="signInWithGoogle()"><span class="g">G</span> Continue with Google</button>
+    <div class="divider">or use your email</div>
+    <label for="li-email">University email</label>
+    <input id="li-email" type="email" autocomplete="email" placeholder="you@aast.edu">
+    <label for="li-pass">Password</label>
+    <input id="li-pass" type="password" autocomplete="current-password" placeholder="••••••••">
+    <div class="login-actions">
+      <button onclick="signInWithEmail()">Sign in</button>
+      <button class="ghost" onclick="signUpWithEmail()">Create account</button>
+    </div>
+    <p class="login-note">First time here? Create an account with your university email.</p>
+  </div>
+</div>
+
+<!-- ===== Profile capture (first login) ===== -->
+<div id="profileModal" class="login-screen" role="dialog" aria-modal="true" aria-label="Complete your profile" hidden>
+  <div class="login-card">
+    <h2>Complete your profile</h2>
+    <p class="lp">This lets your instructor see your work under your name.</p>
+    <div id="profileError" class="login-error" role="alert"></div>
+    <label for="pf-name">Full name</label>
+    <input id="pf-name" type="text" autocomplete="name" placeholder="Your full name">
+    <label for="pf-id">Student ID</label>
+    <input id="pf-id" type="text" placeholder="e.g. 21010123">
+    <div class="login-actions"><button onclick="saveProfile()">Save &amp; continue</button></div>
+  </div>
+</div>
+
+<div class="topwrap">
+  <div class="masthead">
+    <div class="crest" aria-hidden="true">AAST</div>
+    <div class="mast-lines">
+      <div class="l1">Arab Academy for Science, Technology and Maritime Transport</div>
+      <div class="l2">College of Engineering and Technology — Abu Qier Campus</div>
+      <div class="l3">Architectural Engineering and Environmental Design Department</div>
+      <div class="l4">Introduction to Environmental Design — EAR3301 (and Equivalent Courses)</div>
+    </div>
+  </div>
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle chapter menu" aria-expanded="false">☰</button>
+    <div class="brand"><span class="dot" id="brandDot"></span> Environmental Design</div>
+    <div class="progress-wrap">
+      <span id="pctText">0%</span>
+      <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+    </div>
+    <span id="sync-status" class="sync-status" aria-live="polite"></span>
+    <div class="user-chip" id="userChip" hidden><span class="uname" id="userName"></span><button onclick="signOutUser()">Sign out</button></div>
+    <button class="ai-btn" onclick="openAI()" aria-haspopup="dialog">✦ AI Assistant</button>
+  </header>
+  <div class="local-banner" id="localBanner" hidden>📵 Local mode — progress is saved on this device only (Firebase not configured yet).</div>
+</div>
+
+<div class="shell">
+  <nav class="toc" id="toc" aria-label="Table of contents">
+    <h2>The Book</h2>
+    <a data-go="home" onclick="navTo('home')"><span class="num" style="background:#14202B">★</span> Cover &amp; Contents</a>
+    <h2>Chapters</h2>
+    <a data-go="ch1"  onclick="navTo('ch1')"  style="--chip:#16A34A"><span class="num">1</span> Environmental Design Concept <span class="tick">✓</span></a>
+    <a data-go="ch2"  onclick="navTo('ch2')"  style="--chip:#4F46E5"><span class="num">2</span> The Design Concept <span class="tick">✓</span></a>
+    <a data-go="ch3"  onclick="navTo('ch3')"  style="--chip:#0D9488"><span class="num">3</span> Biodiversity <span class="tick">✓</span></a>
+    <a data-go="ch4"  onclick="navTo('ch4')"  style="--chip:#E11D48"><span class="num">4</span> The Biodiversity Debate <span class="tick">✓</span></a>
+    <a data-go="ch5"  onclick="navTo('ch5')"  style="--chip:#F59E0B"><span class="num">5</span> Sun &amp; Solar Geometry <span class="tick">✓</span></a>
+    <a data-go="ch6"  onclick="navTo('ch6')"  style="--chip:#EA580C"><span class="num">6</span> Orientation <span class="tick">✓</span></a>
+    <a data-go="ch7"  onclick="navTo('ch7')"  style="--chip:#DC2626"><span class="num">7</span> Building Skin &amp; OTTV <span class="tick">✓</span></a>
+    <a data-go="ch8"  onclick="navTo('ch8')"  style="--chip:#7C3AED"><span class="num">8</span> Building Geometry (SA/V) <span class="tick">✓</span></a>
+    <a data-go="ch9"  onclick="navTo('ch9')"  style="--chip:#0284C7"><span class="num">9</span> Solar Control <span class="tick">✓</span></a>
+    <a data-go="ch10" onclick="navTo('ch10')" style="--chip:#CA8A04"><span class="num">10</span> Daylighting &amp; ADF <span class="tick">✓</span></a>
+    <a data-go="ch11" onclick="navTo('ch11')" style="--chip:#0891B2"><span class="num">11</span> Natural Ventilation <span class="tick">✓</span></a>
+    <h2>Support</h2>
+    <a data-go="ai" onclick="navTo('ai')"><span class="num" style="background:linear-gradient(135deg,#7C3AED,#2563EB)">✦</span> AI Teaching Assistant</a>
+  </nav>
+
+  <main id="main">
+
+  <!-- ================= COVER ================= -->
+  <div class="view show" id="view-home" data-accent="#16A34A">
+    <div class="cover">
+      <span class="kicker">Interactive Course Book</span>
+      <h1>Introduction to<br>Environmental Design</h1>
+      <p class="sub">Designing buildings for humans <em>and</em> nature — concept, biodiversity, sun, skin, and air, with live calculators and self-check practice.</p>
+      <p class="by">Dr. Bakr Gomaa · AASTMT</p>
+    </div>
+    <div class="cards" id="homeCards"></div>
+    <p class="note" style="text-align:center;margin-top:30px">Each chapter clearly separates <b style="color:var(--inclass)">In Class</b> material (covered in lectures) from <b style="color:var(--read)">Further Readings</b>, and ends with training exercises where you write your own answer and compare it against a model approach. Your progress and answers are saved to your account.</p>
+  </div>
+
+  <!-- ================= CHAPTER 1 ================= -->
+  <div class="view" id="view-ch1" data-accent="#16A34A">
+    <div class="chead">
+      <div class="lbl">Chapter 1 · Pillar foundations</div>
+      <h1>The Environmental Design Concept</h1>
+      <p>Why environmental design is the core of architecture — and why every line you draw is an environmental decision.</p>
+    </div>
+    <div class="obj">
+      <h3>By the end of this chapter you can…</h3>
+      <ul>
+        <li>Explain why environmental design is central to architecture.</li>
+        <li>Describe the environment as an <em>active system</em>, not a background.</li>
+        <li>Recognise that every architectural decision has an environmental consequence.</li>
+      </ul>
+    </div>
+
+    <section class="block">
+      <span class="tag class">● In Class</span>
+      <h2 class="sec">Not “green features” — a life-support system</h2>
+      <div class="panel class">
+        <p>This course is <b>not</b> about bolting “green features” onto a finished design. It is about designing buildings for <b>humans and nature</b> from the first sketch.</p>
+        <p>The opening thought experiment: you are sealed inside a perfectly insulated building on a damaged planet. In one minute you must list the things you need to control to survive — oxygen, CO₂, temperature, water, food, energy, waste — and rank them. In doing this you have just designed a <b>life-support system</b> for human comfort and health.</p>
+        <div class="keytake"><span class="k">1</span><div>Environmental architecture does exactly the same thing: it is a <b>designed built-environment that protects human comfort and health</b>.</div></div>
+        <div class="keytake"><span class="k">2</span><div>The built environment is a <b>controller</b> of the people–nature relationship. If it blocks excessive heat it is good; if it also blocks the view it is bad. Environmental design is finding that <b>balance</b>.</div></div>
+        <div class="keytake"><span class="k">3</span><div>Environmental architecture also <b>cares for the natural environment</b> — in nature, resources regulate themselves; good design works with those cycles instead of fighting them.</div></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <span class="tag class">● In Class</span>
+      <h2 class="sec">The four pillars of the course</h2>
+      <div class="panel class">
+        <ol>
+          <li><b>Life between buildings</b> — how buildings affect natural forces.</li>
+          <li><b>Nature protection</b> — how to design for biodiversity.</li>
+          <li><b>Comfort &amp; the human–nature relationship</b> — naturally cool buildings with ventilation, daylight and views.</li>
+          <li><b>Building physics</b> — <em>calculating</em> these forces to see exactly how your design affects comfort and health.</li>
+        </ol>
+        <p class="note">“Every line you draw is an environmental decision.”</p>
+      </div>
+    </section>
+
+    <section class="block">
+      <span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">The environment as an active system</h2>
+      <div class="panel read">
+        <h4>Buildings as energy exchangers</h4>
+        <p>A building is never neutral. It constantly exchanges heat, light, air and moisture with its surroundings. Engineers describe this with an <b>energy balance</b>: heat gains (sun, people, equipment) must be matched by heat losses (conduction, ventilation) or the interior drifts out of comfort. Every façade decision shifts this balance — which is why the course later teaches you to <em>quantify</em> it (OTTV, ADF, ACH).</p>
+        <h4>Comfort is a range, not a number</h4>
+        <p>Human thermal comfort depends on air temperature, radiant temperature, humidity, air speed and clothing/activity. The <b>adaptive comfort</b> model shows people in naturally ventilated buildings accept a wider temperature range when they have control (an openable window, a breeze). This is the scientific reason natural ventilation and daylight “feel” good — a theme that returns in Chapters 10–11.</p>
+        <p class="note">Connect this to <a onclick="navTo('ch7')">Chapter 7 (OTTV)</a> where the energy balance becomes a number you can design against.</p>
+      </div>
+    </section>
+
+    <div class="exwrap">
+      <h2>✎ Training Exercises</h2>
+      <div class="ex">
+        <div class="q"><span class="qn">1</span><span class="qt">“Seeing the Invisible.” Choose one campus building and map it: What environmental forces (sun, wind) act on it? How do they change over the day and year? Where are the pleasant and unpleasant spots, and what <em>one</em> design change would improve it?</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Sketch the building in plan. Draw the summer and winter sun paths (east→south→west) and mark which façades overheat in afternoon. Add the prevailing wind arrow and note where it is blocked or funnelled. “Nice” spots are usually shaded + breezy (north side, under trees); “bad” spots are west-facing glass with no shading. A strong single change names a force and a strategy, e.g. “add a horizontal shade to the west café glazing to cut afternoon heat gain.”</div>
+        </div>
+        <div class="done-row"><input type="checkbox" data-ex="ch1-1"> Mark complete</div>
+      </div>
+      <div class="ex">
+        <div class="q"><span class="qn">2</span><span class="qt">In your own words, why is “add green features at the end” a weak strategy compared with environmental design from the start? Give one concrete example.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Late “green features” treat symptoms (e.g. bolt-on solar panels to offset an over-glazed, overheating west façade) while the underlying form still wastes energy. Designing from the start lets the <em>form itself</em> solve the problem — orient the long axis east–west, shrink west glazing, shade it — so less energy is needed in the first place. The decision is cheaper, more durable and architecturally integrated.</div>
+        </div>
+        <div class="done-row"><input type="checkbox" data-ex="ch1-2"> Mark complete</div>
+      </div>
+    </div>
+
+    <div class="pager" id="pager-ch1"></div>
+  </div>
+
+  <!-- ================= CHAPTER 2 ================= -->
+  <div class="view" id="view-ch2" data-accent="#4F46E5">
+    <div class="chead"><div class="lbl">Chapter 2 · Pillar 1</div><h1>The Design Concept</h1><p>The single guiding idea that organises every decision — the DNA of your building.</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Formulate an environmental concept from site data.</li>
+      <li>Write a concept statement using the course equation.</li>
+      <li>Generate building masses that respond to one or more site forces.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">What is a design concept?</h2>
+      <div class="panel class">
+        <p>A design concept is a <b>guiding principle that organises design decisions</b> — the DNA of your building. It is the <em>one answer to all questions</em>: when you are unsure whether to do X or Y, the concept decides.</p>
+        <p>The course gives you a concrete formula for writing one:</p>
+        <div class="formula"><b>Concept</b> = Design intention &nbsp;+&nbsp; Environmental force &nbsp;+&nbsp; Spatial strategy</div>
+        <p>Example: <em>“Due to the cool northern wind, the building takes a V-shape with large openings connecting north and south.”</em> — intention (catch the breeze) + force (north wind) + strategy (V-shape, cross openings).</p>
+        <div class="keytake"><span class="k">1</span><div>Remove the concept and the building loses its architecture.</div></div>
+        <div class="keytake"><span class="k">2</span><div>The <b>site defines everything</b>.</div></div>
+        <div class="keytake"><span class="k">3</span><div>An environmental force can be <b>natural</b> (sun, wind, view) or <b>man-made</b> (a noisy road, a neighbour, a special view).</div></div>
+        <p class="note">Weak “concepts” such as “my building is wavy / modern” fail the test — they name a shape, not a force-driven response.</p>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class · Key examples</span>
+      <h2 class="sec">Concepts in built work</h2>
+      <div class="panel class">
+        <p><b>Diriyah Contemporary Art Hub</b> and the <b>Kö-Bogen II</b> mixed-use project in Düsseldorf are studied as buildings whose form is legibly driven by an environmental idea rather than arbitrary styling — the massing, openings and surfaces all answer the same concept.</p>
+        <p class="note">In class you generate 5 building masses for a given site: first responding to <em>one</em> force, then to <em>two</em>, then a full concept statement that follows the equation.</p>
+      </div></section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">From parti to performance</h2>
+      <div class="panel read">
+        <h4>The “parti” tradition</h4>
+        <p>Architects have long used a <b>parti</b> — a single organising diagram — to keep a project coherent. The course equation is a performance-aware version: it forces the parti to name a real environmental force, so the poetic idea and the physics stay coupled from day one.</p>
+        <h4>Concept as a decision filter</h4>
+        <p>A good concept is testable. For every later choice — glazing ratio, shading depth, opening position — you should be able to ask “does this strengthen the concept and the force it answers?” If not, it is decoration. This is exactly why Chapters 7–11 attach <em>numbers</em> (OTTV, ADF, ACH) to the concept.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">Rewrite each weak idea as a proper concept statement using the equation: (a) “my building is wavy”, (b) “my building is modern”.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> (a) <em>“To funnel the lake breeze through the plan (intention) against the prevailing summer wind (force), the floor plates wave in section to open windward and close leeward (strategy).”</em> (b) Replace “modern” with a force: <em>“To exploit the unobstructed southern view and winter sun (force) while rejecting the western afternoon glare (force), the mass steps back to the west and cantilevers a shaded south terrace (strategy).”</em> The test: a reader can name the force you answered.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch2-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">For a site with a park to the south, a noisy street to the west and prevailing north wind, sketch 5 distinct masses driven by <em>one</em> chosen force, then 2 masses driven by <em>two</em> forces together.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Pick the north wind: masses might (1) form a V to catch it, (2) lift on pilotis to let it pass under, (3) carve a central wind slot, (4) angle louvred north openings, (5) terrace down to the south so the breeze washes over. For two forces (wind + street noise) combine a solid acoustic western spine with open, breeze-catching north faces. High marks = clear response, statement follows the equation, quality of drawings, and discussion.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch2-2"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch2"></div>
+  </div>
+
+  <!-- ================= CHAPTER 3 ================= -->
+  <div class="view" id="view-ch3" data-accent="#0D9488">
+    <div class="chead"><div class="lbl">Chapter 3 · Pillar 2</div><h1>Biodiversity</h1><p>Using living systems to do real environmental jobs — and as a generator for the concept.</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Distinguish biodiversity design from cosmetic “greening”.</li>
+      <li>Name the environmental jobs living systems can perform.</li>
+      <li>Use biodiversity as a driver of spatial and environmental systems.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Biodiversity vs. greening</h2>
+      <div class="panel class">
+        <p><b>Biodiversity</b> is the variation of species in an area, and — with habitat — a key factor in environmental balance. Architecture <b>always</b> affects biodiversity, positively or negatively, and it operates at many levels: interior, building, city block, street and whole city.</p>
+        <p><b>Greening</b> adds vegetation chosen mainly for a visual or feel-good effect. <b>Biodiversity design</b> starts from a different question: <em>“What environmental jobs need to be done, and can living systems do them?”</em> — and species choice must suit that function.</p>
+        <div class="keytake"><span class="k">★</span><div>Biodiversity is the idea that design can be a <b>tool to restore nature instead of removing it</b> — and a driver for the concept.</div></div>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Five environmental jobs living systems can do</h2>
+      <div class="panel class">
+        <ol>
+          <li><b>Thermal protection</b> — e.g. New Street Square, London.</li>
+          <li><b>Protection from noise &amp; pollution</b> — e.g. Ian Martin Group offices.</li>
+          <li><b>Regulation of microclimate</b> — e.g. Central Park, New York.</li>
+          <li><b>Habitat restoration &amp; connectivity</b> — e.g. Hunter’s Point South Waterfront Park.</li>
+          <li><b>Urban-heat-island &amp; stormwater management</b> — e.g. Ketcheson Neighbourhood Park.</li>
+        </ol>
+        <p>The <b>Urban Heat Island (UHI)</b> effect: urban materials store heat during the day and release it after sunset, keeping cities hotter than their surroundings. Living systems cool through shade and evapotranspiration.</p>
+        <p class="note">Key examples studied: Paley Park (NY), the Optical Glass House (Hiroshima), Steno Diabetes Center (Copenhagen), Salesforce Transit Center (San Francisco).</p>
+      </div></section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">How plants actually cool and clean</h2>
+      <div class="panel read">
+        <h4>Evapotranspiration &amp; shade</h4>
+        <p>Plants cool in two ways: they <b>block solar radiation</b> before it hits a surface, and they <b>convert heat into latent energy</b> as water evaporates from leaves (evapotranspiration). A mature street tree can have a cooling effect equivalent to several air-conditioners running — at no energy cost.</p>
+        <h4>Green roofs, walls &amp; stormwater</h4>
+        <p>Vegetated roofs reduce roof-surface temperatures dramatically, insulate, and <b>absorb stormwater</b>, easing peak loads on drainage. The design lesson is to match the <em>system</em> to the <em>job</em>: a biodiverse, deep-substrate roof for habitat and water retention behaves very differently from a thin sedum mat chosen only for looks.</p>
+        <h4>Ecosystem services as a design brief</h4>
+        <p>The wider framing is <b>ecosystem services</b> — quantifiable benefits (cooling, air cleaning, pollination, flood control) that nature provides. Treating these as design requirements turns “landscaping” into infrastructure.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">Use biodiversity as the concept for a given site, responding to all its forces. Draw the site plan and three 3D sketches; write the concept statement using the equation.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Assign each force a living-system job: a dense planted western buffer for thermal + noise protection, a green roof for UHI/stormwater, and a habitat corridor linking the park through the site. Concept statement, e.g.: <em>“To restore the severed park-to-street habitat corridor (intention) against UHI and western road noise (forces), the building splits into two planted bars bridged by a biodiverse roof (strategy).”</em></div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch3-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">For each of the five environmental jobs, name one species or planting strategy and justify why it <em>suits the function</em> (not just the look).</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach (examples):</b> Thermal — broad deciduous canopy (shade in summer, sun in winter). Noise/pollution — dense evergreen hedge with rough leaves to trap particulates year-round. Microclimate — water + tall shade trees for evaporative cooling. Habitat/connectivity — native flowering species that link to existing corridors and feed local pollinators. UHI/stormwater — deep-substrate green roof + rain garden to store and slowly release water. Each choice is justified by the <em>job</em>.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch3-2"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch3"></div>
+  </div>
+
+  <!-- ================= CHAPTER 4 ================= -->
+  <div class="view" id="view-ch4" data-accent="#E11D48">
+    <div class="chead"><div class="lbl">Chapter 4 · Argument &amp; advocacy</div><h1>The Biodiversity Debate</h1><p>How do you argue for biodiversity when the pressure is always to cut it first?</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Argue for or against biodiversity requirements from four stakeholder perspectives.</li>
+      <li>Anticipate and counter opposing arguments.</li>
+      <li>Use an LLM as a debate coach without outsourcing your thinking.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">The simulation</h2>
+      <div class="panel class">
+        <p>Parliament puts forward a motion: <em>“Biodiversity requirements must be a non-negotiable, fully funded component of all major urban development projects in Egypt.”</em> You argue from one of four roles:</p>
+        <ul><li><b>Developers</b></li><li><b>Designers</b></li><li><b>Environmentalists</b></li><li><b>Financial sector</b></li></ul>
+        <p><b>Phase 1 (individual):</b> in-class debate on the online platform. <b>Phase 2 (groups of 5):</b> record a 15–20 minute podcast discussing the topic from the different perspectives.</p>
+        <table class="ex-table"><tr><th>Criterion</th><th>Weight</th></tr>
+          <tr><td>Depth &amp; quality of arguments</td><td>40%</td></tr>
+          <tr><td>Engagement with opposing perspectives</td><td>30%</td></tr>
+          <tr><td>Presentation quality &amp; creativity</td><td>30%</td></tr></table>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Using your LLM as a debate coach</h2>
+      <div class="panel class">
+        <p>The course gives you a structured prompt to <b>prepare</b>, not to replace your thinking. Step through it one section at a time:</p>
+        <ol>
+          <li>A neutral 200-word briefing on the topic.</li>
+          <li>How <em>your</em> role specifically views the topic.</li>
+          <li>The likely positions of the other three groups.</li>
+          <li>Three sharp counterarguments against those positions.</li>
+          <li>References you can cite.</li>
+          <li>A 60-second opening statement.</li>
+        </ol>
+        <p>Then a second prompt makes the LLM <b>simulate the three opponents</b>, one at a time, challenging you and giving coaching feedback after each exchange.</p>
+        <p class="note">This is the same retrieval-and-rehearsal logic the AI Teaching Assistant in this book is built around.</p>
+      </div></section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">The economics behind the argument</h2>
+      <div class="panel read">
+        <h4>Why biodiversity gets “cut first”</h4>
+        <p>Green elements are usually a visible up-front cost while their benefits (cooling, health, flood protection) are <b>diffuse and delayed</b>. In a value-engineering exercise the easy cut is the thing whose value isn't on the balance sheet. The strongest pro-biodiversity arguments therefore <b>monetise the benefits</b>: avoided cooling energy, higher rents and sale values for green-adjacent space, reduced stormwater infrastructure, and health-driven productivity.</p>
+        <h4>Natural capital &amp; policy</h4>
+        <p>Frameworks such as <b>natural capital accounting</b> and biodiversity net-gain policies try to put nature on the books so it survives the value-engineering meeting. Knowing this vocabulary lets the “financial sector” and “developer” roles argue credibly on their own terms.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">Write a 60-second opening statement for your assigned role, then list the three strongest counterarguments you expect from the others.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Lead with your role's core value (developer: cost/return; environmentalist: ecological survival; designer: quality of place; finance: risk and asset value), give one piece of evidence, then a memorable close. For counterarguments, attack the <em>weakest assumption</em> of each opponent — e.g. against the developer, “the cost you cite ignores avoided cooling energy and resale premiums.” Rehearse out loud against the AI opponent simulation.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch4-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">Steel-man the opposite side: write the single best argument <em>against</em> your own position, then refute it.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> A strong opposing point to a pro-mandate stance: “A blanket, fully-funded mandate raises housing costs and slows badly-needed development.” Refutation: target the mandate's <em>design</em>, not the goal — tiered requirements by project size, public co-funding, and counting long-term savings — so you concede the concern while keeping the principle. Engaging opposition seriously is worth 30% of the grade.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch4-2"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch4"></div>
+  </div>
+
+  <!-- ================= CHAPTER 5 ================= -->
+  <div class="view" id="view-ch5" data-accent="#F59E0B">
+    <div class="chead"><div class="lbl">Chapter 5 · Pillar 3 &amp; 4</div><h1>Sun &amp; Solar Geometry</h1><p>Reading the sun's path so you can anticipate exactly how it strikes a building.</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Read the sun's path and how daytime length changes through the year.</li>
+      <li>Locate the sun with two angles: altitude and azimuth.</li>
+      <li>Anticipate how the sun hits each façade at a given date and time.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Sun brings light — and heat</h2>
+      <div class="panel class">
+        <p>The sun gives light but also heat, so design has strategies to manage it: <b>orientation, building geometry, thermal protection</b> and <b>solar control</b>. Because the sun is always moving, a designer must know <em>exactly</em> how it strikes the building to respond correctly.</p>
+        <div class="keytake"><span class="k">☀</span><div>No two days have the same daytime length. <b>Summer solstice (21 Jun)</b> = longest day; <b>winter solstice (21 Dec)</b> = shortest; <b>equinox (21 Mar &amp; 21 Sep)</b> = day equals night.</div></div>
+        <p>Latitude lines (90°, 66.5°, 23.5°, equator, …) explain why the sun's height changes with both <em>season</em> and <em>place</em>.</p>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Two angles locate the sun</h2>
+      <div class="panel class">
+        <p>The complex solar geometry is simplified into two angles for design:</p>
+        <ul>
+          <li><b>Altitude angle</b> — how high the sun is above the horizon (vertical).</li>
+          <li><b>Azimuth angle</b> — the sun's compass direction (horizontal), measured from north/south.</li>
+        </ul>
+        <p>With these two numbers you can draw the sun's position and trace how its rays meet each surface. The in-class task: draw the sun and how it hits the building's surfaces at <b>10am, 12pm and 4pm at equinox</b>.</p>
+        <p class="note">These two angles return directly in Chapter 9 (Solar Control), where you size shading to block both the altitude and azimuth components of a ray.</p>
+      </div></section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">Sun-path diagrams &amp; why west is worst</h2>
+      <div class="panel read">
+        <h4>Reading a sun-path diagram</h4>
+        <p>A <b>sun-path (stereographic) diagram</b> plots altitude and azimuth for every hour and month at a given latitude on one chart. Architects overlay it on a plan to read shading and solar access quickly — it is the graphical companion to the two angles you learn here.</p>
+        <h4>Why the west façade overheats</h4>
+        <p>At solar noon the sun is high (large altitude), so a modest overhang shades a south window easily. In late afternoon the sun is <b>low in the west</b> (small altitude) and shines almost horizontally under any overhang, straight onto west glass — while the air is already at its daily peak. That combination is why west-facing glazing is the classic overheating problem, and why it needs <em>vertical</em>, not horizontal, shading.</p>
+        <h4>Hot-climate rule</h4>
+        <p>In a hot climate the mass should <b>reject summer radiation</b> while admitting a controlled amount in winter — the seasonal asymmetry the solstice diagrams make visible.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">Draw the sun's location and how it hits each façade at 10am, 12pm and 4pm at the equinox. Mark which surfaces receive direct sun at each time.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> At equinox the sun rises due east, is due south at noon, sets due west. 10am — low-ish in the south-east, lighting east + south façades. 12pm — high in the south, lighting south (and roof). 4pm — low in the south-west, lighting south + west. North stays in shade all day at this latitude. Show the altitude rising to noon then falling, and the azimuth sweeping east→south→west.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch5-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">Explain, using altitude and azimuth, why a horizontal overhang protects a south window in summer but fails on a west window in the afternoon.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Summer-noon south sun has <em>high altitude</em>, so its rays come from steeply above — a horizontal overhang easily intercepts them. Afternoon west sun has <em>low altitude</em> and a westerly azimuth, so rays travel nearly horizontally beneath the overhang and strike the glass. West windows therefore need vertical fins or screens that block the low, side-on azimuth, not a horizontal shelf.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch5-2"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch5"></div>
+  </div>
+
+  <!-- ================= CHAPTER 6 ================= -->
+  <div class="view" id="view-ch6" data-accent="#EA580C">
+    <div class="chead"><div class="lbl">Chapter 6 · Pillar 3</div><h1>Orientation</h1><p>Turning the building, its zones and its spaces to work with the sun and wind.</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Distinguish mass, zonal and spatial orientation.</li>
+      <li>Orient a hot-climate mass to reject summer sun and admit winter sun.</li>
+      <li>Resolve conflicting factors (ventilation, daylight, shading, view) at the space scale.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Three scales of orientation</h2>
+      <div class="panel class">
+        <ul>
+          <li><b>Building mass orientation</b> — how the whole volume sits on the site. In a hot climate, design the mass to <b>reject as much summer radiation as possible</b> while allowing a controlled amount in winter. The same floor area at different orientations (e.g. 6 m × 30 m vs 15 m × … facing different ways) performs very differently.</li>
+          <li><b>Zonal orientation</b> — placing functions with particular needs in the parts of the building that can supply those conditions (e.g. heat-tolerant services to the west, sensitive offices to the north).</li>
+          <li><b>Spatial orientation</b> — at the single-space scale, finding a solution to <b>conflicting factors</b>: natural ventilation, daylighting, shading, view and energy all at once.</li>
+        </ul>
+        <div class="keytake"><span class="k">↻</span><div>Orientation is a free move: rotating and zoning the same building can cut heat gain and improve daylight and views at <b>no extra material cost</b>.</div></div>
+        <p class="note">Studied examples: ZGF Architects' office in Agoura Hills; PDEC (passive downdraught evaporative cooling) ventilation; and One Hyde Park as an orientation analysis.</p>
+      </div></section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">The east–west long axis &amp; daylight depth</h2>
+      <div class="panel read">
+        <h4>Why elongate east–west</h4>
+        <p>A building stretched on an <b>east–west axis</b> presents its long faces to north and south. South sun is high and easy to shade with horizontal devices; north light is soft and glare-free. The short east and west faces — the hardest to shade because of low sun — are minimised. This single move underlies most passive hot-climate plans.</p>
+        <h4>Zoning as a thermal buffer</h4>
+        <p>Zonal orientation can use less-sensitive rooms (stairs, stores, services) as a <b>thermal buffer</b> on the hot west side, shielding occupied spaces — a free layer of protection before any insulation is added.</p>
+        <h4>Daylight reach</h4>
+        <p>Useful daylight penetrates only about <b>2–2.5× the window head height</b> into a room (Chapter 10). Narrow, well-oriented floor plates therefore daylight naturally; deep plans force artificial light and bigger cooling loads.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">Given the same floor area, compare two mass orientations for a hot climate. Which rejects more summer heat while keeping winter sun, and why?</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> The orientation with its <em>long axis east–west</em> wins: large south and north faces (easy to shade / soft light), small east and west faces (hard, low-sun exposure minimised). It admits controllable high winter south sun while a horizontal shade blocks high summer south sun. The north–south-elongated option exposes big east/west walls to harsh low morning and afternoon sun — more summer gain.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch6-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">Design a concept for a 10,000 m² office (70% offices, 30% services) using only zonal orientation, with biodiversity and sun angles as generators. State which zone goes where and why.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Put offices on the north and shaded south for stable daylight and views to the lake; bank services, cores and circulation along the hot west as a thermal buffer. Use the summer June sun path (10/12/2/4) to mark west “danger zones” and a planted screen there; use the December path to keep south winter sun reaching offices. Concept statement ties plants + sun angles to the massing.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch6-2"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch6"></div>
+  </div>
+
+  <!-- ================= CHAPTER 7 ================= -->
+  <div class="view" id="view-ch7" data-accent="#DC2626">
+    <div class="chead"><div class="lbl">Chapter 7 · Pillar 4 · Building physics</div><h1>Building Skin &amp; OTTV</h1><p>Controlling the thermal performance of the envelope — and proving it with a number.</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Explain the skin energy balance.</li>
+      <li>Compute OTTV surface-by-surface and per floor area.</li>
+      <li>Test interventions to bring OTTV/floor area below the target.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Skin energy balance</h2>
+      <div class="panel class">
+        <p>Energy balance is the <b>strategic optimisation of a building's energy use and environmental impact against the comfort, health and well-being of its occupants</b>. The skin is where most of that exchange happens, so we quantify it with the <b>Overall Thermal Transfer Value (OTTV)</b>.</p>
+        <p>For each surface, heat transfer combines conduction through the opaque wall and glazing plus solar gain through the glazing:</p>
+        <div class="formula">Q<sub>surface</sub> = (A<sub>w</sub>·U<sub>wall</sub>·ΔT) + (A<sub>g</sub>·U<sub>glass</sub>·ΔT) + (A<sub>g</sub>·SHGC·SC·I<sub>sol</sub>)</div>
+        <p>Sum every surface, divide by floor area, and compare against the target. The in-class case: north/south walls 42 m² (WWR 0.3), east/west 28 m², roof 96 m²; wall U = 1.68, glazing U = 5.0, roof U = 0.54.</p>
+        <div class="keytake"><span class="k">⚑</span><div>Target: <b>OTTV / floor area &lt; 100 W/m²</b>. Above it, the design <b>fails</b>.</div></div>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class · Predict → Calculate → Validate</span>
+      <h2 class="sec">The 5-part workflow</h2>
+      <div class="panel class">
+        <ol>
+          <li><b>Predict:</b> without calculating, rank the surfaces from highest to lowest heat gain, with reasoning.</li>
+          <li><b>Calculate:</b> hand-compute OTTV surface by surface and test your hypothesis.</li>
+          <li><b>Hypothesise:</b> propose just <em>two</em> interventions to drop OTTV/floor area the most.</li>
+          <li><b>Validate:</b> use the calculator below to test it — if it stays above 100 W/m², mark it Fail (in red).</li>
+          <li><b>Reflect:</b> one short paragraph on where your hypothesis was right or wrong.</li>
+        </ol>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class · Live tool</span>
+      <h2 class="sec">OTTV &amp; U-Value Calculator</h2>
+      <div class="calc-wrap">
+        <div class="calc-bar">🧮 OTTV Design Tool <a href="OTTV_UValue_Calculator.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+        <iframe data-src="OTTV_UValue_Calculator.html" title="OTTV and U-Value Calculator" loading="lazy"></iframe>
+      </div>
+      <p class="note">Enter the case-study surfaces, then test your two interventions here for Part 4.</p>
+    </section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">U-value, WWR and where the heat really goes</h2>
+      <div class="panel read">
+        <h4>The U-value, demystified</h4>
+        <p>A <b>U-value</b> (W/m²K) is the rate heat passes through 1 m² of a construction per 1 °C difference — lower is better. It is the reciprocal of total thermal resistance (U = 1/ΣR), so adding insulation layers (high R) drives U down. Note the in-class glazing U of 5.0 versus wall 1.68: <b>glass leaks roughly three times faster than the wall</b>, which is why window choices dominate the result.</p>
+        <h4>Window-to-Wall Ratio (WWR)</h4>
+        <p>OTTV is extremely sensitive to <b>WWR</b> and to which façade the glazing sits on. Solar gain through glazing — not conduction — is usually the largest term on sunny façades, so the highest-leverage interventions are <b>reducing west/east WWR</b> and <b>improving the glazing's solar control</b> (low-SHGC glass or external shading), more than thickening opaque walls.</p>
+        <h4>Why per-floor-area?</h4>
+        <p>Dividing by floor area normalises buildings of different sizes so the &lt;100 W/m² target is a fair benchmark — it rewards <em>compact, well-shaded</em> envelopes, linking straight to Chapter 8's SA/V idea.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">Before any maths, rank the case-study surfaces (N, S, E, W, roof) from highest to lowest heat gain and justify. Then hand-calculate OTTV per surface and check your ranking.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Predict the roof and the sun-exposed glazed façades (south, then west/east) as worst because of high solar gain and the leaky U=5 glass; north is lowest (no direct sun). Compute each Q with the formula above, sum, divide by floor area. Compare to your ranking — surprises usually come from WWR differences or the roof's large area. Honest reflection on the mismatch is the point.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch7-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">Propose exactly two interventions to push OTTV/floor area below 100 W/m². Validate them in the calculator above. If it still fails, say why and revise.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> The two highest-leverage moves are almost always (1) cut WWR / add external shading on the worst solar façade, and (2) swap to low-SHGC, lower-U glazing. Thickening opaque walls helps little because the glass dominates. Run both in the tool; if still &gt;100, the solar-gain term is still too high — deepen the shading or reduce glazing further rather than touching the walls.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch7-2"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch7"></div>
+  </div>
+
+  <!-- ================= CHAPTER 8 ================= -->
+  <div class="view" id="view-ch8" data-accent="#7C3AED">
+    <div class="chead"><div class="lbl">Chapter 8 · Pillar 4</div><h1>Building Geometry (SA/V)</h1><p>The shape of your plan changes how much skin trades heat with the outside.</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Show that equal volumes can have very different surface areas.</li>
+      <li>Compute the surface-area-to-volume (SA/V) ratio.</li>
+      <li>Trade off compactness against daylight, view and ventilation.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Same volume, different skin</h2>
+      <div class="panel class">
+        <p>Studying geometry lets you choose intelligently among design alternatives. The key insight: <b>the same cubic metres of space can be wrapped in different surface areas</b>. The building skin offers daylight, views and ventilation — but it also <b>exchanges heat with the outside far more easily than the core</b>.</p>
+        <p>So the <b>shape of your plan changes the external skin area</b>, and therefore the heat that can pass through it. Compare a 100 m² floor as a square (10×10), a thin rectangle, an L, or a circle — each has a different perimeter and skin.</p>
+        <div class="formula"><b>SA/V ratio</b> = total external surface area &nbsp;/&nbsp; enclosed volume &nbsp; <span style="opacity:.7">(lower = more compact = less heat exchange)</span></div>
+        <div class="keytake"><span class="k">◧</span><div>Compact forms (low SA/V) lose/gain less heat; articulated forms (high SA/V) get more daylight, view and cross-ventilation. Design is the <b>trade-off</b>.</div></div>
+      </div></section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">The compactness trade-off, in context</h2>
+      <div class="panel read">
+        <h4>Climate decides the direction</h4>
+        <p>In <b>hot or cold</b> climates with big indoor–outdoor temperature gaps, a <b>compact (low SA/V)</b> form saves energy — less skin to leak through. In <b>mild</b> climates, a more <b>articulated (high SA/V)</b> form can win by harvesting daylight and cross-ventilation, cutting lighting and cooling loads. The “best” shape is climate-dependent.</p>
+        <h4>SA/V meets OTTV</h4>
+        <p>SA/V and Chapter 7's OTTV are two views of the same physics: SA/V sets <em>how much</em> skin you have, OTTV sets <em>how good</em> each square metre is. A compact form with a modest envelope can beat a sprawling form with an expensive one — and costs less.</p>
+        <h4>The thin-plan exception</h4>
+        <p>A deliberately <b>thin plan</b> raises SA/V but is often justified: every space gets a window for daylight and cross-ventilation, slashing lighting and mechanical-cooling energy. The skill is knowing when the daylight/ventilation gain outweighs the extra envelope loss.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">Design three variations of one building mass: keep the volume constant but increase SA/V once and decrease it once. Show the surface-area and volume calculation for each.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Hold volume fixed (e.g. 1000 m³). A cube (10×10×10) has SA = 600 m² → SA/V = 0.6 (compact baseline). A thin slab (5×40×5) raises SA to ~1300 m² → SA/V ≈ 1.3 (more skin, more daylight). A taller, near-cubic block lowers SA toward the cube minimum. Tabulate SA, V and SA/V for all three and state the comfort/energy implication of each.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch8-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">For a hot climate, argue whether you'd pick the most compact form or a slightly less compact one — and how Chapter 10 (daylight) and 11 (ventilation) change your answer.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Pure conduction logic favours the most compact form to reject heat. But a slightly thinner plan lets daylight reach ~2–2.5× the window head height (Ch.10) and enables cross-ventilation for night cooling (Ch.11), cutting lighting and cooling energy that often outweighs the extra skin. The defensible answer balances a moderately compact mass with daylight/ventilation access, not the extreme of either.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch8-2"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch8"></div>
+  </div>
+
+  <!-- ================= CHAPTER 9 ================= -->
+  <div class="view" id="view-ch9" data-accent="#0284C7">
+    <div class="chead"><div class="lbl">Chapter 9 · Pillar 3 &amp; 4</div><h1>Solar Control</h1><p>Shading — keeping the sun's rays off the glazing using altitude and azimuth.</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Decide when and where a façade needs shading.</li>
+      <li>Choose a device type for each orientation.</li>
+      <li>Size a device from the solar altitude and azimuth.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Solar control = shading</h2>
+      <div class="panel class">
+        <p>Architectural solar control is an <b>external device over a window to block the sun</b> — the goal is that solar rays don't fall on the glazing (or large parts of it). The glazing heat balance has two parts:</p>
+        <div class="formula">Q<sub>conduction</sub> = A·U·ΔT &nbsp;&nbsp;|&nbsp;&nbsp; Q<sub>solar gain</sub> = A·SHGF·I<sub>sol</sub></div>
+        <p>Two factors drive the design: <b>microclimate</b> and <b>orientation</b> — solar angles differ per façade, so each façade needs a different device. Because angles also change with season, you must first decide whether you're shading in <b>summer, winter, or both</b>.</p>
+        <p><b>Device types:</b> screen · horizontal shading · overhang · vertical louvers.</p>
+        <p class="note">Studied examples: Kimbell Art Museum Expansion (Renzo Piano), UQ Global Change Institute (Brisbane), Missouri Dept. of Natural Resources.</p>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">How to design &amp; size shading</h2>
+      <div class="panel class">
+        <ol>
+          <li>Identify the glazing areas that need shading.</li>
+          <li>Identify the seasons and times they should be shaded.</li>
+          <li>Use solar angles to place the device to shade the whole window (or part).</li>
+          <li>Calculate the device so it stops rays reaching the glazing — blocking <b>both</b> the azimuth and altitude components.</li>
+        </ol>
+        <p>The geometry: a horizontal device depth is set by the <b>altitude</b>; a vertical fin by the <b>azimuth</b>. For a low, side-on sun you need fins; for a high sun, an overhang.</p>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class · Live tool</span>
+      <h2 class="sec">Solar Control Tool</h2>
+      <div class="calc-wrap">
+        <div class="calc-bar">🛡 Solar Control — interactive <a href="Solar_Control_Tool.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+        <iframe data-src="Solar_Control_Tool.html" title="Solar Control Educational Tool" loading="lazy"></iframe>
+      </div>
+      <p class="note">Use the tool to visualise altitude/azimuth and check the device depths you calculate below.</p>
+    </section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">Matching the device to the sun</h2>
+      <div class="panel read">
+        <h4>The horizontal-shadow-angle / vertical-shadow-angle pair</h4>
+        <p>Designers formalise shading with two angles: the <b>vertical shadow angle</b> (how the altitude projects onto a section, set by overhang depth) and the <b>horizontal shadow angle</b> (how the azimuth projects on plan, set by fin spacing). A device is “designed” when its geometry produces shadow angles that cover the required sun positions.</p>
+        <h4>Right device, right façade</h4>
+        <p><b>South</b> (high sun): horizontal overhangs/louvres work best. <b>East &amp; west</b> (low sun): vertical fins or movable screens, since horizontal shelves can't block near-horizontal rays. <b>North</b> (in shade most of the year at this latitude): usually minimal shading needed. Egg-crate (combined) devices handle façades that face the corner directions.</p>
+        <h4>Fixed vs. movable, and depth vs. daylight</h4>
+        <p>Deeper devices shade more but also <b>cut daylight and view</b> — the link to Chapter 10. Movable louvres, perforated screens and seasonal geometry (blocking high summer sun while admitting low winter sun) resolve this tension.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">Design the device to fully shade a 2×2 m east window when (a) solar altitude 70°, azimuth 90°, and (b) altitude 50°, azimuth 100°. Give the geometry for each.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> East sun is low and side-on, so lead with <b>vertical fins</b> set by the azimuth; add a top horizontal element for the altitude. Depth from altitude: a horizontal projection P shades a window of height H when P = H / tan(altitude). For 70°: P = 2/tan70 ≈ 0.73 m. For 50°: P = 2/tan50 ≈ 1.68 m — much deeper because the sun is lower. The fin spacing/projection follows from the azimuth offset from the façade normal. Verify in the tool.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch9-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">Why does the device get deeper as the solar altitude drops, and what does that imply for east/west versus south shading?</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Required projection P = H/tan(altitude); as altitude falls, tan(altitude) falls, so P grows — a low sun demands a deep (often impractical) horizontal device. South sun is high, so shallow overhangs suffice. East/west sun is low, so horizontal devices become absurdly deep and block daylight; therefore use <b>vertical fins or movable screens</b> there instead. This is the quantitative reason for the device-per-orientation rule.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch9-2"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch9"></div>
+  </div>
+
+  <!-- ================= CHAPTER 10 ================= -->
+  <div class="view" id="view-ch10" data-accent="#CA8A04">
+    <div class="chead"><div class="lbl">Chapter 10 · Pillar 3 &amp; 4</div><h1>Daylighting &amp; ADF</h1><p>Bringing in useful, diffuse light — without the focused heat of direct sun.</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Distinguish daylight (skylight) from sunlight.</li>
+      <li>Calculate the Average Daylight Factor (ADF).</li>
+      <li>Apply daylight design criteria and run a sensitivity analysis.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Daylight vs. sunlight</h2>
+      <div class="panel class">
+        <p><b>Skylight</b> is diffuse and even, present on overcast and clear days — good for work. <b>Sunlight</b> is a focused beam of light and heat, limited to clear days and orientation-dependent, creating bright and dark patches and warmth on cold days but glare on work surfaces.</p>
+        <p>Daylight is measured by the <b>Daylight Factor (DF)</b> — the percentage of external light reaching a specific interior point — averaged across the space as the <b>Average Daylight Factor (ADF)</b>.</p>
+        <div class="keytake"><span class="k">%</span><div>A <b>healthy ADF is between 3% and 6%</b>.</div></div>
+        <div class="formula"><b>ADF</b> = (W · θ · T) &nbsp;/&nbsp; [ A<sub>total</sub> · (1 − R²) ] &nbsp;× C</div>
+        <p>where W = window area, θ = angle of visible sky, T = glazing transmittance, A<sub>total</sub> = area of all internal surfaces, R = average reflectance.</p>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Angle of visible sky &amp; design criteria</h2>
+      <div class="panel class">
+        <p>The <b>angle of visible sky</b> is measured from the window centre, between the obstruction opposite the window and the one above it — the slice of sky the window can actually “see”. <b>Balconies</b> sharply reduce it, especially in dense surroundings; painting external obstructions a light colour is worth roughly <b>+6°</b> of visible sky.</p>
+        <p><b>Design criteria:</b> room depth ≈ <b>2–2.5×</b> the window head height; distribute windows across the wall for even light. Light can also come <b>from above</b> via skylights (horizontal glazing), <b>bulkhead lighting</b>, and <b>roof monitors</b>.</p>
+        <p class="note">Studied example: Wayne L. Morse U.S. Courthouse.</p>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class · Live tool</span>
+      <h2 class="sec">ADF Daylight Calculator</h2>
+      <div class="calc-wrap">
+        <div class="calc-bar">💡 ADF Calculator <a href="ADF_Calculator.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+        <iframe data-src="ADF_Calculator.html" title="ADF Daylight Calculator" loading="lazy"></iframe>
+      </div>
+      <p class="note">Use this for the sensitivity analysis below — change one variable at a time and watch ADF respond.</p>
+    </section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">Beyond the daylight factor</h2>
+      <div class="panel read">
+        <h4>Why the surface reflectance term matters so much</h4>
+        <p>The (1 − R²) denominator means <b>interior reflectance</b> is a powerful lever: light-coloured walls, ceilings and floors bounce daylight deeper into the room, raising ADF without any extra glass (and therefore without extra solar heat gain). This is the cheapest daylight upgrade available.</p>
+        <h4>The daylight–heat tension</h4>
+        <p>Bigger windows raise ADF but also raise OTTV (Chapter 7) and demand shading (Chapter 9). The art is hitting 3–6% ADF with the <em>least</em> glass — using high transmittance, high reflectance and top-lighting — so daylight and thermal goals are met together. This is exactly the Chapter-10 “Part 3” brief: ADF = 5.5 <em>and</em> east-wall OTTV/area ≤ 60.</p>
+        <h4>Modern metrics</h4>
+        <p>Practice now also uses <b>climate-based daylight metrics</b> (Daylight Autonomy, Useful Daylight Illuminance) that account for the real annual sky and glare — but ADF remains the quick, hand-calculable design check you learn here.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">A 10×10×3.6 m room has a 2 m² window (T = 0.55), average R = 0.5 and θ = 25°. Find the ADF and judge the light coverage. Is it healthy?</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Compute total internal surface area (2 walls+floor+ceiling minus window), plug W, θ, T, R into the formula and solve for ADF (use the calculator to confirm). With only 2 m² of glass in a large room, expect an ADF well <em>below</em> the healthy 3–6% band — so it's under-lit. Coverage: useful daylight reaches only ≈2–2.5× the window head height from the wall, leaving the room's far side dark.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch10-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">Sensitivity analysis: increase each variable in turn — W (3→4 m²), T (0.65→0.85), θ (45→65°), R (0.65→0.8). Which moves ADF most, and why?</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> ADF rises ~linearly with W, θ and T (double the window ≈ double ADF). The <b>reflectance R</b> often has outsized impact because it sits in the non-linear (1−R²) denominator — raising R from 0.65 to 0.8 sharply increases ADF without adding any solar heat gain. Run each change one-at-a-time in the calculator and rank the deltas; R and W usually lead.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch10-2"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">3</span><span class="qt">Design a daylighting scheme meeting two targets at once: ADF = 5.5 and east-wall OTTV/area = 60 W/m². How do you satisfy both?</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Hit ADF with <em>quality</em> not quantity of glass: high-transmittance, low-SHGC glazing + very light interior surfaces (high R) + top-lighting (skylight/roof monitor) so you need less east glass. Keeping east WWR modest and adding external shading holds east OTTV/area at 60. Iterate both numbers in the Ch.7 and Ch.10 calculators until both pass — the explicit daylight↔heat trade-off.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch10-3"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch10"></div>
+  </div>
+
+  <!-- ================= CHAPTER 11 ================= -->
+  <div class="view" id="view-ch11" data-accent="#0891B2">
+    <div class="chead"><div class="lbl">Chapter 11 · Pillar 3 &amp; 4</div><h1>Natural Ventilation</h1><p>Using the laws of physics to drive fresh air through a building — for free.</p></div>
+    <div class="obj"><h3>By the end of this chapter you can…</h3><ul>
+      <li>Explain the mechanisms of natural ventilation.</li>
+      <li>Quantify airflow, air change rate and the stack effect.</li>
+      <li>Design and redesign a room for healthy ventilation and summer cooling.</li></ul></div>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">What it is and why it matters</h2>
+      <div class="panel class">
+        <p><b>Ventilation</b> delivers fresh air to occupants — naturally, mechanically or hybrid. <b>Natural ventilation</b> uses the laws of physics to drive airflow between outside and inside. It <b>cuts energy use</b>, connects occupants to the outdoors (a psychological benefit), removes hot stale air, and improves <b>Indoor Air Quality (IAQ)</b> and health. It also gives a sense of comfort even when temperatures are slightly high.</p>
+        <p><b>Two driving forces:</b></p>
+        <ul>
+          <li><b>Pressure-induced (wind-driven)</b> — single-sided and cross ventilation. Pressure differences around the building push air through.</li>
+          <li><b>Temperature-induced (buoyancy-driven)</b> — the <b>stack / solar chimney</b> effect; warm air rises and escapes high, drawing cool air in low.</li>
+        </ul>
+      </div></section>
+
+    <section class="block"><span class="tag class">● In Class</span>
+      <h2 class="sec">Quantifying ventilation</h2>
+      <div class="panel class">
+        <p>Key quantities: <b>age of air</b> (older = warmer, more polluted), <b>ventilation rate</b> (L/s/person or ACH) and <b>air change rate</b> (ACH = volumes replaced per hour).</p>
+        <div class="formula"><b>Airflow rate</b> &nbsp; Q = v · A &nbsp;&nbsp;|&nbsp;&nbsp; <b>ACH</b> = (Q × 3600) / V</div>
+        <div class="formula"><b>Cross (wind):</b> Q = C<sub>d</sub>·A·√(2|ΔP|/ρ)</div>
+        <div class="formula"><b>Stack:</b> Q = C<sub>d</sub>·A·√( 2·g·h·(T<sub>i</sub>−T<sub>e</sub>)/(T<sub>i</sub>+T<sub>e</sub>) )</div>
+        <p>Worked example from class: 4 m/s wind through a 6 m² opening → Q = 24 m³/s; in a 100 m³ room that's a very high ACH. The stack example (T<sub>i</sub>=30°C, T<sub>e</sub>=20°C, A=2 m², h=6 m) shows buoyancy alone can ventilate when there is no wind.</p>
+        <p class="note">Studied examples: KfW Frankfurt (among the most energy-efficient office towers) and Menara UMNO, Malaysia.</p>
+      </div></section>
+
+    <section class="block"><span class="tag read">◆ Further Readings</span>
+      <h2 class="sec">Designing the airflow path</h2>
+      <div class="panel read">
+        <h4>Cross-ventilation depends on the path, not just the openings</h4>
+        <p>Cross ventilation works only to a depth of about <b>5× the floor-to-ceiling height</b>; beyond that, single-sided ventilation (reaching ~2× the height) takes over. Inlet and outlet should be on <b>opposite pressure zones</b> (windward vs leeward) and roughly equal in area; an undersized outlet throttles the whole flow. Wind hitting a façade <b>obliquely or perpendicular-but-reversed</b> changes the pressure sign and can stall or reverse the path.</p>
+        <h4>The stack effect as a wind-independent backup</h4>
+        <p>When wind fails, buoyancy still works: the bigger the <b>height (h)</b> between inlet and outlet and the bigger the <b>temperature difference</b>, the stronger the draw. A <b>solar chimney</b> deliberately heats its top to amplify ΔT, giving reliable ventilation on still, hot days — the strategy behind Menara UMNO's wind-catchers and KfW's ventilated façade.</p>
+        <h4>Comfort ventilation vs. night cooling</h4>
+        <p>Two distinct jobs: <b>daytime comfort ventilation</b> (air movement over skin makes a warm room feel cooler) and <b>night-flush cooling</b> (cool night air purges heat stored in the mass, pre-cooling the next day). Designing for both, plus IAQ, is the goal of the final exercise.</p>
+      </div></section>
+
+    <div class="exwrap"><h2>✎ Training Exercises</h2>
+      <div class="ex"><div class="q"><span class="qn">1</span><span class="qt">A 10×8 m room (H = 3 m) has a 3×1.2 m sliding window, wind 1.2 m/s. Predict whether it gets healthy natural ventilation, name the type, and say if it's effective — in 5 lines.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> One openable wall ⇒ <b>single-sided</b> ventilation, which reaches only ≈2×H = 6 m — but the room is 10 m deep and 8 m wide, so the far side is poorly served. Effective area = 3×1.2 = 3.6 m²; at 1.2 m/s the airflow is modest. Verdict: marginal IAQ near the window, weak at the back; for effective ventilation you'd need a second opening on the opposite/leeward wall to drive cross flow.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch11-1"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">2</span><span class="qt">Calculate ACH for that room by cross ventilation when outside P = 0.2 Pa and inside P = −0.1 Pa (so ΔP = 0.3 Pa). Use C<sub>d</sub> ≈ 0.6, ρ ≈ 1.2 kg/m³. Is the IAQ/cooling healthy?</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> Q = C<sub>d</sub>·A·√(2ΔP/ρ) = 0.6 × 3.6 × √(2×0.3/1.2) = 0.6 × 3.6 × √0.5 ≈ 0.6 × 3.6 × 0.707 ≈ <b>1.53 m³/s</b>. Room V = 10×8×3 = 240 m³. ACH = Q×3600/V = 1.53×3600/240 ≈ <b>23 ACH</b> — far above the few ACH needed for IAQ, so fresh-air health is easily met; whether it <em>cools</em> depends on the air being cooler than the room and the path actually crossing the occupied zone.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch11-2"> Mark complete</div></div>
+      <div class="ex"><div class="q"><span class="qn">3</span><span class="qt">Redesign the room for summer cooling <em>without</em> changing the pressures; then solve the case where there is <em>no wind at all</em>. Sketch the plan changes and give the ACH logic.</span></div>
+        <div class="reveal"><button onclick="toggleAns(this)">Show model approach</button>
+          <div class="answer"><b>Model approach:</b> With pressure fixed, improve the <b>path</b>: add a leeward outlet opposite the inlet, align openings across the occupied zone, and size the outlet ≥ inlet so flow isn't throttled — this raises effective cross flow and sweeps the whole room. <b>No wind:</b> switch to <b>buoyancy</b> — add a tall stack / solar chimney with a high outlet and low inlet; ACH from the stack equation grows with height h and ΔT, so heat the chimney top and maximise the inlet-to-outlet height. Show both on the plan/section.</div></div>
+        <div class="done-row"><input type="checkbox" data-ex="ch11-3"> Mark complete</div></div>
+    </div>
+    <div class="pager" id="pager-ch11"></div>
+  </div>
+
+  <!-- ================= AI ASSISTANT VIEW ================= -->
+  <div class="view" id="view-ai" data-accent="#7C3AED">
+    <div class="chead" style="--accent:#7C3AED;background:linear-gradient(135deg,#7C3AED,#2563EB)">
+      <div class="lbl">Always available</div>
+      <h1>✦ AI Teaching Assistant</h1>
+      <p>Your study companion for this course — available on every page through the floating button.</p>
+    </div>
+    <div class="panel" style="border-left:6px solid #7C3AED">
+      <h4>What this assistant is for</h4>
+      <p>The assistant is here to help you <b>learn the way this course teaches</b>: it explains concepts in plain language, walks you through the calculations step by step (OTTV, ADF, ACH, shading geometry), quizzes you with retrieval practice, and coaches you for the biodiversity debate — without simply handing you final answers.</p>
+      <div class="chip-row">
+        <span>Explain a concept</span><span>Walk me through a calculation</span><span>Quiz me</span><span>Debate coach</span><span>Check my reasoning</span>
+      </div>
+      <div class="mockchat" aria-hidden="true">
+        <div class="bubble u">Why does a west window overheat more than a south one in summer?</div>
+        <div class="bubble a">Great retrieval question — let's reason it out together. Think about the sun's <b>altitude</b> in the late afternoon…</div>
+      </div>
+      <p class="note">Open the assistant from the ✦ button on any page to start a conversation.</p>
+      <div style="margin-top:18px"><button class="ai-btn" onclick="openAI()">Open the assistant panel ✦</button></div>
+    </div>
+    <div class="pager"><button onclick="navTo('home')"><div class="dir">← Back</div><div class="ttl">Cover &amp; Contents</div></button></div>
+  </div>
+
+  </main>
+</div>
+
+<!-- Floating AI button (available throughout) -->
+<button class="fab" onclick="openAI()" aria-haspopup="dialog">✦ Ask the AI Assistant</button>
+<div class="overlay" id="overlay" onclick="closeAI()"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="AI Teaching Assistant" aria-hidden="true">
+  <header>
+    <span style="font-size:1.5rem">✦</span>
+    <h3>AI Teaching Assistant</h3>
+    <button onclick="closeAI()" aria-label="Close assistant">✕</button>
+  </header>
+  <div class="body">
+    <p>Ask about any concept, calculation or exercise in the book. The assistant coaches your reasoning instead of just giving answers.</p>
+    <div class="chip-row">
+      <span>Explain OTTV</span><span>Quiz me on Ch.5</span><span>Debate prep</span><span>Check my ADF</span>
+    </div>
+    <div class="mockchat">
+      <div class="bubble u">Quiz me on natural ventilation.</div>
+      <div class="bubble a">Sure! First: what are the <b>two</b> driving forces of natural ventilation? (Take a guess — I'll give feedback.)</div>
+    </div>
+  </div>
+</aside>
+
+<script>
+/* ============================================================
+   Firebase config — PASTE YOUR PROJECT VALUES BELOW.
+   Until you do, the book runs in local-only mode (no login,
+   progress saved on this device). See SETUP_GUIDE for steps.
+   ============================================================ */
+const firebaseConfig={
+  apiKey:"AIzaSyAnq1eAw9s-U9uMqngC810j2aGGJBBBrfU",
+  authDomain:"env-book-ear3301.firebaseapp.com",
+  databaseURL:"https://env-book-ear3301-default-rtdb.firebaseio.com",
+  projectId:"env-book-ear3301",
+  storageBucket:"env-book-ear3301.firebasestorage.app",
+  messagingSenderId:"736516478397",
+  appId:"1:736516478397:web:382a9979572c23a26c6ed4"
+};
+const APP_KEY='iedbook';
+const FIREBASE_READY = !!(firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('PASTE'));
+let auth=null, db=null, currentUid=null;
+
+/* ---------- Chapter registry ---------- */
+const CH=[
+ {id:'ch1', n:1, t:'Environmental Design Concept', c:'#16A34A', d:'Why design is a life-support system'},
+ {id:'ch2', n:2, t:'The Design Concept', c:'#4F46E5', d:'The DNA of your building'},
+ {id:'ch3', n:3, t:'Biodiversity', c:'#0D9488', d:'Living systems that do real jobs'},
+ {id:'ch4', n:4, t:'The Biodiversity Debate', c:'#E11D48', d:'Argue it — with an LLM coach'},
+ {id:'ch5', n:5, t:'Sun & Solar Geometry', c:'#F59E0B', d:'Reading the sun’s path'},
+ {id:'ch6', n:6, t:'Orientation', c:'#EA580C', d:'Mass, zonal & spatial'},
+ {id:'ch7', n:7, t:'Building Skin & OTTV', c:'#DC2626', d:'Thermal performance of the envelope'},
+ {id:'ch8', n:8, t:'Building Geometry (SA/V)', c:'#7C3AED', d:'Shape drives heat exchange'},
+ {id:'ch9', n:9, t:'Solar Control', c:'#0284C7', d:'Designing shade with angles'},
+ {id:'ch10',n:10,t:'Daylighting & ADF', c:'#CA8A04', d:'Light without the heat'},
+ {id:'ch11',n:11,t:'Natural Ventilation', c:'#0891B2', d:'Driving air with physics'}
+];
+const ORDER=['home',...CH.map(c=>c.id),'ai'];
+
+/* ---------- App data model ---------- */
+function defaultData(){return{profile:null,visited:{},done:{},answers:{},reveals:{},chapterStats:{},events:[]};}
+let appData=defaultData();
+const sessionLogged=new Set();
+
+/* ---------- Local cache ---------- */
+function cacheKey(){return APP_KEY+'_'+(currentUid||'local');}
+function saveLocal(){try{localStorage.setItem(cacheKey(),JSON.stringify(appData));}catch(e){}}
+function loadLocal(){try{return JSON.parse(localStorage.getItem(cacheKey())||'null');}catch(e){return null;}}
+
+/* ---------- Cloud sync (skill patterns) ---------- */
+let saveTimer=null;
+function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveToCloud,800);}
+async function saveToCloud(){
+  saveLocal();
+  if(!FIREBASE_READY||!currentUid)return;
+  try{ await db.ref(`${APP_KEY}/users/${currentUid}/data`).set(appData); showSync('synced'); }
+  catch(err){ showSync('error',err.message); }
+}
+async function loadFromCloud(uid){           // called ONLY from onAuthStateChanged
+  showSync('loading');
+  const to=setTimeout(()=>showSync('offline'),8000);
+  try{
+    const snap=await db.ref(`${APP_KEY}/users/${uid}/data`).get();
+    clearTimeout(to);
+    appData = snap.exists() ? Object.assign(defaultData(),snap.val()) : (loadLocal()||defaultData());
+    showSync('synced');
+  }catch(err){ clearTimeout(to); appData=loadLocal()||defaultData(); showSync('error',err.message); }
+}
+function showSync(state,msg=''){
+  const el=document.getElementById('sync-status'); if(!el)return;
+  const map={loading:'🔄 Syncing…',synced:'✅ Saved',error:'⚠️ '+msg,offline:'📵 Offline'};
+  el.textContent=map[state]||state; el.className='sync-status sync-'+state;
+}
+
+/* ---------- Analytics ---------- */
+function logEvent(type,target){
+  appData.events=appData.events||[];
+  appData.events.push({t:type,x:target||'',ts:Date.now()});
+  if(appData.events.length>800)appData.events=appData.events.slice(-800);
+  if(appData.profile)appData.profile.lastSeen=Date.now();
+  scheduleSave();
+}
+let curChapter=null, chapterStart=0;
+function leaveChapter(){
+  if(curChapter&&chapterStart){
+    const secs=Math.min(Math.round((Date.now()-chapterStart)/1000),3600);
+    const s=appData.chapterStats[curChapter]||{opens:0,seconds:0,firstOpen:Date.now(),lastOpen:Date.now()};
+    s.seconds=(s.seconds||0)+secs; appData.chapterStats[curChapter]=s;
+  }
+  curChapter=null; chapterStart=0;
+}
+
+/* ---------- Build cards & pagers ---------- */
+document.getElementById('homeCards').innerHTML=CH.map(c=>
+ `<div class="ccard" onclick="navTo('${c.id}')"><div class="num" style="background:${c.c}">${c.n}</div><h3>${c.t}</h3><p>${c.d}</p></div>`).join('');
+CH.forEach(c=>{
+  const i=ORDER.indexOf(c.id), prev=ORDER[i-1], next=ORDER[i+1];
+  const meta=id=>id==='home'?{t:'Cover & Contents'}:id==='ai'?{t:'AI Teaching Assistant'}:CH.find(x=>x.id===id);
+  const p=document.getElementById('pager-'+c.id); if(!p)return;
+  const pm=meta(prev), nm=meta(next);
+  p.innerHTML=
+   `<button onclick="navTo('${prev}')"><div class="dir">← Previous</div><div class="ttl">${pm.t}</div></button>`+
+   `<button class="next" onclick="navTo('${next}')"><div class="dir">Next →</div><div class="ttl">${nm.t}</div></button>`;
+});
+
+/* ---------- Navigation ---------- */
+function navTo(id){
+  const v=document.getElementById('view-'+id); if(!v)return;
+  leaveChapter();
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('show'));
+  v.classList.add('show');
+  const accent=v.getAttribute('data-accent')||'#16A34A';
+  document.documentElement.style.setProperty('--accent',accent);
+  document.documentElement.style.setProperty('--accent-soft',accent+'1f');
+  document.getElementById('brandDot').style.background=accent;
+  document.querySelectorAll('.toc a').forEach(a=>a.classList.toggle('active',a.dataset.go===id));
+  if(id.startsWith('ch')){
+    appData.visited[id]=true;
+    const s=appData.chapterStats[id]||{opens:0,seconds:0,firstOpen:Date.now(),lastOpen:0};
+    s.opens=(s.opens||0)+1; s.lastOpen=Date.now(); if(!s.firstOpen)s.firstOpen=Date.now();
+    appData.chapterStats[id]=s; curChapter=id; chapterStart=Date.now();
+    logEvent('open_chapter',id);
+  } else if(id==='ai'){ logEvent('open_ai_section',''); }
+  document.querySelectorAll('#view-'+id+' iframe[data-src]').forEach(f=>{ if(!f.src){f.src=f.dataset.src; logEvent('open_calculator',f.dataset.src);} });
+  renderProgress();
+  document.getElementById('toc').classList.remove('open');
+  document.getElementById('menuBtn').setAttribute('aria-expanded','false');
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('main').focus?.();
+}
+
+/* ---------- Progress ---------- */
+function renderProgress(){
+  const exTotal=document.querySelectorAll('[data-ex]').length;
+  const denom=CH.length+exTotal;
+  const num=Object.keys(appData.visited||{}).length+Object.keys(appData.done||{}).length;
+  const pct=denom?Math.min(100,Math.round(num/denom*100)):0;
+  document.getElementById('barFill').style.width=pct+'%';
+  document.getElementById('pctText').textContent=pct+'%';
+  CH.forEach(c=>{
+    const exs=[...document.querySelectorAll('#view-'+c.id+' [data-ex]')].map(i=>i.dataset.ex);
+    const allDone=exs.length>0 && exs.every(e=>appData.done[e]);
+    const link=document.querySelector('.toc a[data-go="'+c.id+'"]');
+    if(link)link.classList.toggle('done', !!appData.visited[c.id]&&(exs.length===0||allDone));
+  });
+}
+
+/* ---------- Inject student answer boxes ---------- */
+function injectAnswerBoxes(){
+  document.querySelectorAll('.ex').forEach(ex=>{
+    const cb=ex.querySelector('[data-ex]'); if(!cb)return;
+    const key=cb.dataset.ex;
+    if(ex.querySelector('.your-answer'))return;
+    const wrap=document.createElement('div'); wrap.className='your-answer';
+    wrap.innerHTML=`<label for="ans-${key}">✍ Your answer <span class="saved" id="sv-${key}"></span></label>`+
+      `<textarea id="ans-${key}" data-ans="${key}" rows="4" placeholder="Write your own answer first, then reveal the model approach to compare…"></textarea>`;
+    const reveal=ex.querySelector('.reveal');
+    ex.insertBefore(wrap,reveal);
+  });
+}
+
+/* ---------- Apply loaded data to the DOM ---------- */
+function applyData(){
+  injectAnswerBoxes();
+  Object.keys(appData.done||{}).forEach(k=>{const el=document.querySelector('[data-ex="'+k+'"]');if(el)el.checked=true;});
+  Object.entries(appData.answers||{}).forEach(([k,v])=>{
+    const t=document.getElementById('ans-'+k); if(t){t.value=(v&&v.text)||''; const sv=document.getElementById('sv-'+k); if(sv&&t.value)sv.textContent='saved ✓';}
+  });
+  renderProgress();
+}
+
+/* ---------- Exercise interactions ---------- */
+function toggleAns(btn){
+  const a=btn.parentElement.querySelector('.answer');
+  const open=a.classList.toggle('show');
+  btn.textContent=open?'Hide model approach':'Show model approach';
+  btn.setAttribute('aria-expanded',open);
+  if(open){
+    const ex=btn.closest('.ex'); const k=ex&&ex.querySelector('[data-ex]')?ex.querySelector('[data-ex]').dataset.ex:null;
+    if(k){ appData.reveals[k]=(appData.reveals[k]||0)+1; logEvent('reveal_answer',k); scheduleSave(); }
+  }
+}
+document.addEventListener('change',e=>{
+  if(e.target.matches('[data-ex]')){
+    const k=e.target.dataset.ex;
+    if(e.target.checked)appData.done[k]=true; else delete appData.done[k];
+    logEvent(e.target.checked?'mark_done':'unmark_done',k);
+    scheduleSave(); renderProgress();
+  }
+});
+document.addEventListener('input',e=>{
+  if(e.target.matches('[data-ans]')){
+    const k=e.target.dataset.ans;
+    appData.answers[k]={text:e.target.value,updated:Date.now()};
+    const sv=document.getElementById('sv-'+k); if(sv)sv.textContent='saving…';
+    clearTimeout(e.target._t);
+    e.target._t=setTimeout(()=>{const s=document.getElementById('sv-'+k);if(s)s.textContent='saved ✓';},700);
+    if(!sessionLogged.has('ans:'+k)){ sessionLogged.add('ans:'+k); logEvent('answer_attempt',k); }
+    scheduleSave();
+  }
+});
+
+/* ---------- AI drawer ---------- */
+let lastFocus=null;
+function openAI(){lastFocus=document.activeElement;document.getElementById('overlay').classList.add('show');const d=document.getElementById('drawer');d.classList.add('show');d.setAttribute('aria-hidden','false');d.querySelector('button').focus();logEvent('open_ai_panel','');}
+function closeAI(){document.getElementById('overlay').classList.remove('show');const d=document.getElementById('drawer');d.classList.remove('show');d.setAttribute('aria-hidden','true');lastFocus&&lastFocus.focus();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAI();});
+
+/* ---------- Mobile menu ---------- */
+document.getElementById('menuBtn').addEventListener('click',()=>{
+  const t=document.getElementById('toc');const o=t.classList.toggle('open');
+  document.getElementById('menuBtn').setAttribute('aria-expanded',o);
+});
+
+/* ---------- Flush on leave ---------- */
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ leaveChapter(); saveToCloud(); } });
+window.addEventListener('beforeunload',()=>{ leaveChapter(); saveLocal(); });
+
+/* ============================================================
+   Authentication
+   ============================================================ */
+function showLoginError(m){const e=document.getElementById('loginError');if(e){e.textContent=m;e.classList.add('show');}}
+function clearLoginError(){const e=document.getElementById('loginError');if(e){e.textContent='';e.classList.remove('show');}}
+function showLogin(){document.getElementById('loginScreen').hidden=false;document.getElementById('userChip').hidden=true;}
+function showApp(user){
+  document.getElementById('loginScreen').hidden=true;
+  const chip=document.getElementById('userChip'); chip.hidden=false;
+  document.getElementById('userName').textContent=(appData.profile&&appData.profile.name)||user.displayName||user.email||'Student';
+}
+async function signInWithGoogle(){
+  clearLoginError();
+  try{ await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  catch(err){ if(err.code==='auth/popup-blocked'||err.code==='auth/popup-closed-by-user'){ try{await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());}catch(e2){showLoginError(e2.message);} } else { showLoginError(err.message); } }
+}
+async function signInWithEmail(){
+  clearLoginError();
+  const em=document.getElementById('li-email').value.trim(), pw=document.getElementById('li-pass').value;
+  if(!em||!pw){showLoginError('Enter your email and password.');return;}
+  try{ await auth.signInWithEmailAndPassword(em,pw); }catch(err){ showLoginError(err.message); }
+}
+async function signUpWithEmail(){
+  clearLoginError();
+  const em=document.getElementById('li-email').value.trim(), pw=document.getElementById('li-pass').value;
+  if(!em||pw.length<6){showLoginError('Enter your email and a password of at least 6 characters.');return;}
+  try{ await auth.createUserWithEmailAndPassword(em,pw); }catch(err){ showLoginError(err.message); }
+}
+function signOutUser(){ leaveChapter(); saveToCloud().finally(()=>auth.signOut()); }
+
+/* ---------- Profile capture ---------- */
+let pendingUser=null;
+function needsProfile(){ return !appData.profile || !appData.profile.studentId || !appData.profile.name; }
+function askProfile(user){
+  pendingUser=user;
+  document.getElementById('loginScreen').hidden=true;
+  const m=document.getElementById('profileModal'); m.hidden=false;
+  document.getElementById('pf-name').value=(appData.profile&&appData.profile.name)||user.displayName||'';
+  document.getElementById('pf-id').value=(appData.profile&&appData.profile.studentId)||'';
+}
+function saveProfile(){
+  const name=document.getElementById('pf-name').value.trim();
+  const sid=document.getElementById('pf-id').value.trim();
+  const err=document.getElementById('profileError');
+  if(!name||!sid){ err.textContent='Please enter your name and Student ID.'; err.classList.add('show'); return; }
+  err.classList.remove('show');
+  const u=pendingUser;
+  appData.profile=Object.assign({firstSeen:Date.now()},appData.profile||{},{name,studentId:sid,email:u.email||'',photo:u.photoURL||'',lastSeen:Date.now()});
+  document.getElementById('profileModal').hidden=true;
+  logEvent('login',''); saveToCloud();
+  showApp(u); applyData(); navTo('home');
+}
+
+/* ============================================================
+   Boot
+   ============================================================ */
+if(FIREBASE_READY){
+  firebase.initializeApp(firebaseConfig);
+  auth=firebase.auth(); db=firebase.database();
+  auth.getRedirectResult().catch(err=>showLoginError(err.message));
+  auth.onAuthStateChanged(async user=>{
+    if(user){
+      currentUid=user.uid;
+      await loadFromCloud(user.uid);           // sole load trigger
+      if(needsProfile()){ askProfile(user); }
+      else{
+        appData.profile.lastSeen=Date.now();
+        if(user.email&&!appData.profile.email)appData.profile.email=user.email;
+        logEvent('login','');
+        showApp(user); applyData(); navTo('home');
+      }
+    } else { showLogin(); }
+  });
+}else{
+  /* Local-only mode until Firebase is configured */
+  document.getElementById('loginScreen').hidden=true;
+  document.getElementById('profileModal').hidden=true;
+  document.getElementById('localBanner').hidden=false;
+  currentUid=null;
+  appData=loadLocal()||defaultData();
+  applyData();
+  showSync('offline');
+}
+</script>
+</body>
+</html>

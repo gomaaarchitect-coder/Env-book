@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTTV Design Tool & U-Value Calculator — AASTMT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════════════════════════
+     GLOBAL RESET + INSTITUTIONAL HEADER
+     ═══════════════════════════════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100vh; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f5f4f0; color: #1a1917; }
+
+  /* Institutional header */
+  .inst-header {
+    background: #1a1410;
+    color: #f5f0e8;
+    padding: 23px 31px 21px;
+    border-bottom: 3px solid #c4a882;
+  }
+  .inst-header .inst-top {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: #fdfcfa;
+    letter-spacing: 0.01em;
+  }
+  .inst-header .inst-sub {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 17px;
+    color: #c4a882;
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .inst-header .inst-credit {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    color: #9c7a52;
+    margin-top: 13px;
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+    border-top: 1px solid #4a3f35;
+    padding-top: 10px;
+    max-width: 960px;
+  }
+  .inst-header .inst-credit strong { color: #e8a020; font-weight: 600; }
+
+  /* Tool selector (top-level switch between the two tools) */
+  .tool-switch {
+    background: #fdfcfa;
+    border-bottom: 1px solid #e0ddd6;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+  }
+  .tool-switch button {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 14px 28px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #7a6e64;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .tool-switch button:hover { color: #1a1410; background: #f5f0e8; }
+  .tool-switch button.active {
+    color: #1a1410;
+    border-bottom-color: #c4a882;
+    font-weight: 600;
+    background: #f5f0e8;
+  }
+
+  .tool-panel { display: none; }
+  .tool-panel.active { display: block; }
+
+  @media (max-width: 640px) {
+    .inst-header { padding: 18px 18px 16px; }
+    .inst-header .inst-top { font-size: 16px; }
+    .inst-header .inst-sub { font-size: 15px; }
+    .inst-header .inst-credit { font-size: 13px; }
+    .tool-switch button { padding: 12px 14px; font-size: 12px; flex: 1; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     U-VALUE CALCULATOR — scoped under #uval-tool
+     (original: BS EN ISO 6946:2017 styles, minimally adjusted)
+     ═══════════════════════════════════════════════════════════════ */
+  #uval-tool {
+    --u-bg:        #f5f4f0;
+    --u-surface:   #ffffff;
+    --u-surface2:  #f9f8f5;
+    --u-border:    #e0ddd6;
+    --u-border2:   #ccc9c0;
+    --u-text:      #1a1917;
+    --u-text2:     #6b6860;
+    --u-text3:     #9b9890;
+    --u-accent:    #2b5c8a;
+    --u-accent-bg: #eaf2fb;
+    --u-pass:      #2d6a3f;
+    --u-pass-bg:   #e8f5ed;
+    --u-fail:      #9b2c2c;
+    --u-fail-bg:   #fdf0f0;
+    --u-warn:      #7a5a00;
+    --u-warn-bg:   #fef9e7;
+    --u-radius:    6px;
+    --u-radius-lg: 10px;
+    --u-shadow:    0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--u-bg);
+    color: var(--u-text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  #uval-tool .u-page-header {
+    background: var(--u-surface);
+    border-bottom: 1px solid var(--u-border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  #uval-tool .u-page-header h1 { font-size: 18px; font-weight: 600; color: var(--u-text); }
+  #uval-tool .u-page-header .u-std {
+    font-size: 12px;
+    background: var(--u-accent-bg);
+    color: var(--u-accent);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  #uval-tool .u-main { max-width: 1020px; margin: 0 auto; padding: 24px 24px 60px; }
+
+  #uval-tool .u-card {
+    background: var(--u-surface);
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--u-shadow);
+  }
+  #uval-tool .u-card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--u-text2);
+    margin-bottom: 14px;
+  }
+
+  #uval-tool .u-form-row { display: grid; gap: 14px; margin-bottom: 14px; }
+  #uval-tool .u-form-row.u-cols2 { grid-template-columns: 1fr 1fr; }
+  #uval-tool .u-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--u-text2);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  #uval-tool select,
+  #uval-tool input[type="number"],
+  #uval-tool input[type="text"] {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--u-border2);
+    border-radius: var(--u-radius);
+    background: var(--u-surface);
+    color: var(--u-text);
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  #uval-tool select:focus, #uval-tool input:focus {
+    outline: none;
+    border-color: var(--u-accent);
+    box-shadow: 0 0 0 3px rgba(43,92,138,0.1);
+  }
+  #uval-tool input[readonly] { background: var(--u-surface2); color: var(--u-text2); cursor: default; }
+  #uval-tool input::placeholder { color: var(--u-text3); }
+  #uval-tool .u-info-box {
+    font-size: 12px;
+    color: var(--u-text2);
+    background: var(--u-accent-bg);
+    border-left: 3px solid var(--u-accent);
+    border-radius: 0 var(--u-radius) var(--u-radius) 0;
+    padding: 9px 12px;
+    line-height: 1.6;
+  }
+
+  #uval-tool .u-layers-wrap { overflow-x: auto; }
+  #uval-tool .u-layers-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+  }
+  #uval-tool .u-layers-table thead th {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--u-text3);
+    padding: 0 8px 6px;
+    text-align: left;
+    border-bottom: 1px solid var(--u-border);
+  }
+  #uval-tool .u-layers-table thead th:nth-child(3),
+  #uval-tool .u-layers-table thead th:nth-child(4),
+  #uval-tool .u-layers-table thead th:nth-child(5) { text-align: right; }
+
+  #uval-tool .u-layer-row td {
+    padding: 5px 6px;
+    vertical-align: middle;
+    background: var(--u-surface2);
+  }
+  #uval-tool .u-layer-row td:first-child { border-radius: var(--u-radius) 0 0 var(--u-radius); padding-left: 10px; }
+  #uval-tool .u-layer-row td:last-child  { border-radius: 0 var(--u-radius) var(--u-radius) 0; padding-right: 10px; }
+
+  #uval-tool .u-layer-row td select, #uval-tool .u-layer-row td input {
+    font-size: 12px;
+    padding: 5px 7px;
+    border-color: var(--u-border);
+  }
+  #uval-tool .u-layer-row td input[type="number"] { text-align: right; }
+
+  #uval-tool .u-col-mat  { width: 38%; min-width: 180px; }
+  #uval-tool .u-col-lam  { width: 13%; min-width: 80px; }
+  #uval-tool .u-col-thk  { width: 13%; min-width: 80px; }
+  #uval-tool .u-col-r    { width: 14%; min-width: 80px; }
+  #uval-tool .u-col-act  { width: 5%;  min-width: 36px; text-align: center; }
+
+  #uval-tool .u-btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  #uval-tool .u-btn {
+    font-size: 12px;
+    font-family: inherit;
+    padding: 6px 14px;
+    border: 1px solid var(--u-border2);
+    border-radius: var(--u-radius);
+    background: var(--u-surface);
+    color: var(--u-text);
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  #uval-tool .u-btn:hover { background: var(--u-surface2); border-color: var(--u-accent); color: var(--u-accent); }
+  #uval-tool .u-btn-remove {
+    width: 26px; height: 26px; padding: 0;
+    border: none; background: none; cursor: pointer;
+    border-radius: var(--u-radius);
+    color: var(--u-text3);
+    font-size: 18px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.12s, background 0.12s;
+  }
+  #uval-tool .u-btn-remove:hover { color: var(--u-fail); background: var(--u-fail-bg); }
+
+  #uval-tool .u-results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  #uval-tool .u-metric {
+    background: var(--u-surface2);
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius);
+    padding: 14px 16px;
+  }
+  #uval-tool .u-metric-label { font-size: 11px; color: var(--u-text2); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; margin-bottom: 6px; }
+  #uval-tool .u-metric-value { font-size: 26px; font-weight: 300; color: var(--u-text); font-variant-numeric: tabular-nums; }
+  #uval-tool .u-metric-value sup { font-size: 13px; color: var(--u-text2); font-weight: 400; }
+
+  #uval-tool .u-status-bar {
+    border-radius: var(--u-radius);
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: none;
+  }
+  #uval-tool .u-status-bar.u-pass { background: var(--u-pass-bg); color: var(--u-pass); display: block; }
+  #uval-tool .u-status-bar.u-fail { background: var(--u-fail-bg); color: var(--u-fail); display: block; }
+  #uval-tool .u-status-bar.u-warn { background: var(--u-warn-bg); color: var(--u-warn); display: block; }
+
+  #uval-tool .u-breakdown { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px; }
+  #uval-tool .u-breakdown thead th {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--u-text3);
+    padding: 0 8px 6px; text-align: left; border-bottom: 1px solid var(--u-border);
+  }
+  #uval-tool .u-breakdown thead th:not(:first-child) { text-align: right; }
+  #uval-tool .u-breakdown tbody tr td { padding: 5px 8px; color: var(--u-text2); border-bottom: 1px solid var(--u-border); }
+  #uval-tool .u-breakdown tbody tr td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+  #uval-tool .u-breakdown tbody tr:last-child td { border-bottom: none; }
+  #uval-tool .u-breakdown tbody tr.u-b-surface td { color: var(--u-text3); font-style: italic; }
+  #uval-tool .u-breakdown tbody tr.u-b-total td { font-weight: 600; color: var(--u-text); border-top: 2px solid var(--u-border2); border-bottom: none; }
+  #uval-tool .u-breakdown tbody tr.u-b-uval td { font-weight: 700; color: var(--u-accent); border-bottom: none; font-size: 13px; }
+
+  #uval-tool .u-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  #uval-tool .u-badge-custom { background: var(--u-warn-bg); color: var(--u-warn); }
+
+  #uval-tool .u-formula {
+    font-size: 12px;
+    color: var(--u-text2);
+    background: var(--u-surface2);
+    border: 1px solid var(--u-border);
+    border-radius: var(--u-radius);
+    padding: 8px 14px;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 14px;
+    line-height: 1.8;
+  }
+
+  #uval-tool hr.u-divider { border: none; border-top: 1px solid var(--u-border); margin: 16px 0; }
+
+  @media (max-width: 640px) {
+    #uval-tool .u-page-header { padding: 14px 16px; }
+    #uval-tool .u-main { padding: 16px 12px 40px; }
+    #uval-tool .u-card { padding: 16px; }
+    #uval-tool .u-form-row.u-cols2 { grid-template-columns: 1fr; }
+    #uval-tool .u-results-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     OTTV CALCULATOR — scoped under #ottv-tool
+     (original: IBM Plex / sand+clay palette)
+     ═══════════════════════════════════════════════════════════════ */
+  #ottv-tool {
+    --o-sand:#f5f0e8; --o-sand-dk:#e8e0d0; --o-white:#fdfcfa;
+    --o-ink:#1a1410; --o-ink-lt:#4a3f35; --o-smoke:#7a6e64;
+    --o-clay:#c4a882; --o-clay-dk:#9c7a52;
+    --o-green:#2a7a4e; --o-green-lt:#e4f5ec;
+    --o-blue:#1a5c8a; --o-blue-lt:#e4f0f8;
+    --o-sun:#e8a020; --o-sun-lt:#fef3d8;
+    --o-red:#c23b22; --o-red-lt:#fde8e4;
+
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--o-sand);
+    color: var(--o-ink);
+    line-height: 1.6;
+  }
+
+  #ottv-tool .o-topbar {
+    background: var(--o-ink); color: var(--o-clay);
+    padding: 0.6rem 1.25rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.05em;
+    display: flex; justify-content: space-between;
+  }
+  #ottv-tool .o-topbar span:last-child { color: var(--o-smoke); font-size: 0.65rem; }
+
+  #ottv-tool .o-tab-nav {
+    background: var(--o-white);
+    border-bottom: 2px solid var(--o-sand-dk);
+    display: flex; overflow-x: auto; scrollbar-width: none;
+  }
+  #ottv-tool .o-tab-nav::-webkit-scrollbar { display: none; }
+  #ottv-tool .o-tab-btn {
+    flex-shrink: 0; padding: 0.8rem 1.1rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--o-smoke); background: none; border: none;
+    border-bottom: 3px solid transparent; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  #ottv-tool .o-tab-btn.active { color: var(--o-ink); border-bottom-color: var(--o-clay-dk); }
+  #ottv-tool .o-tab-btn:hover:not(.active) { color: var(--o-ink-lt); }
+
+  #ottv-tool .o-panel { display: none; }
+  #ottv-tool .o-panel.active { display: block; }
+
+  #ottv-tool .o-content { max-width: 660px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+
+  #ottv-tool h1 { font-size: 1.6rem; font-weight: 600; line-height: 1.2; margin-bottom: 0.5rem; }
+  #ottv-tool h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem; margin-top: 1.25rem; }
+  #ottv-tool h3 { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--o-smoke); margin-bottom: 0.5rem; }
+  #ottv-tool p { color: var(--o-ink-lt); font-size: 0.875rem; margin-bottom: 0.55rem; }
+
+  #ottv-tool .o-callout { border-radius: 8px; padding: 0.9rem 1rem; margin: 0.85rem 0; font-size: 0.875rem; }
+  #ottv-tool .o-callout-blue { background: var(--o-blue-lt); border-left: 4px solid var(--o-blue); }
+  #ottv-tool .o-callout-sun  { background: var(--o-sun-lt);  border-left: 4px solid var(--o-sun); }
+  #ottv-tool .o-callout strong { display: block; margin-bottom: 0.2rem; color: var(--o-ink); }
+
+  #ottv-tool hr { border: none; border-top: 1px solid var(--o-sand-dk); margin: 1.35rem 0; }
+
+  #ottv-tool .o-field-group { margin-bottom: 1.1rem; }
+  #ottv-tool .o-field-label { font-size: 0.83rem; font-weight: 500; margin-bottom: 0.3rem; display: block; }
+  #ottv-tool .o-field-row { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; align-items: center; }
+  #ottv-tool input[type=number] {
+    width: 100%; padding: 0.55rem 0.75rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem;
+    border: 1.5px solid var(--o-sand-dk); border-radius: 6px;
+    background: var(--o-sand); color: var(--o-ink);
+    transition: border-color 0.15s;
+  }
+  #ottv-tool input[type=number]:focus { outline: none; border-color: var(--o-clay); background: var(--o-white); }
+  #ottv-tool .o-unit { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--o-smoke); flex-shrink: 0; }
+
+  #ottv-tool .o-calc-card { background: var(--o-white); border: 1px solid var(--o-sand-dk); border-radius: 10px; padding: 1.1rem; margin: 0.85rem 0; }
+  #ottv-tool .o-calc-card h3 { margin-top: 0; }
+
+  #ottv-tool .o-formula { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; background: var(--o-sand); border: 1px solid var(--o-sand-dk); border-radius: 6px; padding: 0.55rem 0.7rem; margin: 0.5rem 0; color: var(--o-ink); word-break: break-all; line-height: 1.5; }
+  #ottv-tool .o-formula .o-val { color: var(--o-clay-dk); font-weight: 600; }
+
+  #ottv-tool .o-subtotal-row { display: flex; justify-content: space-between; align-items: center; background: var(--o-sand-dk); border-radius: 6px; padding: 0.55rem 0.7rem; margin-top: 0.65rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.83rem; font-weight: 600; }
+
+  #ottv-tool .o-result-card { border-radius: 10px; padding: 1.5rem; text-align: center; margin: 1rem 0; }
+  #ottv-tool .o-result-card.o-excellent { background: var(--o-green-lt); border: 2px solid var(--o-green); }
+  #ottv-tool .o-result-card.o-good      { background: var(--o-blue-lt);  border: 2px solid var(--o-blue);  }
+  #ottv-tool .o-result-card.o-poor      { background: var(--o-sun-lt);   border: 2px solid var(--o-sun);   }
+  #ottv-tool .o-result-card.o-critical  { background: var(--o-red-lt);   border: 2px solid var(--o-red);   }
+  #ottv-tool .o-result-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6; margin-bottom: 0.3rem; }
+  #ottv-tool .o-result-ottv  { font-size: 2.5rem; font-weight: 600; line-height: 1; margin-bottom: 0.3rem; }
+  #ottv-tool .o-result-tier  { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.35rem; }
+  #ottv-tool .o-result-card.o-excellent .o-result-ottv,
+  #ottv-tool .o-result-card.o-excellent .o-result-tier { color: var(--o-green); }
+  #ottv-tool .o-result-card.o-good      .o-result-ottv,
+  #ottv-tool .o-result-card.o-good      .o-result-tier { color: var(--o-blue); }
+  #ottv-tool .o-result-card.o-poor      .o-result-ottv,
+  #ottv-tool .o-result-card.o-poor      .o-result-tier { color: var(--o-sun); }
+  #ottv-tool .o-result-card.o-critical  .o-result-ottv,
+  #ottv-tool .o-result-card.o-critical  .o-result-tier { color: var(--o-red); }
+  #ottv-tool .o-result-msg { font-size: 0.85rem; opacity: 0.8; }
+
+  #ottv-tool .o-bar-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.55rem; font-size: 0.78rem; }
+  #ottv-tool .o-bar-label { width: 80px; flex-shrink: 0; color: var(--o-smoke); font-family: 'IBM Plex Mono', monospace; }
+  #ottv-tool .o-bar-track { flex: 1; height: 18px; background: var(--o-sand-dk); border-radius: 4px; overflow: hidden; display: flex; }
+  #ottv-tool .o-bar-wc { background: #8b5e3c; height: 100%; transition: width 0.7s cubic-bezier(0.16,1,0.3,1); }
+  #ottv-tool .o-bar-gc { background: #2a7a4e; height: 100%; transition: width 0.7s cubic-bezier(0.16,1,0.3,1); }
+  #ottv-tool .o-bar-gs { background: #e8a020; height: 100%; transition: width 0.7s cubic-bezier(0.16,1,0.3,1); }
+  #ottv-tool .o-bar-val { width: 60px; flex-shrink: 0; text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 0.75rem; }
+
+  #ottv-tool .o-legend { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; font-size: 0.73rem; margin: 0.6rem 0 1rem; }
+  #ottv-tool .o-legend-item { display: flex; align-items: center; gap: 0.3rem; color: var(--o-ink-lt); }
+  #ottv-tool .o-ldot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+
+  #ottv-tool .o-btn-primary { width: 100%; padding: 0.85rem; font-size: 0.9rem; font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; border: none; border-radius: 8px; background: var(--o-ink); color: var(--o-sand); cursor: pointer; transition: background 0.15s; margin-top: 0.5rem; }
+  #ottv-tool .o-btn-primary:hover { background: var(--o-clay-dk); }
+  #ottv-tool .o-btn-outline { display: inline-block; padding: 0.55rem 1rem; font-size: 0.82rem; font-family: 'IBM Plex Sans', sans-serif; font-weight: 500; border: 1.5px solid var(--o-clay-dk); border-radius: 6px; background: transparent; color: var(--o-clay-dk); cursor: pointer; margin-top: 0.5rem; }
+  #ottv-tool .o-btn-outline:hover { background: var(--o-sand-dk); }
+
+  #ottv-tool table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.75rem 0; }
+  #ottv-tool th { background: var(--o-ink); color: var(--o-sand); padding: 0.45rem 0.65rem; text-align: left; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; letter-spacing: 0.04em; }
+  #ottv-tool td { padding: 0.4rem 0.65rem; border-bottom: 1px solid var(--o-sand-dk); color: var(--o-ink-lt); }
+  #ottv-tool tr:nth-child(even) td { background: var(--o-sand); }
+  #ottv-tool td:last-child { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--o-ink); }
+
+  #ottv-tool .o-mode-switch { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+  #ottv-tool .o-mode-btn { flex: 1; padding: 0.6rem; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.82rem; font-weight: 500; border: 1.5px solid var(--o-sand-dk); border-radius: 7px; background: var(--o-white); color: var(--o-smoke); cursor: pointer; text-align: center; transition: all 0.15s; }
+  #ottv-tool .o-mode-btn.active { background: var(--o-ink); border-color: var(--o-ink); color: var(--o-sand); }
+
+  #ottv-tool footer { text-align: center; padding: 1.25rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--o-smoke); letter-spacing: 0.04em; border-top: 1px solid var(--o-sand-dk); line-height: 2; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     INSTITUTIONAL HEADER
+     ══════════════════════════════════════════════════════════════ -->
+<div class="inst-header">
+  <div class="inst-top">Arab Academy for Science, Technology and Maritime Transport</div>
+  <div class="inst-sub">College of Engineering and Technology &middot; Architectural Engineering and Environmental Design Department</div>
+  <div class="inst-credit">
+    <strong>OTTV Design Tool &amp; U-Value Calculator</strong> &nbsp;·&nbsp; developed by Dr. Bakr Gomaa using the LLM Opus&nbsp;4.6 (Claude). Results should be confirmed by the user.
+  </div>
+</div>
+
+<!-- Top-level tool switch -->
+<div class="tool-switch" role="tablist">
+  <button type="button" id="sw-ottv" class="active" onclick="selectTool('ottv')">OTTV Design Tool</button>
+  <button type="button" id="sw-uval" onclick="selectTool('uval')">U-Value Calculator</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     OTTV DESIGN TOOL
+     ══════════════════════════════════════════════════════════════ -->
+<div id="ottv-tool" class="tool-panel active">
+
+  <div class="o-topbar">
+    <span>OTTV CALCULATOR · ENV DESIGN</span>
+    <span>AASTMT · FAED</span>
+  </div>
+
+  <nav class="o-tab-nav">
+    <button class="o-tab-btn active" onclick="ottvSwitchTab('o-tab-formula')">Formula Guide</button>
+    <button class="o-tab-btn" onclick="ottvSwitchTab('o-tab-calc')">Calculator</button>
+    <button class="o-tab-btn" onclick="ottvSwitchTab('o-tab-params')">Parameters</button>
+  </nav>
+
+  <!-- ── TAB 1: FORMULA GUIDE ── -->
+  <div class="o-panel active o-content" id="o-tab-formula">
+    <h1>OTTV Calculator</h1>
+    <p>Use this tool to calculate the Overall Thermal Transmittance Value (OTTV) for any building envelope. You can work through the formula manually or use the live calculator.</p>
+
+    <div class="o-callout o-callout-blue">
+      <strong>What is OTTV?</strong>
+      OTTV is the average rate of heat gain through the building envelope per unit of total envelope area (W/m²). It combines conductive and solar heat gain through walls, glazing, and the roof into a single performance metric.
+    </div>
+
+    <h2>The formula — three heat pathways</h2>
+    <p>For each opaque or glazed surface, heat enters by three routes. You calculate each route separately, then sum everything and divide by total envelope area.</p>
+
+    <div class="o-calc-card">
+      <h3>Pathway 1 — Wall conduction</h3>
+      <div class="o-formula">Q_wall = A_wall × U_wall × ETD × colour_factor</div>
+      <p style="margin-top:0.5rem;">
+        <strong>A_wall</strong> = Total wall area × (1 − WWR) — the opaque part only<br>
+        <strong>U_wall</strong> = Wall thermal transmittance (W/m²K)<br>
+        <strong>ETD</strong> = Equivalent Temperature Difference — accounts for thermal mass, colour, and diurnal swing (°C)<br>
+        <strong>Colour factor</strong> — Light: 1.0 · Medium: 1.25 · Dark: 1.5 (applied to ETD, walls only)
+      </p>
+    </div>
+
+    <div class="o-calc-card">
+      <h3>Pathway 2 — Glazing conduction</h3>
+      <div class="o-formula">Q_glaze_cond = A_glaze × U_glaze × ΔT</div>
+      <p style="margin-top:0.5rem;">
+        <strong>A_glaze</strong> = Total wall area × WWR — the glazed part<br>
+        <strong>U_glaze</strong> = Glazing U-value (W/m²K)<br>
+        <strong>ΔT</strong> = Simple indoor/outdoor temperature difference (°C) — not ETD
+      </p>
+    </div>
+
+    <div class="o-calc-card">
+      <h3>Pathway 3 — Solar gain through glass</h3>
+      <div class="o-formula">Q_glaze_sol = A_glaze × Isol × SHGC</div>
+      <p style="margin-top:0.5rem;">
+        <strong>Isol</strong> = Solar irradiance on the façade (W/m²) — depends on orientation<br>
+        <strong>SHGC</strong> = Solar Heat Gain Coefficient of the glazing (0 to 1)
+      </p>
+    </div>
+
+    <div class="o-calc-card">
+      <h3>Final OTTV</h3>
+      <div class="o-formula">Total Q  =  Σ (Q_wall + Q_glaze_cond + Q_glaze_sol)  &nbsp;[W]<br>
+OTTV  =  Total Q ÷ A_skin  &nbsp;[W/m² envelope]<br>
+Cooling load density  =  Total Q ÷ A_floor  &nbsp;[W/m² floor]</div>
+      <p style="margin-top:0.5rem;">A_skin = sum of ALL wall areas + roof area (opaque + glazed combined). A_floor = total building floor area — this lets you compare heat load per usable square metre. The roof uses the same three pathways but with its own ETD, Isol, and U_roof values. Colour factor does NOT apply to the roof.</p>
+    </div>
+
+    <hr>
+    <h2>Worked example — North façade</h2>
+    <p>Wall area: 40 m² · WWR: 10% · Colour: Light · ETD_N = 8°C · Isol_N = 450 W/m²</p>
+    <div class="o-formula">
+      A_wall = 40 × (1 − 0.1) = <span class="o-val">36 m²</span> &nbsp;|&nbsp; A_glaze = 40 × 0.1 = <span class="o-val">4 m²</span><br>
+      Q_wall_cond = 36 × 2.5 × 8 × 1.0 = <span class="o-val">720 W</span><br>
+      Q_glaze_cond = 4 × 5.0 × 12 = <span class="o-val">240 W</span><br>
+      Q_glaze_sol = 4 × 450 × 0.9 = <span class="o-val">1,620 W</span><br>
+      Q_North = <span class="o-val">2,580 W</span>
+    </div>
+    <p>Note: solar gain (1,620 W) is 63% of this façade's total — from only 4 m² of glass.</p>
+
+    <hr>
+    <h2>Tier thresholds</h2>
+    <table>
+      <thead><tr><th>OTTV (W/m²)</th><th>Rating</th></tr></thead>
+      <tbody>
+        <tr><td>≤ 70</td><td>Excellent</td></tr>
+        <tr><td>70 – 100</td><td>Good</td></tr>
+        <tr><td>100 – 150</td><td>Poor</td></tr>
+        <tr><td>&gt; 150</td><td>Critical</td></tr>
+      </tbody>
+    </table>
+
+    <button class="o-btn-primary" onclick="ottvSwitchTab('o-tab-calc')">Go to Calculator →</button>
+  </div>
+
+  <!-- ── TAB 2: CALCULATOR ── -->
+  <div class="o-panel o-content" id="o-tab-calc">
+    <h1>OTTV Calculator</h1>
+    <p>Enter your building's parameters. You can use custom values for any building — not just the generic building case.</p>
+
+    <div class="o-mode-switch">
+      <button class="o-mode-btn active" id="o-btn-villa" onclick="ottvLoadGeneric()">Generic building case</button>
+      <button class="o-mode-btn" id="o-btn-custom" onclick="ottvLoadCustom()">Custom building</button>
+    </div>
+
+    <!-- MATERIALS -->
+    <div class="o-calc-card">
+      <h3>Material Parameters</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-glazU">Glazing U-value</label>
+          <div class="o-field-row"><input type="number" id="o-glazU" value="5.0" step="0.1" min="0"><span class="o-unit">W/m²K</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-shgc">Glazing SHGC</label>
+          <div class="o-field-row"><input type="number" id="o-shgc" value="0.9" step="0.01" min="0" max="1"><span class="o-unit">—</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-wallU">Wall U-value</label>
+          <div class="o-field-row"><input type="number" id="o-wallU" value="2.5" step="0.1" min="0"><span class="o-unit">W/m²K</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-roofU">Roof U-value</label>
+          <div class="o-field-row"><input type="number" id="o-roofU" value="1.0" step="0.1" min="0"><span class="o-unit">W/m²K</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-dT">ΔT (indoor/outdoor)</label>
+          <div class="o-field-row"><input type="number" id="o-dT" value="12" step="1" min="0"><span class="o-unit">°C</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-colorFactor">Colour factor</label>
+          <div class="o-field-row"><input type="number" id="o-colorFactor" value="1.0" step="0.05" min="1" max="2"><span class="o-unit">—</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0; grid-column: 1 / -1;">
+          <label class="o-field-label" for="o-floorArea">Building total floor area <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--o-smoke);">(used to compute cooling load per m² floor)</span></label>
+          <div class="o-field-row" style="max-width:220px;"><input type="number" id="o-floorArea" value="200" step="1" min="0" placeholder="m²"><span class="o-unit">m²</span></div>
+        </div>
+      </div>
+      <p style="font-size:0.75rem;color:var(--o-smoke);margin-top:0.6rem;">Colour factor: Light = 1.0 · Medium = 1.25 · Dark = 1.5. Applied to wall ETD only, not roof.</p>
+    </div>
+
+    <!-- SURFACES -->
+    <div id="o-surface-cards"></div>
+
+    <!-- ADD SURFACE -->
+    <button class="o-btn-outline" onclick="ottvAddSurface()" style="width:100%;text-align:center;">+ Add surface</button>
+
+    <!-- ROOF -->
+    <div class="o-calc-card" style="margin-top:1rem;">
+      <h3>Roof</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.65rem;">
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-roofArea">Total roof area</label>
+          <div class="o-field-row"><input type="number" id="o-roofArea" value="200" step="1" min="0"><span class="o-unit">m²</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-roofSkylight">Skylight fraction</label>
+          <div class="o-field-row"><input type="number" id="o-roofSkylight" value="0" step="0.01" min="0" max="1"><span class="o-unit">0–1</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-roofETD">Roof ETD</label>
+          <div class="o-field-row"><input type="number" id="o-roofETD" value="32" step="1" min="0"><span class="o-unit">°C</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label" for="o-roofIsol">Roof Isol</label>
+          <div class="o-field-row"><input type="number" id="o-roofIsol" value="650" step="10" min="0"><span class="o-unit">W/m²</span></div>
+        </div>
+      </div>
+      <p style="font-size:0.75rem;color:var(--o-smoke);margin-top:0.5rem;">Colour factor does not apply to the roof. U_roof from materials above.</p>
+    </div>
+
+    <button class="o-btn-primary" onclick="ottvCalculate()">Calculate OTTV</button>
+
+    <div id="o-result-section" style="display:none; margin-top:1.25rem;"></div>
+  </div>
+
+  <!-- ── TAB 3: PARAMETERS ── -->
+  <div class="o-panel o-content" id="o-tab-params">
+    <h1>Climate Parameters</h1>
+    <p>Reference values for Alexandria, Egypt (31.2°N). Use these in the Calculator tab for the class exercise, or replace them with site-specific data for other locations.</p>
+
+    <h2>ETD and Solar Irradiance — Alexandria</h2>
+    <table>
+      <thead><tr><th>Façade</th><th>ETD (°C)</th><th>Isol (W/m²)</th><th>Wall area (villa)</th></tr></thead>
+      <tbody>
+        <tr><td>North</td><td>8</td><td>450</td><td>40 m²</td></tr>
+        <tr><td>South</td><td>10</td><td>550</td><td>40 m²</td></tr>
+        <tr><td>East</td><td>12</td><td>600</td><td>80 m²</td></tr>
+        <tr><td>West</td><td>12</td><td>600</td><td>80 m²</td></tr>
+        <tr><td>Roof (horiz.)</td><td>32</td><td>650</td><td>200 m²</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Generic building case — material parameters</h2>
+    <table>
+      <thead><tr><th>Parameter</th><th>Value</th><th>Context</th></tr></thead>
+      <tbody>
+        <tr><td>Glazing U-value</td><td>5.0 W/m²K</td><td>Single glazing, no coating</td></tr>
+        <tr><td>Glazing SHGC</td><td>0.9</td><td>Clear glass, no film</td></tr>
+        <tr><td>Wall U-value</td><td>2.5 W/m²K</td><td>Uninsulated hollow block</td></tr>
+        <tr><td>Roof U-value</td><td>1.0 W/m²K</td><td>Flat reinforced concrete slab</td></tr>
+        <tr><td>ΔT</td><td>12 °C</td><td>25°C inside vs 37°C peak outdoor</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Colour factor guide</h2>
+    <table>
+      <thead><tr><th>Colour</th><th>Factor</th><th>Typical finishes</th></tr></thead>
+      <tbody>
+        <tr><td>Light</td><td>1.0</td><td>White paint, light stone, cream render</td></tr>
+        <tr><td>Medium</td><td>1.25</td><td>Beige, buff brick, mid-grey</td></tr>
+        <tr><td>Dark</td><td>1.5</td><td>Dark brick, charcoal render, dark stone</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Typical U-values for reference</h2>
+    <table>
+      <thead><tr><th>Construction</th><th>U-value (W/m²K)</th></tr></thead>
+      <tbody>
+        <tr><td>Single clear glazing</td><td>5.0 – 5.8</td></tr>
+        <tr><td>Double glazing (air gap)</td><td>2.7 – 3.0</td></tr>
+        <tr><td>Double glazing (low-e)</td><td>1.4 – 1.8</td></tr>
+        <tr><td>Triple glazing (low-e)</td><td>0.6 – 0.9</td></tr>
+        <tr><td>Uninsulated hollow block wall</td><td>2.0 – 3.0</td></tr>
+        <tr><td>Hollow block + 50mm insulation</td><td>0.6 – 0.8</td></tr>
+        <tr><td>Flat concrete slab roof (no insulation)</td><td>0.9 – 1.2</td></tr>
+        <tr><td>Flat concrete slab roof + 100mm EPS</td><td>0.25 – 0.35</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Typical SHGC values</h2>
+    <table>
+      <thead><tr><th>Glass type</th><th>SHGC</th></tr></thead>
+      <tbody>
+        <tr><td>Clear single glazing</td><td>0.85 – 0.90</td></tr>
+        <tr><td>Clear double glazing</td><td>0.70 – 0.76</td></tr>
+        <tr><td>Low-e double glazing</td><td>0.25 – 0.40</td></tr>
+        <tr><td>Solar control double glazing</td><td>0.20 – 0.35</td></tr>
+        <tr><td>Highly tinted glass</td><td>0.15 – 0.30</td></tr>
+      </tbody>
+    </table>
+
+    <div class="o-callout o-callout-sun" style="margin-top:1rem;">
+      <strong>Note on ETD</strong>
+      The Equivalent Temperature Difference (ETD) accounts for the fact that heat gain through a wall is not instantaneous — it depends on the thermal mass of the wall, the time lag, and the diurnal temperature swing. The values given here are peak-hour values for Alexandria for a typical summer design day.
+    </div>
+  </div>
+
+  <footer>
+    OTTV Calculator — Environmental Design Course<br>
+    Architectural Engineering and Environmental Design Department<br>
+    College of Engineering and Technology, AASTMT
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     U-VALUE CALCULATOR
+     ══════════════════════════════════════════════════════════════ -->
+<div id="uval-tool" class="tool-panel">
+
+  <div class="u-page-header">
+    <h1>U-Value Calculator</h1>
+    <span class="u-std">BS EN ISO 6946:2017</span>
+  </div>
+
+  <div class="u-main">
+
+    <!-- Element Settings -->
+    <div class="u-card">
+      <div class="u-card-title">Element settings</div>
+      <div class="u-form-row u-cols2">
+        <div class="u-field">
+          <label>Element type</label>
+          <select id="u-elemType" onchange="uvalOnElemChange()">
+            <option value="ext-wall">External wall</option>
+            <option value="int-wall">Internal wall</option>
+            <option value="pitched-cold">Pitched roof (cold)</option>
+            <option value="pitched-warm">Pitched roof (warm)</option>
+            <option value="flat-cold">Flat roof (cold)</option>
+            <option value="flat-warm">Flat roof (warm)</option>
+            <option value="int-floor">Intermediate floor</option>
+            <option value="ground-floor">Ground floor (exposed underside)</option>
+          </select>
+        </div>
+        <div class="u-field">
+          <label>Target max U-value (W/m²K) — optional</label>
+          <input type="number" id="u-maxU" step="0.01" min="0" placeholder="e.g. 0.18">
+        </div>
+      </div>
+      <div class="u-info-box" id="u-elem-info"></div>
+    </div>
+
+    <!-- Layers -->
+    <div class="u-card">
+      <div class="u-card-title">Construction layers <span style="font-size:11px;font-weight:400;text-transform:none;letter-spacing:0">(add from outside → inside)</span></div>
+      <div class="u-layers-wrap">
+        <table class="u-layers-table" id="u-layers-table">
+          <thead>
+            <tr>
+              <th class="u-col-mat">Material / description</th>
+              <th class="u-col-lam">λ (W/mK)</th>
+              <th class="u-col-thk">Thickness (mm)</th>
+              <th class="u-col-r">R (m²K/W)</th>
+              <th class="u-col-act"></th>
+            </tr>
+          </thead>
+          <tbody id="u-tbody"></tbody>
+        </table>
+      </div>
+      <div class="u-btn-group">
+        <button class="u-btn" onclick="uvalAddLayer('material')">+ Material layer</button>
+        <button class="u-btn" onclick="uvalAddLayer('cavity')">+ Cavity / air gap</button>
+        <button class="u-btn" onclick="uvalAddLayer('custom')">+ Custom layer</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="u-card">
+      <div class="u-card-title">Results</div>
+      <div class="u-formula" id="u-formula-display">
+        RT = Rse + ... + Rsi &nbsp;|&nbsp; U = 1 / RT
+      </div>
+      <div class="u-results-grid">
+        <div class="u-metric">
+          <div class="u-metric-label">Total thickness</div>
+          <div class="u-metric-value" id="u-res-thick">—<sup> mm</sup></div>
+        </div>
+        <div class="u-metric">
+          <div class="u-metric-label">Total resistance R<sub>T</sub></div>
+          <div class="u-metric-value" id="u-res-rt">—<sup> m²K/W</sup></div>
+        </div>
+        <div class="u-metric">
+          <div class="u-metric-label">U-value</div>
+          <div class="u-metric-value" id="u-res-u">—<sup> W/m²K</sup></div>
+        </div>
+      </div>
+      <div class="u-status-bar" id="u-status-bar"></div>
+      <hr class="u-divider">
+      <table class="u-breakdown">
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>λ (W/mK)</th>
+            <th>Thickness (mm)</th>
+            <th>R (m²K/W)</th>
+          </tr>
+        </thead>
+        <tbody id="u-breakdown-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   TOP-LEVEL TOOL SWITCHER
+   ═══════════════════════════════════════════════════════════════ */
+function selectTool(which) {
+  var ottv = document.getElementById('ottv-tool');
+  var uval = document.getElementById('uval-tool');
+  var swO = document.getElementById('sw-ottv');
+  var swU = document.getElementById('sw-uval');
+  if (which === 'uval') {
+    ottv.classList.remove('active');
+    uval.classList.add('active');
+    swO.classList.remove('active');
+    swU.classList.add('active');
+  } else {
+    uval.classList.remove('active');
+    ottv.classList.add('active');
+    swU.classList.remove('active');
+    swO.classList.add('active');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OTTV CALCULATOR — JavaScript
+   (all globals prefixed `ottv`, ids prefixed `o-`)
+   ═══════════════════════════════════════════════════════════════ */
+const OTTV_TIERS = [
+  { max:70,       name:'Excellent', cls:'o-excellent', msg:'This design meets a high thermal performance standard. Heat gains are well controlled.' },
+  { max:100,      name:'Good',      cls:'o-good',      msg:'Reasonable performance. There is room to improve — review the highest-contributing surfaces.' },
+  { max:150,      name:'Poor',      cls:'o-poor',      msg:'High heat gain. Key surfaces need attention — check East/West glazing and roof performance.' },
+  { max:Infinity, name:'Critical',  cls:'o-critical',  msg:'Very high heat gain. Major redesign of glazing strategy or envelope materials is needed.' }
+];
+
+function ottvGetTier(v) { return OTTV_TIERS.find(t => v <= t.max); }
+
+function ottvSwitchTab(id) {
+  document.querySelectorAll('#ottv-tool .o-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const tabIds = ['o-tab-formula','o-tab-calc','o-tab-params'];
+  document.querySelectorAll('#ottv-tool .o-tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', tabIds[i] === id);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── SURFACES ── */
+let ottvSurfaces = [];
+let ottvSurfaceId = 0;
+
+function ottvDefaultSurfaces() {
+  return [
+    { id: ++ottvSurfaceId, label:'North', area:40, wwr:0.1, etd:8,  isol:450 },
+    { id: ++ottvSurfaceId, label:'South', area:40, wwr:0.1, etd:10, isol:550 },
+    { id: ++ottvSurfaceId, label:'East',  area:80, wwr:0.1, etd:12, isol:600 },
+    { id: ++ottvSurfaceId, label:'West',  area:80, wwr:0.1, etd:12, isol:600 }
+  ];
+}
+
+function ottvLoadGeneric() {
+  ottvSurfaceId = 0;
+  ottvSurfaces = ottvDefaultSurfaces();
+  document.getElementById('o-glazU').value       = '5.0';
+  document.getElementById('o-shgc').value        = '0.9';
+  document.getElementById('o-wallU').value       = '2.5';
+  document.getElementById('o-roofU').value       = '1.0';
+  document.getElementById('o-dT').value          = '12';
+  document.getElementById('o-colorFactor').value = '1.0';
+  document.getElementById('o-roofArea').value    = '200';
+  document.getElementById('o-floorArea').value   = '200';
+  document.getElementById('o-roofSkylight').value= '0';
+  document.getElementById('o-roofETD').value     = '32';
+  document.getElementById('o-roofIsol').value    = '650';
+  document.getElementById('o-btn-villa').classList.add('active');
+  document.getElementById('o-btn-custom').classList.remove('active');
+  ottvRenderSurfaces();
+  document.getElementById('o-result-section').style.display = 'none';
+}
+
+function ottvLoadCustom() {
+  ottvSurfaceId = 0;
+  ottvSurfaces = [{ id: ++ottvSurfaceId, label:'Surface 1', area:50, wwr:0.3, etd:12, isol:600 }];
+  document.getElementById('o-floorArea').value = '';
+  document.getElementById('o-btn-custom').classList.add('active');
+  document.getElementById('o-btn-villa').classList.remove('active');
+  ottvRenderSurfaces();
+  document.getElementById('o-result-section').style.display = 'none';
+}
+
+function ottvAddSurface() {
+  ottvSurfaces.push({ id: ++ottvSurfaceId, label:'Surface '+(ottvSurfaces.length+1), area:50, wwr:0.3, etd:12, isol:600 });
+  ottvRenderSurfaces();
+}
+
+function ottvRemoveSurface(id) {
+  if (ottvSurfaces.length <= 1) return;
+  ottvSurfaces = ottvSurfaces.filter(s => s.id !== id);
+  ottvRenderSurfaces();
+}
+
+function ottvGetVal(id, sid) {
+  const el = document.getElementById(id+'-'+sid);
+  return el ? parseFloat(el.value) || 0 : 0;
+}
+function ottvGetStr(id, sid) {
+  const el = document.getElementById(id+'-'+sid);
+  return el ? el.value : '';
+}
+
+function ottvRenderSurfaces() {
+  const container = document.getElementById('o-surface-cards');
+  container.innerHTML = '';
+  ottvSurfaces.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'o-calc-card';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.65rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <h3 style="margin:0;">Surface</h3>
+          <input type="text" id="o-label-${s.id}" value="${s.label}"
+            style="font-family:'IBM Plex Mono',monospace;font-size:0.82rem;border:1.5px solid var(--o-sand-dk);border-radius:5px;padding:0.2rem 0.4rem;background:var(--o-sand);color:var(--o-ink);width:90px;">
+        </div>
+        ${ottvSurfaces.length > 1 ? `<button onclick="ottvRemoveSurface(${s.id})" style="background:none;border:none;color:var(--o-smoke);cursor:pointer;font-size:0.8rem;font-family:'IBM Plex Mono',monospace;padding:0.2rem 0.4rem;border-radius:4px;border:1px solid var(--o-sand-dk);">✕ remove</button>` : ''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label">Total wall area</label>
+          <div class="o-field-row"><input type="number" id="o-area-${s.id}" value="${s.area}" step="1" min="0"><span class="o-unit">m²</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label">WWR (0 to 1)</label>
+          <div class="o-field-row"><input type="number" id="o-wwr-${s.id}" value="${s.wwr}" step="0.01" min="0" max="1"><span class="o-unit">—</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label">ETD</label>
+          <div class="o-field-row"><input type="number" id="o-etd-${s.id}" value="${s.etd}" step="1" min="0"><span class="o-unit">°C</span></div>
+        </div>
+        <div class="o-field-group" style="margin-bottom:0;">
+          <label class="o-field-label">Solar Isol</label>
+          <div class="o-field-row"><input type="number" id="o-isol-${s.id}" value="${s.isol}" step="10" min="0"><span class="o-unit">W/m²</span></div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function ottvCalculate() {
+  const glazU  = parseFloat(document.getElementById('o-glazU').value)  || 0;
+  const shgc   = parseFloat(document.getElementById('o-shgc').value)   || 0;
+  const wallU  = parseFloat(document.getElementById('o-wallU').value)  || 0;
+  const roofU  = parseFloat(document.getElementById('o-roofU').value)  || 0;
+  const dT     = parseFloat(document.getElementById('o-dT').value)     || 0;
+  const cf     = parseFloat(document.getElementById('o-colorFactor').value) || 1;
+
+  const roofArea     = parseFloat(document.getElementById('o-roofArea').value)     || 0;
+  const roofSkylight = parseFloat(document.getElementById('o-roofSkylight').value) || 0;
+  const roofETD      = parseFloat(document.getElementById('o-roofETD').value)      || 0;
+  const roofIsol     = parseFloat(document.getElementById('o-roofIsol').value)     || 0;
+
+  let totalQ = 0;
+  let totalArea = roofArea;
+  const breakdown = [];
+
+  ottvSurfaces.forEach(s => {
+    const area = ottvGetVal('o-area', s.id);
+    const wwr  = ottvGetVal('o-wwr',  s.id);
+    const etd  = ottvGetVal('o-etd',  s.id);
+    const isol = ottvGetVal('o-isol', s.id);
+    const label = ottvGetStr('o-label', s.id) || s.label;
+    totalArea += area;
+    const gA  = area * wwr;
+    const wA  = area * (1 - wwr);
+    const qWC = wA  * wallU * etd * cf;
+    const qGC = gA  * glazU * dT;
+    const qGS = gA  * isol  * shgc;
+    const tot = qWC + qGC + qGS;
+    totalQ += tot;
+    breakdown.push({ label, qWC, qGC, qGS, tot });
+  });
+
+  // Roof
+  const rgA  = roofArea * roofSkylight;
+  const roA  = roofArea * (1 - roofSkylight);
+  const qROC = roA * roofU * roofETD;
+  const qRGC = rgA * glazU * dT;
+  const qRGS = rgA * roofIsol * shgc;
+  const roofTot = qROC + qRGC + qRGS;
+  totalQ += roofTot;
+  breakdown.push({ label:'Roof', qWC:qROC, qGC:qRGC, qGS:qRGS, tot:roofTot });
+
+  const ottv = totalArea > 0 ? totalQ / totalArea : 0;
+  const floorArea  = parseFloat(document.getElementById('o-floorArea').value) || 0;
+  const ottvPerSkin = totalArea > 0 ? totalQ / totalArea : 0;
+  const coolingPerFloor = floorArea > 0 ? totalQ / floorArea : null;
+  const tier = ottvGetTier(ottvPerSkin);
+  const maxQ = Math.max(...breakdown.map(b => b.tot), 1);
+
+  const secEl = document.getElementById('o-result-section');
+  secEl.style.display = 'block';
+
+  const legendHTML = `
+    <div class="o-legend">
+      <div class="o-legend-item"><div class="o-ldot" style="background:#8b5e3c;"></div>Wall / roof conduction</div>
+      <div class="o-legend-item"><div class="o-ldot" style="background:#2a7a4e;"></div>Glazing conduction</div>
+      <div class="o-legend-item"><div class="o-ldot" style="background:#e8a020;"></div>Solar through glass</div>
+    </div>`;
+
+  const barsHTML = breakdown.map(b => `
+    <div class="o-bar-row">
+      <span class="o-bar-label">${b.label}</span>
+      <div class="o-bar-track">
+        <div class="o-bar-wc" style="width:${(b.qWC/maxQ*100).toFixed(1)}%"></div>
+        <div class="o-bar-gc" style="width:${(b.qGC/maxQ*100).toFixed(1)}%"></div>
+        <div class="o-bar-gs" style="width:${(b.qGS/maxQ*100).toFixed(1)}%"></div>
+      </div>
+      <span class="o-bar-val">${b.tot.toFixed(0)} W</span>
+    </div>`).join('');
+
+  const summaryHTML = breakdown.map(b => `
+    <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:0.35rem 0;border-bottom:1px solid var(--o-sand);">
+      <span style="color:var(--o-smoke);">${b.label}</span>
+      <span style="font-family:'IBM Plex Mono',monospace;">WC:${b.qWC.toFixed(0)} + GC:${b.qGC.toFixed(0)} + GS:${b.qGS.toFixed(0)} = <strong>${b.tot.toFixed(0)} W</strong></span>
+    </div>`).join('');
+
+  secEl.innerHTML = `
+    <div class="o-result-card ${tier.cls}">
+      <div class="o-result-label">OTTV per skin m²</div>
+      <div class="o-result-ottv">${ottvPerSkin.toFixed(1)}</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.75rem;opacity:0.6;margin-bottom:0.35rem;">W/m² envelope</div>
+      <div class="o-result-tier">${tier.name}</div>
+      <div class="o-result-msg">${tier.msg}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.85rem;">
+      <div class="o-calc-card" style="margin:0;text-align:center;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--o-smoke);margin-bottom:0.4rem;">Total Heat Gain Q</div>
+        <div style="font-size:1.7rem;font-weight:600;line-height:1;">${totalQ.toFixed(0)}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--o-smoke);margin-top:0.2rem;">W</div>
+        <div style="font-size:0.75rem;color:var(--o-smoke);margin-top:0.4rem;">over ${totalArea.toFixed(0)} m² skin</div>
+      </div>
+      <div class="o-calc-card" style="margin:0;text-align:center;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--o-smoke);margin-bottom:0.4rem;">Cooling Load per Floor m²</div>
+        <div style="font-size:1.7rem;font-weight:600;line-height:1;">${coolingPerFloor !== null ? coolingPerFloor.toFixed(1) : '—'}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--o-smoke);margin-top:0.2rem;">W/m² floor</div>
+        <div style="font-size:0.75rem;color:var(--o-smoke);margin-top:0.4rem;">${coolingPerFloor !== null ? 'over ' + floorArea.toFixed(0) + ' m² floor' : 'enter floor area above'}</div>
+      </div>
+    </div>
+
+    <div class="o-calc-card">
+      <h3>Heat gain by surface</h3>
+      ${legendHTML}
+      ${barsHTML}
+      <div class="o-subtotal-row" style="margin-top:0.75rem;">
+        <span>Total Q</span><span>${totalQ.toFixed(0)} W ÷ ${totalArea.toFixed(0)} m² skin = ${ottvPerSkin.toFixed(2)} W/m²</span>
+      </div>
+    </div>
+
+    <div class="o-calc-card">
+      <h3>Calculation breakdown (W)</h3>
+      ${summaryHTML}
+      <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:0.85rem;font-weight:600;padding:0.45rem 0;margin-top:0.25rem;">
+        <span>OTTV</span>
+        <span>${totalQ.toFixed(0)} ÷ ${totalArea.toFixed(0)} = ${ottvPerSkin.toFixed(2)} W/m²</span>
+      </div>
+    </div>
+  `;
+
+  secEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// Init OTTV
+ottvLoadGeneric();
+
+/* ═══════════════════════════════════════════════════════════════
+   U-VALUE CALCULATOR — JavaScript
+   (all globals prefixed `uval`, ids prefixed `u-`)
+   ═══════════════════════════════════════════════════════════════ */
+const UVAL_MATS = {
+  "Bricks": [
+    {n:"Brickwork — outer leaf",          l:0.77},
+    {n:"Brickwork — inner leaf",          l:0.56},
+    {n:"Bricks (dense, 2080 kg/m³)",      l:1.31},
+    {n:"Bricks (medium, 1920 kg/m³)",     l:0.72},
+    {n:"Bricks (lightweight, 1000 kg/m³)",l:0.44},
+    {n:"Clay brickwork — outer",          l:0.84},
+    {n:"Clay brickwork — inner",          l:0.62},
+  ],
+  "Blocks & Blockwork": [
+    {n:"Blockwork — dense (≥1800 kg/m³)", l:1.13},
+    {n:"Blockwork — medium (1000–1800)",  l:0.51},
+    {n:"Blockwork — lightweight (<1000)", l:0.19},
+    {n:"Concrete block — heavyweight",    l:1.13},
+    {n:"Concrete block — medium weight",  l:0.57},
+    {n:"Concrete block — lightweight agg.",l:0.19},
+    {n:"Concrete block — aerated AAC (500 kg/m³)",l:0.16},
+    {n:"Concrete block — aerated AAC (600 kg/m³)",l:0.19},
+  ],
+  "Concrete": [
+    {n:"Cast concrete — high density (2400 kg/m³)",l:1.93},
+    {n:"Cast concrete — medium density (2000)",    l:1.35},
+    {n:"Cast concrete — low density (1200)",       l:0.38},
+    {n:"Reinforced concrete — 1% steel",           l:2.30},
+    {n:"Reinforced concrete — 2% steel",           l:2.50},
+    {n:"Aerated concrete slab (500 kg/m³)",        l:0.16},
+    {n:"Screed (1200 kg/m³)",                      l:0.41},
+  ],
+  "Insulation": [
+    {n:"Mineral wool quilt/roll (12 kg/m³)",       l:0.042},
+    {n:"Mineral wool batt (25 kg/m³)",             l:0.038},
+    {n:"Glass fibre/wool batt (16 kg/m³)",         l:0.040},
+    {n:"EPS board — standard (15 kg/m³)",          l:0.040},
+    {n:"EPS board — HD (25 kg/m³)",                l:0.035},
+    {n:"XPS — extruded polystyrene",               l:0.033},
+    {n:"Polyurethane foam (PUR) board",            l:0.025},
+    {n:"Phenolic foam board",                      l:0.022},
+    {n:"Polyisocyanurate (PIR) board",             l:0.023},
+    {n:"Cork (insulation)",                        l:0.045},
+    {n:"Foamglass",                                l:0.045},
+    {n:"Wood wool slab (500 kg/m³)",               l:0.100},
+    {n:"Cellulosic insulation (loose fill)",       l:0.042},
+  ],
+  "Boards & Panels": [
+    {n:"Plasterboard — standard (900 kg/m³)",      l:0.25},
+    {n:"Plasterboard — dense/FR (>900 kg/m³)",     l:0.28},
+    {n:"OSB board",                                l:0.13},
+    {n:"WBP Plywood",                              l:0.13},
+    {n:"Chipboard",                                l:0.14},
+    {n:"MDF",                                      l:0.14},
+    {n:"Fibreboard (soft, 250 kg/m³)",             l:0.06},
+    {n:"Hardboard (900 kg/m³)",                    l:0.21},
+    {n:"Structural fibreboard",                    l:0.11},
+    {n:"Fibre cement board",                       l:0.36},
+  ],
+  "Timber": [
+    {n:"Softwood — joists, studs, rafters",        l:0.13},
+    {n:"Softwood — general",                       l:0.14},
+    {n:"Hardwood (700 kg/m³)",                     l:0.18},
+  ],
+  "Coatings & Finishes": [
+    {n:"Plaster — dense (1300 kg/m³)",             l:0.57},
+    {n:"Plaster — lightweight (600 kg/m³)",        l:0.18},
+    {n:"Mortar — exposed",                         l:0.94},
+    {n:"Mortar — protected",                       l:0.88},
+    {n:"Rendering — external",                     l:0.57},
+    {n:"Rendering — internal",                     l:0.57},
+  ],
+  "Tiles, Stone & Roofing": [
+    {n:"Clay roof tiles (2000 kg/m³)",             l:1.00},
+    {n:"Concrete roof tiles (2100 kg/m³)",         l:1.50},
+    {n:"Natural slate",                            l:2.00},
+    {n:"Limestone — hard",                         l:1.80},
+    {n:"Sandstone",                                l:1.30},
+    {n:"Portland stone",                           l:1.50},
+    {n:"Stone chippings (roof, 2000 kg/m³)",       l:0.96},
+    {n:"Asphalt (roofing, 2100 kg/m³)",            l:0.70},
+    {n:"Felt / bitumen layers",                    l:0.23},
+    {n:"Vapour control layer",                     l:0.20},
+    {n:"Breathable membrane",                      l:0.25},
+  ],
+  "Metal": [
+    {n:"Steel — mild structural",                  l:50.0},
+    {n:"Stainless steel",                          l:17.0},
+    {n:"Aluminium",                                l:160.0},
+  ],
+};
+
+// Cavity types — heat flow direction used to look up R from ISO 6946:2017 Table 9
+const UVAL_CAVITY_TYPES = [
+  {n:"Unventilated — horizontal heat flow (wall)",  dir:"horiz"},
+  {n:"Unventilated — upward heat flow (roof)",      dir:"up"},
+  {n:"Unventilated — downward heat flow (floor)",   dir:"down"},
+  {n:"Ventilated airspace (well-ventilated roof)",  dir:"vented"},
+  {n:"Ventilated airspace (cold pitched roof void)",dir:"vented_cold"},
+];
+
+// BS EN ISO 6946:2017 Table 9 — R values (m²K/W) for unventilated airspaces
+const UVAL_CAV_TABLE = {
+  thk:   [0,    5,    7,    10,   15,   25,   50,   100,  300],
+  up:    [0.00, 0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16, 0.16],
+  horiz: [0.00, 0.11, 0.13, 0.15, 0.17, 0.18, 0.18, 0.18, 0.18],
+  down:  [0.00, 0.11, 0.13, 0.15, 0.17, 0.19, 0.21, 0.22, 0.23],
+};
+
+function uvalCavityR(thicknessMm, dir) {
+  if (dir === 'vented')      return 0.30;
+  if (dir === 'vented_cold') return 0.20;
+  const t = Math.max(0, thicknessMm);
+  const xs = UVAL_CAV_TABLE.thk;
+  const ys = UVAL_CAV_TABLE[dir] || UVAL_CAV_TABLE.horiz;
+  if (t <= xs[0]) return ys[0];
+  if (t >= xs[xs.length - 1]) return ys[ys.length - 1];
+  for (let i = 0; i < xs.length - 1; i++) {
+    if (t >= xs[i] && t <= xs[i+1]) {
+      const frac = (t - xs[i]) / (xs[i+1] - xs[i]);
+      return +(ys[i] + frac * (ys[i+1] - ys[i])).toFixed(4);
+    }
+  }
+  return ys[ys.length - 1];
+}
+
+const UVAL_ELEM_CONFIG = {
+  "ext-wall":     {rsi:0.13, rse:0.04, label:"External wall",            maxU:0.18, hflow:"Horizontal (wall)"},
+  "int-wall":     {rsi:0.13, rse:0.13, label:"Internal wall",            maxU:null, hflow:"Horizontal"},
+  "pitched-cold": {rsi:0.10, rse:0.04, label:"Pitched roof (cold)",      maxU:0.16, hflow:"Upward (roof)"},
+  "pitched-warm": {rsi:0.10, rse:0.04, label:"Pitched roof (warm)",      maxU:0.16, hflow:"Upward (roof)"},
+  "flat-cold":    {rsi:0.10, rse:0.04, label:"Flat roof (cold)",         maxU:0.18, hflow:"Upward (roof)"},
+  "flat-warm":    {rsi:0.10, rse:0.04, label:"Flat roof (warm)",         maxU:0.18, hflow:"Upward (roof)"},
+  "int-floor":    {rsi:0.17, rse:0.17, label:"Intermediate floor",       maxU:null, hflow:"Downward (floor)"},
+  "ground-floor": {rsi:0.17, rse:0.04, label:"Ground floor (exposed)",   maxU:0.22, hflow:"Downward (floor)"},
+};
+
+const UVAL_ELEM_INFO = {
+  "ext-wall":     "Rsi = 0.13, Rse = 0.04 m²K/W (horizontal heat flow). UK Part L typical target for new build: ≤ 0.18 W/m²K.",
+  "int-wall":     "Both surfaces internal: Rsi = Rse = 0.13 m²K/W. No regulatory U-value limit applies to internal walls.",
+  "pitched-cold": "Cold roof: insulation at ceiling level, ventilated void above. Rsi = 0.10, Rse = 0.04 m²K/W (upward heat flow). Include a ventilated airspace layer. UK target: ≤ 0.16 W/m²K.",
+  "pitched-warm": "Warm roof: insulation between/above rafters, no cold void. Rsi = 0.10, Rse = 0.04 m²K/W (upward heat flow). UK Part L target: ≤ 0.16 W/m²K.",
+  "flat-cold":    "Cold flat roof: insulation at ceiling level below ventilated deck. Rsi = 0.10, Rse = 0.04 m²K/W (upward heat flow).",
+  "flat-warm":    "Warm flat roof: insulation above structural deck, below waterproofing membrane. Rsi = 0.10, Rse = 0.04 m²K/W (upward heat flow).",
+  "int-floor":    "Floor between two heated spaces. Both surfaces internal: Rsi = Rse = 0.17 m²K/W (downward heat flow).",
+  "ground-floor": "Floor exposed on underside or over unheated space. Rsi = 0.17, Rse = 0.04 m²K/W (downward heat flow). Note: Ground-contact slab-on-grade uses BS EN ISO 13370 — this calculator uses the simplified exposed-underside method.",
+};
+
+let uvalLayerIdCounter = 0;
+
+function uvalGetElemCfg() {
+  return UVAL_ELEM_CONFIG[document.getElementById('u-elemType').value];
+}
+
+function uvalBuildMatSelectHTML(id) {
+  let h = `<select id="${id}" onchange="uvalOnMatChange('${id}')" style="width:100%">`;
+  h += `<option value="">— select material —</option>`;
+  for (const [grp, items] of Object.entries(UVAL_MATS)) {
+    h += `<optgroup label="${grp}">`;
+    items.forEach((m, i) => {
+      h += `<option value="${grp}||${i}">${m.n}</option>`;
+    });
+    h += `</optgroup>`;
+  }
+  h += `</select>`;
+  return h;
+}
+
+function uvalBuildCavitySelectHTML(id) {
+  let h = `<select id="${id}" onchange="uvalOnCavChange('${id}')" style="width:100%">`;
+  UVAL_CAVITY_TYPES.forEach((c, i) => {
+    h += `<option value="${i}">${c.n}</option>`;
+  });
+  h += `</select>`;
+  return h;
+}
+
+function uvalAddLayer(type) {
+  const id = 'UL' + (uvalLayerIdCounter++);
+  const tbody = document.getElementById('u-tbody');
+  const tr = document.createElement('tr');
+  tr.className = 'u-layer-row';
+  tr.id = 'u-row_' + id;
+
+  if (type === 'material') {
+    tr.innerHTML = `
+      <td class="u-col-mat">${uvalBuildMatSelectHTML('u-mat_'+id)}</td>
+      <td class="u-col-lam"><input type="number" id="u-lam_${id}" step="0.001" min="0" placeholder="auto" onchange="uvalOnManualLam('${id}')"></td>
+      <td class="u-col-thk"><input type="number" id="u-thk_${id}" step="1"   min="0" placeholder="mm" onchange="uvalRecalcRow('${id}')"></td>
+      <td class="u-col-r"  ><input type="number" id="u-r_${id}"   step="0.001" readonly placeholder="—" tabindex="-1"></td>
+      <td class="u-col-act"><button class="u-btn-remove" onclick="uvalRemoveLayer('${id}')" title="Remove">×</button></td>`;
+
+  } else if (type === 'cavity') {
+    const defaultR = uvalCavityR(25, UVAL_CAVITY_TYPES[0].dir).toFixed(4);
+    tr.innerHTML = `
+      <td class="u-col-mat">${uvalBuildCavitySelectHTML('u-cav_'+id)}</td>
+      <td class="u-col-lam"><input type="number" id="u-lam_${id}" readonly placeholder="n/a" tabindex="-1" title="Cavities use tabulated R-values — λ does not apply"></td>
+      <td class="u-col-thk"><input type="number" id="u-thk_${id}" step="1" min="0" placeholder="mm" value="25" onchange="uvalOnCavThkChange('${id}')" title="Cavity thickness — R is looked up from BS EN ISO 6946:2017 Table 9"></td>
+      <td class="u-col-r"  ><input type="number" id="u-r_${id}"   step="0.001" value="${defaultR}" onchange="uvalCalculate()" title="R from BS EN ISO 6946 Table 9. Editable if you need to override."></td>
+      <td class="u-col-act"><button class="u-btn-remove" onclick="uvalRemoveLayer('${id}')" title="Remove">×</button></td>`;
+
+  } else {
+    // custom
+    tr.innerHTML = `
+      <td class="u-col-mat"><input type="text" id="u-name_${id}" placeholder="Description (optional)" onchange="uvalCalculate()" style="width:100%"></td>
+      <td class="u-col-lam"><input type="number" id="u-lam_${id}" step="0.001" min="0" placeholder="λ" onchange="uvalRecalcRow('${id}')"></td>
+      <td class="u-col-thk"><input type="number" id="u-thk_${id}" step="1"   min="0" placeholder="mm" onchange="uvalRecalcRow('${id}')"></td>
+      <td class="u-col-r"  ><input type="number" id="u-r_${id}"   step="0.001" placeholder="or enter R" onchange="uvalCalculate()"></td>
+      <td class="u-col-act"><button class="u-btn-remove" onclick="uvalRemoveLayer('${id}')" title="Remove">×</button></td>`;
+  }
+
+  tr.dataset.type = type;
+  tbody.appendChild(tr);
+  uvalCalculate();
+}
+
+function uvalRemoveLayer(id) {
+  const row = document.getElementById('u-row_' + id);
+  if (row) row.remove();
+  uvalCalculate();
+}
+
+function uvalOnMatChange(matId) {
+  const sel = document.getElementById(matId);
+  const val = sel.value;
+  // matId looks like "u-mat_UL0" → lid = "UL0"
+  const lid = matId.replace('u-mat_', '');
+  const lamInput = document.getElementById('u-lam_' + lid);
+
+  if (!val) {
+    lamInput.value = '';
+    document.getElementById('u-r_' + lid).value = '';
+    uvalCalculate();
+    return;
+  }
+  const [grp, idxStr] = val.split('||');
+  const mat = UVAL_MATS[grp][parseInt(idxStr)];
+  lamInput.value = mat.l;
+  lamInput.dataset.auto = mat.l;
+  uvalRecalcRow(lid);
+}
+
+function uvalOnManualLam(lid) {
+  uvalRecalcRow(lid);
+}
+
+function uvalRecalcRow(lid) {
+  const lamEl = document.getElementById('u-lam_' + lid);
+  const thkEl = document.getElementById('u-thk_' + lid);
+  const rEl   = document.getElementById('u-r_'   + lid);
+  const lam = parseFloat(lamEl ? lamEl.value : '');
+  const thk = parseFloat(thkEl ? thkEl.value : '');
+  if (lam > 0 && thk > 0) {
+    rEl.value = (thk / 1000 / lam).toFixed(4);
+  } else {
+    rEl.value = '';
+  }
+  uvalCalculate();
+}
+
+function uvalOnCavChange(cavId) {
+  const lid = cavId.replace('u-cav_', '');
+  uvalUpdateCavR(lid);
+}
+
+function uvalOnCavThkChange(lid) {
+  uvalUpdateCavR(lid);
+}
+
+function uvalUpdateCavR(lid) {
+  const sel = document.getElementById('u-cav_' + lid);
+  const thkEl = document.getElementById('u-thk_' + lid);
+  const rEl   = document.getElementById('u-r_'   + lid);
+  const cavType = UVAL_CAVITY_TYPES[parseInt(sel.value)];
+  const thk = parseFloat(thkEl ? thkEl.value : '') || 25;
+  rEl.value = uvalCavityR(thk, cavType.dir).toFixed(4);
+  uvalCalculate();
+}
+
+function uvalOnElemChange() {
+  const cfg = uvalGetElemCfg();
+  const key = document.getElementById('u-elemType').value;
+  document.getElementById('u-elem-info').textContent = UVAL_ELEM_INFO[key];
+  if (cfg.maxU) {
+    document.getElementById('u-maxU').placeholder = 'e.g. ' + cfg.maxU + ' (typical target)';
+  } else {
+    document.getElementById('u-maxU').placeholder = 'no regulatory limit for this element';
+  }
+  uvalCalculate();
+}
+
+function uvalCalculate() {
+  const cfg = uvalGetElemCfg();
+  let RT = cfg.rsi + cfg.rse;
+  let totalThk = 0;
+  const breakRows = [];
+  let incomplete = false;
+
+  const tbody = document.getElementById('u-tbody');
+  const rows  = tbody.querySelectorAll('tr.u-layer-row');
+
+  rows.forEach(tr => {
+    const lid  = tr.id.replace('u-row_', '');
+    const type = tr.dataset.type;
+    let r = null, lam = null, thk = null, name = '';
+
+    if (type === 'material') {
+      const sel = document.getElementById('u-mat_' + lid);
+      const lamEl = document.getElementById('u-lam_' + lid);
+      const thkEl = document.getElementById('u-thk_' + lid);
+      const rEl   = document.getElementById('u-r_'   + lid);
+      name = sel && sel.value ? sel.options[sel.selectedIndex].text : 'Material (unselected)';
+      lam  = parseFloat(lamEl ? lamEl.value : '') || null;
+      thk  = parseFloat(thkEl ? thkEl.value : '') || null;
+      r    = parseFloat(rEl  ? rEl.value   : '') || null;
+      if (thk) totalThk += thk;
+      if (!r) incomplete = true;
+
+    } else if (type === 'cavity') {
+      const sel   = document.getElementById('u-cav_' + lid);
+      const thkEl = document.getElementById('u-thk_' + lid);
+      const rEl   = document.getElementById('u-r_'   + lid);
+      name = sel ? sel.options[sel.selectedIndex].text : 'Air cavity';
+      thk  = parseFloat(thkEl ? thkEl.value : '') || null;
+      r    = parseFloat(rEl ? rEl.value : '') || null;
+      if (thk) totalThk += thk;
+      if (!r) incomplete = true;
+
+    } else {
+      // custom
+      const nameEl = document.getElementById('u-name_' + lid);
+      const lamEl  = document.getElementById('u-lam_'  + lid);
+      const thkEl  = document.getElementById('u-thk_'  + lid);
+      const rEl    = document.getElementById('u-r_'    + lid);
+      name = (nameEl && nameEl.value) ? nameEl.value : 'Custom layer';
+      lam  = parseFloat(lamEl ? lamEl.value : '') || null;
+      thk  = parseFloat(thkEl ? thkEl.value : '') || null;
+      r    = parseFloat(rEl   ? rEl.value   : '') || null;
+      if (!r && lam && thk) { r = thk / 1000 / lam; }
+      if (thk) totalThk += thk;
+      if (!r) incomplete = true;
+    }
+
+    if (r) RT += r;
+    breakRows.push({ name, lam, thk, r, type });
+  });
+
+  const U = (RT > 0 && !incomplete) ? (1 / RT) : null;
+  const maxU = parseFloat(document.getElementById('u-maxU').value) || cfg.maxU;
+
+  document.getElementById('u-res-thick').innerHTML = totalThk > 0 ? totalThk.toFixed(0) + '<sup> mm</sup>' : '—';
+  document.getElementById('u-res-rt').innerHTML    = (RT > 0 && !incomplete) ? RT.toFixed(3) + '<sup> m²K/W</sup>' : '—';
+  document.getElementById('u-res-u').innerHTML     = U !== null ? U.toFixed(3) + '<sup> W/m²K</sup>' : '—';
+
+  let formulaParts = ['Rse=' + cfg.rse.toFixed(2)];
+  breakRows.forEach(br => {
+    if (br.r) formulaParts.push('R=' + br.r.toFixed(3));
+  });
+  formulaParts.push('Rsi=' + cfg.rsi.toFixed(2));
+  const rtStr = (RT > 0 && !incomplete) ? RT.toFixed(3) : '?';
+  const uStr  = U !== null ? U.toFixed(3) : '?';
+  document.getElementById('u-formula-display').innerHTML =
+    `RT = ${formulaParts.join(' + ')} = <strong>${rtStr}</strong> m²K/W &nbsp;|&nbsp; U = 1 / ${rtStr} = <strong>${uStr}</strong> W/m²K`;
+
+  const sb = document.getElementById('u-status-bar');
+  sb.className = 'u-status-bar';
+  if (U !== null && maxU) {
+    if (U <= maxU) {
+      sb.className = 'u-status-bar u-pass';
+      sb.textContent = `✓  PASS — U-value (${U.toFixed(3)} W/m²K) is at or below the target of ${maxU} W/m²K`;
+    } else {
+      sb.className = 'u-status-bar u-fail';
+      sb.textContent = `✗  FAIL — U-value (${U.toFixed(3)} W/m²K) exceeds the target of ${maxU} W/m²K`;
+    }
+  } else if (incomplete) {
+    sb.className = 'u-status-bar u-warn';
+    sb.textContent = `⚠  Some layers are missing λ or thickness values. Complete all layers to get a U-value.`;
+  } else {
+    sb.style.display = 'none';
+  }
+
+  const bt = document.getElementById('u-breakdown-tbody');
+  bt.innerHTML = '';
+
+  const addRow = (cls, name, lam, thk, r) => {
+    const tr = document.createElement('tr');
+    tr.className = cls;
+    tr.innerHTML = `
+      <td>${name}</td>
+      <td>${lam !== null ? lam : '—'}</td>
+      <td>${thk !== null ? thk + ' mm' : '—'}</td>
+      <td>${r !== null ? r.toFixed(4) : '?'}</td>`;
+    bt.appendChild(tr);
+  };
+
+  addRow('u-b-surface', `External surface resistance (R<sub>se</sub>) — ${cfg.hflow}`, '—', '—', cfg.rse);
+  breakRows.forEach(br => {
+    const custBadge = br.type === 'custom' ? '<span class="u-badge u-badge-custom">custom</span>' : '';
+    addRow('', br.name + custBadge,
+      br.lam !== null ? br.lam : null,
+      br.thk !== null ? br.thk : null,
+      br.r);
+  });
+  addRow('u-b-surface', `Internal surface resistance (R<sub>si</sub>) — ${cfg.hflow}`, '—', '—', cfg.rsi);
+
+  const totalTr = document.createElement('tr');
+  totalTr.className = 'u-b-total';
+  totalTr.innerHTML = `<td>Total resistance R<sub>T</sub> = R<sub>se</sub> + ΣR + R<sub>si</sub></td><td>—</td><td>${totalThk > 0 ? totalThk.toFixed(0)+' mm' : '—'}</td><td>${(!incomplete && RT > 0) ? RT.toFixed(4) : '—'}</td>`;
+  bt.appendChild(totalTr);
+
+  if (U !== null) {
+    const uTr = document.createElement('tr');
+    uTr.className = 'u-b-uval';
+    uTr.innerHTML = `<td><strong>U-value = 1 / R<sub>T</sub></strong></td><td></td><td></td><td><strong>${U.toFixed(4)} W/m²K</strong></td>`;
+    bt.appendChild(uTr);
+  }
+}
+
+// Init U-value
+uvalOnElemChange();
+uvalAddLayer('material');
+uvalAddLayer('material');
+</script>
+</body>
+</html>
