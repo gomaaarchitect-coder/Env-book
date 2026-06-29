@@ -1146,7 +1146,7 @@ const CH=[
 const ORDER=['home',...CH.map(c=>c.id),'ai'];
 
 /* ---------- App data model ---------- */
-function defaultData(){return{profile:null,visited:{},done:{},answers:{},reveals:{},chapterStats:{},events:[],chat:{started:0,messages:[]}};}
+function defaultData(){return{profile:null,visited:{},done:{},answers:{},reveals:{},chapterStats:{},events:[],chat:{started:0,messages:[]},chatLog:[]};}
 let appData=defaultData();
 const sessionLogged=new Set();
 
@@ -1339,6 +1339,8 @@ async function newConversation(){
       catch(e){ alert('Could not access the clipboard. The conversation will still be cleared.'); }
     }
   }
+  if(Array.isArray(appData.chatLog)&&appData.chatLog.length&&appData.chatLog[appData.chatLog.length-1].role!=='divider')
+    appData.chatLog.push({role:'divider',ts:Date.now()}); // marks a conversation break for the dashboard
   appData.chat={started:Date.now(),messages:[]};
   chatBusy=false;
   logEvent('chat_new','');
@@ -1422,7 +1424,10 @@ async function sendChat(e){
   if(messagesLeft()<=0){ renderChat(); return false; }
   if(!appData.chat) appData.chat={started:Date.now(),messages:[]};
   if(!appData.chat.started) appData.chat.started=Date.now();
-  appData.chat.messages.push({role:'user',content:text,ts:Date.now()});
+  const userMsg={role:'user',content:text,ts:Date.now()};
+  appData.chat.messages.push(userMsg);
+  if(!Array.isArray(appData.chatLog)) appData.chatLog=[];
+  appData.chatLog.push(userMsg); // permanent record for the instructor dashboard
   quota().count++;
   if(appData.chat.messages.length===1) logEvent('chat_started','');
   logEvent('chat_message','');
@@ -1446,7 +1451,10 @@ async function sendChat(e){
     // reconcile local counter with the server's authoritative remaining count
     if(typeof data.left==='number') quota().count=Math.max(quota().count, DAILY_MSG_LIMIT-data.left);
     const reply=(data.reply||'').trim()||'…';
-    appData.chat.messages.push({role:'assistant',content:reply,ts:Date.now()});
+    const aMsg={role:'assistant',content:reply,ts:Date.now()};
+    appData.chat.messages.push(aMsg);
+    if(!Array.isArray(appData.chatLog)) appData.chatLog=[];
+    appData.chatLog.push(aMsg); // permanent record
   }catch(err){
     chatBusy=false; setChatEnabled(true); renderChat();
     const box=document.getElementById('chatScroll');

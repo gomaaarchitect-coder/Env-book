@@ -264,9 +264,12 @@ function detailHtml(r){
   const evs=(d.events||[]).slice(-60).reverse();
   const evHtml=evs.length?evs.map(e=>`<div class="row"><span class="t">${fmtDate(e.ts)}</span><span>${EVENT_LABEL[e.t]||e.t}${e.x?' · <b>'+esc(e.x)+'</b>':''}</span></div>`).join(''):'<p class="muted">No activity logged.</p>';
   const cs=Object.entries(d.chapterStats||{}).map(([k,c])=>`${k}: ${c.opens||0} opens, ${mins(c.seconds)}m`).join(' · ')||'—';
-  const msgs=(d.chat&&d.chat.messages)||[];
+  // Prefer the permanent append-only log; fall back to the live chat for older records.
+  const msgs=(Array.isArray(d.chatLog)&&d.chatLog.length)?d.chatLog:((d.chat&&d.chat.messages)||[]);
   const userCount=msgs.filter(m=>m.role==='user').length;
-  const chatHtml=msgs.length?msgs.map(m=>`<div class="bubble ${m.role==='user'?'u':'a'}"><div class="who">${m.role==='user'?'Student':'Assistant'} · ${fmtDate(m.ts)}</div>${esc(m.content)}</div>`).join(''):'<p class="muted">No conversations yet.</p>';
+  const chatHtml=msgs.length?msgs.map(m=>m.role==='divider'
+      ?`<div class="who" style="text-align:center;margin:6px 0;opacity:.6">— new conversation · ${fmtDate(m.ts)} —</div>`
+      :`<div class="bubble ${m.role==='user'?'u':'a'}"><div class="who">${m.role==='user'?'Student':'Assistant'} · ${fmtDate(m.ts)}</div>${esc(m.content)}</div>`).join(''):'<p class="muted">No conversations yet.</p>';
   return `<div class="detail-inner">
     <div><h3>✍ Written answers (${ans.length})</h3>${ansHtml}<h3 style="margin-top:14px">Chapter activity</h3><p class="muted" style="font-size:.8rem">${cs}</p></div>
     <div><h3>✦ Live Assistant chat (${userCount} student message${userCount===1?'':'s'})</h3><div class="chatlog">${chatHtml}</div>
@@ -301,7 +304,7 @@ function exportExcel(){
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cstats.length?cstats:[{Note:'No data yet'}]),'ChapterStats');
   // Sheet 5: Live Assistant chats
   const chats=[];
-  rows.forEach(r=>{const ms=(r.data.chat&&r.data.chat.messages)||[];ms.forEach(m=>chats.push({Name:r.name,'Student ID':r.studentId,Role:m.role==='user'?'Student':'Assistant',Message:m.content,Time:m.ts?new Date(m.ts).toLocaleString():''}));});
+  rows.forEach(r=>{const ms=(Array.isArray(r.data.chatLog)&&r.data.chatLog.length)?r.data.chatLog:((r.data.chat&&r.data.chat.messages)||[]);ms.forEach(m=>{if(m.role==='divider')return;chats.push({Name:r.name,'Student ID':r.studentId,Role:m.role==='user'?'Student':'Assistant',Message:m.content,Time:m.ts?new Date(m.ts).toLocaleString():''});});});
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(chats.length?chats:[{Note:'No chats yet'}]),'Chats');
   const stamp=new Date().toISOString().slice(0,10);
   XLSX.writeFile(wb,`EAR3301_book_usage_${stamp}.xlsx`);
