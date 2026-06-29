@@ -84,6 +84,8 @@ main{padding:38px clamp(20px,5vw,72px) 90px;max-width:980px;width:100%}
 .cover h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.04;margin:18px 0 10px}
 .cover p.sub{font-size:1.2rem;color:var(--ink-soft);max-width:620px;margin:0 auto 8px}
 .cover .by{color:var(--ink-soft);font-weight:600;margin-top:14px}
+.hero-illu{margin:26px auto 4px;max-width:760px;padding:0}
+.hero-illu svg{width:100%;height:auto;display:block;border-radius:22px;box-shadow:0 18px 40px -18px rgba(22,163,74,.45)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:34px;text-align:left}
 .ccard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.18s;box-shadow:var(--shadow)}
 .ccard:hover{transform:translateY(-3px)}
@@ -165,7 +167,8 @@ h2.sec::before{content:"";width:10px;height:26px;border-radius:4px;background:va
 .drawer.show{transform:none}
 .drawer header{background:linear-gradient(135deg,#7C3AED,#2563EB);color:#fff;padding:22px;display:flex;align-items:center;gap:12px}
 .drawer header h3{margin:0;font-size:1.2rem}
-.drawer header button{margin-left:auto;background:rgba(255,255,255,.2);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:1.1rem;cursor:pointer}
+.drawer header button{background:rgba(255,255,255,.2);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:1.1rem;cursor:pointer}
+.drawer header .newchat-btn{margin-left:auto;width:auto;padding:0 14px;font-size:.9rem;font-weight:700;white-space:nowrap}
 .drawer .body{padding:22px;overflow-y:auto;flex:1}
 .drawer .body p{color:var(--ink-soft)}
 .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
@@ -323,7 +326,7 @@ header.topbar{position:static;top:auto;box-shadow:none}
     </div>
     <span id="sync-status" class="sync-status" aria-live="polite"></span>
     <div class="user-chip" id="userChip" hidden><span class="uname" id="userName"></span><button onclick="signOutUser()">Sign out</button></div>
-    <button class="ai-btn" onclick="openAI()" aria-haspopup="dialog">✦ AI Assistant</button>
+    <button class="ai-btn" onclick="openAI()" aria-haspopup="dialog">✦ Live Assistant</button>
   </header>
   <div class="local-banner" id="localBanner" hidden>📵 Local mode — progress is saved on this device only (Firebase not configured yet).</div>
 </div>
@@ -358,6 +361,69 @@ header.topbar{position:static;top:auto;box-shadow:none}
       <p class="sub">Designing buildings for humans <em>and</em> nature — concept, biodiversity, sun, skin, and air, with live calculators and self-check practice.</p>
       <p class="by">Dr. Bakr Gomaa · AASTMT</p>
     </div>
+
+    <figure class="hero-illu" role="img" aria-label="Illustration of the natural and built environment integrated — green landscape and trees blending into a building with planted terraces under the sun and wind.">
+      <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="heroSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#DBF1E4"/><stop offset="1" stop-color="#F4FBF6"/>
+          </linearGradient>
+          <linearGradient id="heroBld" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#1E3A8A"/>
+          </linearGradient>
+          <linearGradient id="heroGround" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#16A34A"/><stop offset="1" stop-color="#0D9488"/>
+          </linearGradient>
+        </defs>
+        <!-- sky -->
+        <rect x="0" y="0" width="800" height="360" rx="22" fill="url(#heroSky)"/>
+        <!-- sun -->
+        <circle cx="120" cy="86" r="40" fill="#F59E0B"/>
+        <g stroke="#F59E0B" stroke-width="5" stroke-linecap="round" opacity=".8">
+          <line x1="120" y1="18" x2="120" y2="2"/><line x1="190" y1="86" x2="208" y2="86"/>
+          <line x1="168" y1="38" x2="180" y2="26"/><line x1="168" y1="134" x2="180" y2="146"/>
+        </g>
+        <!-- wind / air flow -->
+        <g fill="none" stroke="#0EA5E9" stroke-width="4" stroke-linecap="round" opacity=".5">
+          <path d="M250 70 q40 -18 80 0 t80 0"/>
+          <path d="M270 100 q40 -18 80 0 t80 0"/>
+        </g>
+        <!-- rolling hills -->
+        <path d="M0 250 Q200 200 400 245 T800 235 V360 H0 Z" fill="url(#heroGround)" opacity=".25"/>
+        <path d="M0 285 Q220 240 460 285 T800 280 V360 H0 Z" fill="url(#heroGround)"/>
+        <!-- trees (natural side) -->
+        <g>
+          <rect x="86" y="250" width="10" height="46" rx="3" fill="#7C4A1E"/>
+          <circle cx="91" cy="240" r="34" fill="#16A34A"/><circle cx="68" cy="252" r="22" fill="#15803D"/><circle cx="114" cy="252" r="22" fill="#22C55E"/>
+          <rect x="180" y="262" width="8" height="40" rx="3" fill="#7C4A1E"/>
+          <circle cx="184" cy="256" r="26" fill="#22C55E"/><circle cx="166" cy="266" r="17" fill="#16A34A"/>
+        </g>
+        <!-- building with green terraces (built side) -->
+        <g>
+          <rect x="470" y="120" width="150" height="180" rx="10" fill="url(#heroBld)"/>
+          <rect x="640" y="180" width="96" height="120" rx="8" fill="#3B82F6"/>
+          <!-- windows -->
+          <g fill="#BFDBFE" opacity=".85">
+            <rect x="488" y="140" width="26" height="22" rx="3"/><rect x="524" y="140" width="26" height="22" rx="3"/><rect x="560" y="140" width="26" height="22" rx="3"/>
+            <rect x="488" y="178" width="26" height="22" rx="3"/><rect x="560" y="178" width="26" height="22" rx="3"/>
+            <rect x="488" y="216" width="26" height="22" rx="3"/><rect x="524" y="216" width="26" height="22" rx="3"/>
+            <rect x="656" y="200" width="24" height="20" rx="3"/><rect x="700" y="200" width="24" height="20" rx="3"/><rect x="656" y="236" width="24" height="20" rx="3"/>
+          </g>
+          <!-- planted green terraces integrating nature into the building -->
+          <g fill="#22C55E">
+            <rect x="524" y="172" width="26" height="8" rx="4"/>
+            <rect x="524" y="210" width="62" height="8" rx="4"/>
+            <rect x="470" y="252" width="150" height="9" rx="4" fill="#16A34A"/>
+            <rect x="640" y="226" width="96" height="8" rx="4"/>
+          </g>
+          <circle cx="537" cy="168" r="8" fill="#16A34A"/><circle cx="690" cy="222" r="9" fill="#15803D"/>
+        </g>
+        <!-- foreground grass strip -->
+        <rect x="0" y="300" width="800" height="60" fill="#15803D"/>
+        <rect x="0" y="300" width="800" height="60" fill="url(#heroGround)" opacity=".5"/>
+      </svg>
+    </figure>
+
     <div class="cards" id="homeCards"></div>
     <p class="note" style="text-align:center;margin-top:30px">Each chapter clearly separates <b style="color:var(--inclass)">In Class</b> material (covered in lectures) from <b style="color:var(--read)">Further Readings</b>, and ends with training exercises where you write your own answer and compare it against a model approach. Your progress and answers are saved to your account.</p>
   </div>
@@ -1012,13 +1078,13 @@ header.topbar{position:static;top:auto;box-shadow:none}
   <header>
     <span style="font-size:1.5rem">✦</span>
     <h3>Live Assistant</h3>
+    <button class="newchat-btn" onclick="newConversation()" aria-label="Start a new conversation" title="Start a new conversation">✎ New</button>
     <button onclick="closeAI()" aria-label="Close assistant">✕</button>
   </header>
   <div class="chat-scroll" id="chatScroll" role="log" aria-live="polite" aria-label="Conversation"></div>
   <p class="chat-note">Coaches your reasoning with questions — it won't hand you final answers. Your chats are saved and visible to your instructor.</p>
   <form class="chat-inputrow" id="chatForm" onsubmit="return sendChat(event)">
-    <label for="chatInput" class="skip">Type your message</label>
-    <textarea id="chatInput" rows="1" placeholder="Ask about a concept, calculation, or exercise…" oninput="autoGrow(this)" onkeydown="chatKey(event)"></textarea>
+    <textarea id="chatInput" rows="1" aria-label="Type your message" placeholder="Ask about a concept, calculation, or exercise…" oninput="autoGrow(this)" onkeydown="chatKey(event)"></textarea>
     <button type="submit" class="chat-send" id="chatSend" aria-label="Send message">➤</button>
   </form>
 </aside>
@@ -1248,6 +1314,21 @@ function openAI(){
 function closeAI(){document.getElementById('overlay').classList.remove('show');const d=document.getElementById('drawer');d.classList.remove('show');d.setAttribute('aria-hidden','true');lastFocus&&lastFocus.focus();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAI();});
 
+function newConversation(){
+  if(!ASSISTANT_READY)return;
+  const msgs=(appData.chat&&appData.chat.messages)||[];
+  if(msgs.length){
+    if(!confirm('Start a new conversation? Your current chat will be saved and a fresh one will begin.'))return;
+    // archive the current conversation so the instructor's record is preserved
+    if(!appData.chatArchive) appData.chatArchive=[];
+    appData.chatArchive.push({started:appData.chat.started||Date.now(),ended:Date.now(),messages:msgs});
+  }
+  appData.chat={started:Date.now(),messages:[]};
+  chatBusy=false;
+  logEvent('chat_new','');
+  renderChat(); scheduleSave();
+  const inp=document.getElementById('chatInput'); if(inp){inp.value='';autoGrow(inp);setTimeout(()=>inp.focus(),60);}
+}
 function autoGrow(t){t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';}
 function chatKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(e); } }
 
