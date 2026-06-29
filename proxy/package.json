@@ -1,0 +1,9 @@
+{
+  "name": "ear3301-live-assistant-proxy",
+  "version": "1.0.0",
+  "description": "Anthropic API proxy for the EAR3301 book Live Assistant (keeps the API key secret).",
+  "main": "server.js",
+  "engines": { "node": ">=18" },
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^4.19.2" }
+}
