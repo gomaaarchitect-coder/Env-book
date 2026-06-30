@@ -86,6 +86,18 @@ main{padding:38px clamp(20px,5vw,72px) 90px;max-width:980px;width:100%}
 .cover .by{color:var(--ink-soft);font-weight:600;margin-top:14px}
 .hero-illu{margin:26px auto 4px;max-width:760px;padding:0}
 .hero-illu svg{width:100%;height:auto;display:block;border-radius:22px;box-shadow:0 18px 40px -18px rgba(22,163,74,.45)}
+
+/* ---------- Project figures (original schematic drawings) ---------- */
+.projfig{margin:18px 0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);box-shadow:var(--shadow)}
+.projfig > svg{width:100%;height:auto;display:block;background:#FBFAF4}
+.projfig figcaption{padding:11px 15px;font-size:.85rem;color:var(--ink-soft);border-top:1px solid var(--line);line-height:1.5}
+.projfig figcaption .pname{color:var(--ink);font-weight:700;font-family:'Space Grotesk',sans-serif}
+.projfig figcaption .pmeta{font-style:normal}
+.projfig figcaption a.src{font-weight:600;white-space:nowrap}
+.projfig figcaption .credit{display:block;font-size:.74rem;color:var(--ink-soft);margin-top:3px;opacity:.85}
+.projgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:16px;margin:18px 0}
+.projgrid .projfig{margin:0}
+.figcluster-label{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);font-weight:700;margin:20px 0 2px}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:34px;text-align:left}
 .ccard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.18s;box-shadow:var(--shadow)}
 .ccard:hover{transform:translateY(-3px)}
@@ -530,6 +542,38 @@ header.topbar{position:static;top:auto;box-shadow:none}
       <h2 class="sec">Concepts in built work</h2>
       <div class="panel class">
         <p><b>Diriyah Contemporary Art Hub</b> and the <b>Kö-Bogen II</b> mixed-use project in Düsseldorf are studied as buildings whose form is legibly driven by an environmental idea rather than arbitrary styling — the massing, openings and surfaces all answer the same concept.</p>
+        <div class="projgrid">
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic drawing: a low courtyard mass embedded in the Diriyah escarpment with thick self-shading walls and deep narrow openings">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <circle cx="332" cy="40" r="13" fill="#F59E0B"/>
+              <g stroke="#F59E0B" stroke-width="3" stroke-linecap="round"><line x1="332" y1="16" x2="332" y2="23"/><line x1="356" y1="40" x2="363" y2="40"/><line x1="350" y1="22" x2="355" y2="17"/><line x1="350" y1="58" x2="355" y2="63"/></g>
+              <line x1="320" y1="50" x2="252" y2="118" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" opacity=".7"/>
+              <path d="M0 152 L70 152 L108 132 L300 132 L338 152 L400 152 L400 210 L0 210Z" fill="#E7DEC8"/>
+              <path d="M90 132 L90 98 L150 98 L150 84 L250 84 L250 98 L300 98 L300 132 Z" fill="#C8A878" stroke="#16202B" stroke-width="2"/>
+              <rect x="90" y="98" width="13" height="34" fill="#A98455"/>
+              <rect x="287" y="98" width="13" height="34" fill="#A98455"/>
+              <rect x="180" y="98" width="40" height="34" fill="#FBFAF4" stroke="#16202B" stroke-width="1.5"/>
+              <rect x="120" y="110" width="7" height="13" fill="#16202B"/><rect x="263" y="110" width="7" height="13" fill="#16202B"/>
+              <text x="200" y="76" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#475569">shaded courtyard</text>
+            </svg>
+            <figcaption><span class="pname">Diriyah Contemporary Art Hub</span> <span class="pmeta">— Riyadh.</span> Concept: a low, earth-toned mass tucked into the wadi escarpment; thick Najdi-style walls and deep, narrow openings self-shade against the desert sun, while courtyards admit controlled light. <a class="src" href="https://www.archdaily.com/1023785/diriyah-art-futures-contemporary-art-hub-schiattarella-associati" target="_blank" rel="noopener">Source ↗</a><span class="credit">Schiattarella Associati · photos via ArchDaily</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic drawing: two sloping volumes clad in stepped hornbeam hedges facing a plaza, Kö-Bogen II">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <circle cx="60" cy="40" r="13" fill="#F59E0B"/>
+              <g stroke="#F59E0B" stroke-width="3" stroke-linecap="round"><line x1="60" y1="16" x2="60" y2="23"/><line x1="36" y1="40" x2="43" y2="40"/><line x1="42" y1="22" x2="47" y2="17"/></g>
+              <rect x="0" y="170" width="400" height="40" fill="#E7DEC8"/>
+              <path d="M120 170 L120 60 L60 170 Z" fill="#4D7C2F" stroke="#16202B" stroke-width="2"/>
+              <path d="M280 170 L280 60 L340 170 Z" fill="#4D7C2F" stroke="#16202B" stroke-width="2"/>
+              <g stroke="#6FAE45" stroke-width="2" opacity=".9"><line x1="66" y1="158" x2="116" y2="158"/><line x1="74" y1="140" x2="116" y2="140"/><line x1="82" y1="122" x2="116" y2="122"/><line x1="90" y1="104" x2="116" y2="104"/><line x1="98" y1="86" x2="116" y2="86"/><line x1="284" y1="158" x2="334" y2="158"/><line x1="284" y1="140" x2="326" y2="140"/><line x1="284" y1="122" x2="318" y2="122"/><line x1="284" y1="104" x2="310" y2="104"/><line x1="284" y1="86" x2="302" y2="86"/></g>
+              <rect x="150" y="120" width="100" height="50" fill="#fff" stroke="#16202B" stroke-width="1.5"/>
+              <text x="200" y="150" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#475569">public plaza</text>
+            </svg>
+            <figcaption><span class="pname">Kö-Bogen II</span> <span class="pmeta">— Düsseldorf.</span> Concept: two sloping volumes wrapped in 8 km of hornbeam hedge — Europe's largest green façade — shading the glass, cutting local heat, and turning the roofs into a stepped park edge. <a class="src" href="https://www.archdaily.com/966059/ko-bogen-ii-office-building-ingenhoven-architects" target="_blank" rel="noopener">Source ↗</a><span class="credit">ingenhoven architects · photos via ArchDaily</span></figcaption>
+          </figure>
+        </div>
         <p class="note">In class you generate 5 building masses for a given site: first responding to <em>one</em> force, then to <em>two</em>, then a full concept statement that follows the equation.</p>
       </div></section>
 
@@ -581,8 +625,126 @@ header.topbar{position:static;top:auto;box-shadow:none}
           <li><b>Habitat restoration &amp; connectivity</b> — e.g. Hunter’s Point South Waterfront Park.</li>
           <li><b>Urban-heat-island &amp; stormwater management</b> — e.g. Ketcheson Neighbourhood Park.</li>
         </ol>
+        <p class="figcluster-label">The five jobs, one precedent each</p>
+        <div class="projgrid">
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: a green wall on the sunlit face of a building intercepting solar heat before it reaches the glass">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <circle cx="58" cy="42" r="13" fill="#F59E0B"/>
+              <g stroke="#F59E0B" stroke-width="3" stroke-linecap="round"><line x1="58" y1="18" x2="58" y2="25"/><line x1="34" y1="42" x2="41" y2="42"/><line x1="40" y1="24" x2="45" y2="19"/></g>
+              <g stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" opacity=".75"><line x1="72" y1="52" x2="150" y2="96"/><line x1="74" y1="70" x2="150" y2="120"/></g>
+              <rect x="200" y="40" width="150" height="150" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <g fill="#BFD8C4" stroke="#16202B" stroke-width=".5"><rect x="222" y="60" width="22" height="22"/><rect x="252" y="60" width="22" height="22"/><rect x="222" y="90" width="22" height="22"/><rect x="252" y="90" width="22" height="22"/></g>
+              <rect x="150" y="40" width="50" height="150" fill="#4D7C2F" stroke="#16202B" stroke-width="2"/>
+              <g fill="#6FAE45"><circle cx="165" cy="70" r="9"/><circle cx="185" cy="95" r="9"/><circle cx="165" cy="120" r="9"/><circle cx="185" cy="150" r="9"/><circle cx="165" cy="170" r="9"/></g>
+              <text x="175" y="205" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#475569">living wall</text>
+            </svg>
+            <figcaption><span class="pname">New Street Square</span> <span class="pmeta">— London · thermal protection.</span> A 2,600 sq ft green wall shades the façade, cooling the surface and softening the public realm. <a class="src" href="https://www.betterbuildingspartnership.co.uk/land-securities-creates-green-walls-central-london" target="_blank" rel="noopener">Source ↗</a><span class="credit">Gillespies + Biotecture · via Better Buildings Partnership</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: traffic noise and pollution from a road absorbed by a planted green wall protecting an office">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <rect x="0" y="168" width="400" height="42" fill="#C9C3B4"/>
+              <g stroke="#fff" stroke-width="3" stroke-dasharray="14 12"><line x1="0" y1="189" x2="400" y2="189"/></g>
+              <rect x="30" y="150" width="46" height="20" rx="4" fill="#475569"/><circle cx="44" cy="172" r="6" fill="#16202B"/><circle cx="66" cy="172" r="6" fill="#16202B"/>
+              <g fill="none" stroke="#94A3B8" stroke-width="2"><path d="M110 150 A26 26 0 0 1 110 192"/><path d="M124 144 A40 40 0 0 1 124 198"/><path d="M138 138 A54 54 0 0 1 138 204"/></g>
+              <rect x="200" y="40" width="46" height="150" fill="#4D7C2F" stroke="#16202B" stroke-width="2"/>
+              <g fill="#6FAE45"><circle cx="212" cy="62" r="8"/><circle cx="234" cy="86" r="8"/><circle cx="212" cy="112" r="8"/><circle cx="234" cy="140" r="8"/><circle cx="212" cy="166" r="8"/></g>
+              <rect x="246" y="40" width="120" height="150" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <g fill="#E8E3D5"><rect x="266" y="62" width="20" height="20"/><rect x="296" y="62" width="20" height="20"/><rect x="266" y="92" width="20" height="20"/><rect x="296" y="92" width="20" height="20"/></g>
+              <text x="306" y="205" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#475569">quiet office</text>
+            </svg>
+            <figcaption><span class="pname">Ian Martin Group offices</span> <span class="pmeta">— noise &amp; pollution.</span> A planted wall buffers the workspace from road noise and traffic particulates while supporting insect and bird life. <a class="src" href="https://ianmartin.com/" target="_blank" rel="noopener">Source ↗</a><span class="credit">Office living-wall precedent · company site</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: a large green park amid dense city blocks lowering local air temperature">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <g fill="#D9D3C4" stroke="#16202B" stroke-width="1.5"><rect x="10" y="20" width="46" height="170"/><rect x="62" y="40" width="46" height="150"/><rect x="292" y="40" width="46" height="150"/><rect x="344" y="20" width="46" height="170"/></g>
+              <rect x="120" y="40" width="160" height="150" rx="10" fill="#9FC79A" stroke="#16202B" stroke-width="2"/>
+              <g fill="#4D7C2F"><circle cx="155" cy="80" r="14"/><circle cx="205" cy="115" r="16"/><circle cx="245" cy="75" r="13"/><circle cx="175" cy="150" r="14"/><circle cx="240" cy="150" r="13"/></g>
+              <g fill="#2563EB" font-family="Inter,sans-serif" font-size="13" font-weight="700"><text x="200" y="60" text-anchor="middle">↓°C</text></g>
+              <text x="200" y="180" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#1f3d1c">cool island</text>
+            </svg>
+            <figcaption><span class="pname">Central Park</span> <span class="pmeta">— New York · microclimate.</span> A 340-ha green mass measurably cools the surrounding city through shade and evapotranspiration. <a class="src" href="https://www.centralparknyc.org/about" target="_blank" rel="noopener">Source ↗</a><span class="credit">Olmsted &amp; Vaux · Central Park Conservancy</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: a soft wetland waterfront edge with parallel planted ecological corridors and birds">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <rect x="0" y="120" width="400" height="90" fill="#BFD8E8"/>
+              <g stroke="#2563EB" stroke-width="1.5" opacity=".5" fill="none"><path d="M0 150 Q100 142 200 150 T400 150"/><path d="M0 172 Q100 164 200 172 T400 172"/></g>
+              <path d="M0 120 Q120 104 260 116 T400 110 L400 60 L0 60 Z" fill="#9FC79A"/>
+              <g stroke="#4D7C2F" stroke-width="3" stroke-linecap="round"><line x1="40" y1="120" x2="60" y2="96"/><line x1="80" y1="118" x2="96" y2="92"/><line x1="150" y1="116" x2="168" y2="90"/><line x1="220" y1="118" x2="238" y2="92"/><line x1="300" y1="114" x2="318" y2="90"/></g>
+              <path d="M120 84 q8 -8 16 0 q8 -8 16 0" fill="none" stroke="#16202B" stroke-width="1.5"/>
+              <path d="M260 76 q8 -8 16 0 q8 -8 16 0" fill="none" stroke="#16202B" stroke-width="1.5"/>
+              <text x="200" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#475569">soft tidal edge + corridor</text>
+            </svg>
+            <figcaption><span class="pname">Hunter's Point South Waterfront Park</span> <span class="pmeta">— habitat &amp; connectivity.</span> Hard bulkheads give way to wetlands and parallel planted strands that reconnect ecologies along the water. <a class="src" href="https://landezine.com/hunters-point-south-waterfront-park-by-swa-group/" target="_blank" rel="noopener">Source ↗</a><span class="credit">SWA/Balsley + WEISS/MANFREDI · via Landezine</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: rainfall captured by vegetated swales and pools instead of running off hot paving">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <g stroke="#2563EB" stroke-width="2" stroke-linecap="round" opacity=".8"><line x1="60" y1="20" x2="52" y2="44"/><line x1="100" y1="16" x2="92" y2="40"/><line x1="140" y1="22" x2="132" y2="46"/><line x1="180" y1="16" x2="172" y2="40"/></g>
+              <path d="M0 150 Q60 150 90 130 Q140 96 210 130 Q280 162 340 140 Q370 130 400 138 L400 210 L0 210 Z" fill="#9FC79A"/>
+              <ellipse cx="120" cy="158" rx="34" ry="12" fill="#7FB6D9"/>
+              <ellipse cx="270" cy="166" rx="40" ry="13" fill="#7FB6D9"/>
+              <g fill="#4D7C2F"><circle cx="70" cy="140" r="8"/><circle cx="190" cy="126" r="9"/><circle cx="330" cy="138" r="8"/></g>
+              <text x="200" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#1f3d1c">swales hold &amp; cool stormwater</text>
+            </svg>
+            <figcaption><span class="pname">Ketcheson Neighbourhood Park</span> <span class="pmeta">— Richmond BC · UHI &amp; stormwater.</span> Reflecting pools, streams and planted islands detain runoff and cut local heat instead of shedding water to drains. <a class="src" href="https://landezine.com/ketcheson-neighbourhood-park/" target="_blank" rel="noopener">Source ↗</a><span class="credit">PWL Partnership · via Landezine</span></figcaption>
+          </figure>
+        </div>
         <p>The <b>Urban Heat Island (UHI)</b> effect: urban materials store heat during the day and release it after sunset, keeping cities hotter than their surroundings. Living systems cool through shade and evapotranspiration.</p>
         <p class="note">Key examples studied: Paley Park (NY), the Optical Glass House (Hiroshima), Steno Diabetes Center (Copenhagen), Salesforce Transit Center (San Francisco).</p>
+        <div class="projgrid">
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: a small park enclosed by walls with a water wall at the back and honey locust trees giving dappled shade">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <rect x="40" y="20" width="320" height="170" fill="#EEEADD" stroke="#16202B" stroke-width="2"/>
+              <rect x="40" y="20" width="320" height="26" fill="#7FB6D9"/>
+              <g stroke="#2563EB" stroke-width="1.5" opacity=".7"><line x1="60" y1="46" x2="60" y2="120"/><line x1="100" y1="46" x2="100" y2="120"/><line x1="140" y1="46" x2="140" y2="120"/><line x1="180" y1="46" x2="180" y2="120"/><line x1="220" y1="46" x2="220" y2="120"/><line x1="260" y1="46" x2="260" y2="120"/><line x1="300" y1="46" x2="300" y2="120"/><line x1="340" y1="46" x2="340" y2="120"/></g>
+              <g><line x1="130" y1="190" x2="130" y2="150" stroke="#7a5230" stroke-width="4"/><circle cx="130" cy="140" r="22" fill="#6FAE45" opacity=".85"/><line x1="200" y1="190" x2="200" y2="150" stroke="#7a5230" stroke-width="4"/><circle cx="200" cy="138" r="24" fill="#6FAE45" opacity=".85"/><line x1="270" y1="190" x2="270" y2="150" stroke="#7a5230" stroke-width="4"/><circle cx="270" cy="140" r="22" fill="#6FAE45" opacity=".85"/></g>
+              <text x="200" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#0b3a57" font-weight="700">water wall</text>
+            </svg>
+            <figcaption><span class="pname">Paley Park</span> <span class="pmeta">— New York.</span> A pocket park where a back wall of falling water and a grid of honey locusts mask traffic noise and drop the temperature in a tiny footprint. <a class="src" href="https://www.tclf.org/landscapes/paley-park" target="_blank" rel="noopener">Source ↗</a><span class="credit">Zion Breen Richardson Assoc. · via TCLF</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: a glass-block façade screening a courtyard garden from a busy street">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <rect x="0" y="170" width="130" height="40" fill="#C9C3B4"/>
+              <rect x="30" y="152" width="40" height="18" rx="3" fill="#475569"/>
+              <rect x="130" y="20" width="34" height="170" fill="#CDE6F2" stroke="#16202B" stroke-width="2"/>
+              <g stroke="#9cc4d6" stroke-width="1"><line x1="130" y1="40" x2="164" y2="40"/><line x1="130" y1="60" x2="164" y2="60"/><line x1="130" y1="80" x2="164" y2="80"/><line x1="130" y1="100" x2="164" y2="100"/><line x1="130" y1="120" x2="164" y2="120"/><line x1="130" y1="140" x2="164" y2="140"/><line x1="130" y1="160" x2="164" y2="160"/><line x1="147" y1="20" x2="147" y2="190"/></g>
+              <rect x="164" y="20" width="120" height="170" fill="#EAF3E4"/>
+              <g fill="#4D7C2F"><circle cx="200" cy="150" r="16"/><circle cx="240" cy="130" r="18"/><line x1="200" y1="150" x2="200" y2="190" stroke="#7a5230" stroke-width="4"/><line x1="240" y1="148" x2="240" y2="190" stroke="#7a5230" stroke-width="4"/></g>
+              <rect x="284" y="20" width="90" height="170" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <text x="224" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#1f3d1c">inner garden</text>
+            </svg>
+            <figcaption><span class="pname">Optical Glass House</span> <span class="pmeta">— Hiroshima.</span> ~6,000 cast-glass blocks form a heavy façade that shuts out city noise yet lets light into a private courtyard garden. <a class="src" href="https://www.archdaily.com/885674/optical-glass-house-hiroshi-nakamura-and-nap" target="_blank" rel="noopener">Source ↗</a><span class="credit">Hiroshi Nakamura &amp; NAP · via ArchDaily</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: a compact building threaded with four planted courtyards bringing daylight and greenery inside">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <rect x="40" y="30" width="320" height="150" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <g fill="#9FC79A" stroke="#16202B" stroke-width="1.5"><rect x="70" y="60" width="60" height="40" rx="6"/><rect x="170" y="60" width="60" height="40" rx="6"/><rect x="270" y="60" width="60" height="40" rx="6"/><rect x="120" y="120" width="60" height="40" rx="6"/></g>
+              <g fill="#4D7C2F"><circle cx="100" cy="80" r="10"/><circle cx="200" cy="80" r="10"/><circle cx="300" cy="80" r="10"/><circle cx="150" cy="140" r="10"/></g>
+              <g stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="3 3" opacity=".8"><line x1="100" y1="40" x2="100" y2="58"/><line x1="200" y1="40" x2="200" y2="58"/><line x1="300" y1="40" x2="300" y2="58"/></g>
+              <text x="200" y="200" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#475569">courtyards bring nature inward</text>
+            </svg>
+            <figcaption><span class="pname">Steno Diabetes Center</span> <span class="pmeta">— Copenhagen.</span> Four planted courtyards cut through a compact hospital, putting daylight, greenery and the seasons into every room as therapy. <a class="src" href="https://landezine.com/steno-diabetes-center-copenhagen-by-sted/" target="_blank" rel="noopener">Source ↗</a><span class="credit">STED + Vilhelm Lauritzen + Mikkelsen · via Landezine</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: a planted park on the roof of a transit hall above the street">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <rect x="30" y="120" width="340" height="70" fill="#E8E3D5" stroke="#16202B" stroke-width="2"/>
+              <g stroke="#C9C3B4" stroke-width="2"><line x1="80" y1="120" x2="80" y2="190"/><line x1="160" y1="120" x2="160" y2="190"/><line x1="240" y1="120" x2="240" y2="190"/><line x1="320" y1="120" x2="320" y2="190"/></g>
+              <rect x="20" y="92" width="360" height="30" rx="6" fill="#9FC79A" stroke="#16202B" stroke-width="2"/>
+              <g fill="#4D7C2F"><circle cx="70" cy="92" r="14"/><circle cx="130" cy="90" r="12"/><circle cx="200" cy="92" r="15"/><circle cx="270" cy="90" r="12"/><circle cx="330" cy="92" r="14"/></g>
+              <line x1="200" y1="190" x2="200" y2="120" stroke="#94A3B8" stroke-width="1" stroke-dasharray="3 3"/>
+              <text x="200" y="160" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#475569">transit hall below</text>
+            </svg>
+            <figcaption><span class="pname">Salesforce Transit Center</span> <span class="pmeta">— San Francisco.</span> A 5.4-acre planted park rides on the roof of the transit hall — green infrastructure stacked above intense urban use. <a class="src" href="https://www.pwpla.com/projects/salesforce-transit-center-park" target="_blank" rel="noopener">Source ↗</a><span class="credit">PWP Landscape Architecture / Pelli Clarke</span></figcaption>
+          </figure>
+        </div>
       </div></section>
 
     <section class="block"><span class="tag read">◆ Further Readings</span>
@@ -737,6 +899,39 @@ header.topbar{position:static;top:auto;box-shadow:none}
         </ul>
         <div class="keytake"><span class="k">↻</span><div>Orientation is a free move: rotating and zoning the same building can cut heat gain and improve daylight and views at <b>no extra material cost</b>.</div></div>
         <p class="note">Studied examples: ZGF Architects' office in Agoura Hills; PDEC (passive downdraught evaporative cooling) ventilation; and One Hyde Park as an orientation analysis.</p>
+        <div class="projgrid">
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: a passive downdraught cooling tower spraying water at the top so cooled air falls down through a narrow daylit office">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <circle cx="350" cy="36" r="12" fill="#F59E0B"/>
+              <g stroke="#F59E0B" stroke-width="3" stroke-linecap="round"><line x1="350" y1="14" x2="350" y2="21"/><line x1="372" y1="36" x2="379" y2="36"/></g>
+              <rect x="60" y="20" width="60" height="170" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <rect x="120" y="70" width="200" height="120" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <g stroke="#2563EB" stroke-width="2" opacity=".85"><circle cx="80" cy="40" r="1.6"/><circle cx="92" cy="46" r="1.6"/><circle cx="104" cy="40" r="1.6"/></g>
+              <g fill="#2563EB"><polygon points="84,70 96,70 90,86"/><polygon points="84,110 96,110 90,126"/><polygon points="84,150 96,150 90,166"/></g>
+              <g fill="#2563EB" opacity=".8"><polygon points="140,160 156,160 148,176"/><polygon points="200,160 216,160 208,176"/><polygon points="270,160 286,160 278,176"/></g>
+              <g fill="#E11D48"><polygon points="300,90 312,90 306,76"/></g>
+              <text x="90" y="205" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#475569">cool air falls</text>
+              <text x="220" y="60" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#475569">narrow daylit plan</text>
+            </svg>
+            <figcaption><span class="pname">ZGF office, Agoura Hills</span> <span class="pmeta">— Conrad N. Hilton Foundation HQ · PDEC.</span> A passive down-draught evaporative tower spray-cools air that sinks through a narrow, daylight-oriented plan — cutting HVAC energy ~60%. <a class="src" href="https://architizer.com/projects/conrad-n-hilton-foundation-headquarters/" target="_blank" rel="noopener">Source ↗</a><span class="credit">ZGF Architects · via Architizer</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic plan: building pavilions oriented with the park to the north and the city street to the south">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <rect x="0" y="0" width="400" height="70" fill="#D7EAD0"/>
+              <g fill="#4D7C2F"><circle cx="60" cy="34" r="13"/><circle cx="140" cy="28" r="15"/><circle cx="240" cy="34" r="13"/><circle cx="330" cy="28" r="15"/></g>
+              <rect x="0" y="150" width="400" height="60" fill="#D9D3C4"/>
+              <g fill="#C9C3B4" stroke="#16202B" stroke-width="1"><rect x="20" y="166" width="40" height="30"/><rect x="120" y="166" width="40" height="30"/><rect x="240" y="166" width="40" height="30"/><rect x="330" y="166" width="40" height="30"/></g>
+              <g fill="#fff" stroke="#16202B" stroke-width="2"><polygon points="110,80 160,80 150,150 120,150"/><polygon points="190,80 240,80 250,150 180,150"/><polygon points="270,80 320,80 330,150 280,150"/></g>
+              <circle cx="200" cy="195" r="9" fill="#F59E0B"/>
+              <g stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"><line x1="200" y1="180" x2="200" y2="186"/></g>
+              <text x="50" y="58" font-family="Inter,sans-serif" font-size="10" fill="#1f3d1c">park (N)</text>
+              <text x="300" y="146" font-family="Inter,sans-serif" font-size="10" fill="#475569">city / sun (S)</text>
+            </svg>
+            <figcaption><span class="pname">One Hyde Park</span> <span class="pmeta">— London · orientation analysis.</span> Tapering pavilions are turned so living spaces open north to the park and oblique views, while the busy, sun-struck south edge faces Knightsbridge. <a class="src" href="https://archello.com/project/one-hyde-park-2" target="_blank" rel="noopener">Source ↗</a><span class="credit">Rogers Stirk Harbour + Partners · via Archello</span></figcaption>
+          </figure>
+        </div>
       </div></section>
 
     <section class="block"><span class="tag read">◆ Further Readings</span>
@@ -883,6 +1078,54 @@ header.topbar{position:static;top:auto;box-shadow:none}
         <p>Two factors drive the design: <b>microclimate</b> and <b>orientation</b> — solar angles differ per façade, so each façade needs a different device. Because angles also change with season, you must first decide whether you're shading in <b>summer, winter, or both</b>.</p>
         <p><b>Device types:</b> screen · horizontal shading · overhang · vertical louvers.</p>
         <p class="note">Studied examples: Kimbell Art Museum Expansion (Renzo Piano), UQ Global Change Institute (Brisbane), Missouri Dept. of Natural Resources.</p>
+        <div class="projgrid">
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic section: a gallery roof of louvers and stretched fabric filtering direct sun into soft daylight">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <circle cx="60" cy="34" r="12" fill="#F59E0B"/>
+              <g stroke="#F59E0B" stroke-width="3" stroke-linecap="round"><line x1="60" y1="14" x2="60" y2="20"/><line x1="38" y1="34" x2="44" y2="34"/></g>
+              <g stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" opacity=".75"><line x1="74" y1="44" x2="150" y2="72"/><line x1="78" y1="60" x2="170" y2="72"/></g>
+              <rect x="60" y="72" width="280" height="14" fill="#C9C3B4" stroke="#16202B" stroke-width="1.5"/>
+              <g stroke="#94A3B8" stroke-width="3"><line x1="80" y1="72" x2="80" y2="86"/><line x1="110" y1="72" x2="110" y2="86"/><line x1="140" y1="72" x2="140" y2="86"/><line x1="170" y1="72" x2="170" y2="86"/><line x1="200" y1="72" x2="200" y2="86"/><line x1="230" y1="72" x2="230" y2="86"/><line x1="260" y1="72" x2="260" y2="86"/><line x1="290" y1="72" x2="290" y2="86"/><line x1="320" y1="72" x2="320" y2="86"/></g>
+              <rect x="60" y="86" width="280" height="8" fill="#FBE7A3" opacity=".8"/>
+              <rect x="60" y="94" width="280" height="96" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <g fill="#FCD34D" opacity=".45"><polygon points="80,94 320,94 300,150 100,150"/></g>
+              <text x="200" y="180" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#475569">soft, even daylight</text>
+            </svg>
+            <figcaption><span class="pname">Kimbell Art Museum Expansion</span> <span class="pmeta">— Fort Worth.</span> Direct sun is tamed by aluminium louvers, glass and stretched fabric between timber beams, delivering controlled gallery daylight. <a class="src" href="https://www.archdaily.com/448735/renzo-piano-pavilion-at-kimbell-art-museum-renzo-piano-kendall-heaton-associates" target="_blank" rel="noopener">Source ↗</a><span class="credit">Renzo Piano Building Workshop · via ArchDaily</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic: a sun-tracking operable louver screen shading glass louvers that also drive natural ventilation">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <circle cx="60" cy="36" r="12" fill="#F59E0B"/>
+              <g stroke="#F59E0B" stroke-width="3" stroke-linecap="round"><line x1="60" y1="16" x2="60" y2="22"/><line x1="42" y1="22" x2="46" y2="18"/></g>
+              <g stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" opacity=".75"><line x1="74" y1="46" x2="150" y2="80"/><line x1="76" y1="66" x2="150" y2="110"/></g>
+              <g stroke="#16202B" stroke-width="3" stroke-linecap="round"><line x1="150" y1="60" x2="178" y2="50"/><line x1="150" y1="90" x2="178" y2="80"/><line x1="150" y1="120" x2="178" y2="110"/><line x1="150" y1="150" x2="178" y2="140"/></g>
+              <rect x="200" y="40" width="150" height="150" fill="#CDE6F2" stroke="#16202B" stroke-width="2"/>
+              <g stroke="#9cc4d6" stroke-width="2"><line x1="200" y1="70" x2="350" y2="70"/><line x1="200" y1="100" x2="350" y2="100"/><line x1="200" y1="130" x2="350" y2="130"/><line x1="200" y1="160" x2="350" y2="160"/></g>
+              <g fill="#16A34A"><polygon points="214,76 226,76 220,64"/><polygon points="214,106 226,106 220,94"/><polygon points="214,136 226,136 220,124"/></g>
+              <text x="275" y="205" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#475569">tracking shade + vent louvers</text>
+            </svg>
+            <figcaption><span class="pname">UQ Global Change Institute</span> <span class="pmeta">— Brisbane.</span> A sun-tracking operable screen shades glass louvers that double as the building's natural-ventilation openings — passive-first in a subtropical climate. <a class="src" href="https://www.archdaily.com/461298/university-of-queensland-global-change-institute-hassell" target="_blank" rel="noopener">Source ↗</a><span class="credit">HASSELL · via ArchDaily</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic section: an external light shelf bouncing summer sun away while reflecting daylight deep into the room">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <circle cx="60" cy="30" r="12" fill="#F59E0B"/>
+              <g stroke="#F59E0B" stroke-width="3" stroke-linecap="round"><line x1="60" y1="12" x2="60" y2="18"/></g>
+              <line x1="74" y1="40" x2="150" y2="92" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" opacity=".8"/>
+              <line x1="150" y1="92" x2="120" y2="60" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" opacity=".55"/>
+              <rect x="150" y="40" width="14" height="150" fill="#C9C3B4" stroke="#16202B" stroke-width="1.5"/>
+              <rect x="120" y="90" width="60" height="6" fill="#94A3B8" stroke="#16202B" stroke-width="1"/>
+              <rect x="164" y="50" width="20" height="40" fill="#CDE6F2" stroke="#16202B" stroke-width="1.5"/>
+              <rect x="164" y="100" width="20" height="60" fill="#CDE6F2" stroke="#16202B" stroke-width="1.5"/>
+              <rect x="184" y="40" width="180" height="150" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <g stroke="#FBBF24" stroke-width="1.5"><line x1="180" y1="96" x2="300" y2="70"/><line x1="180" y1="96" x2="320" y2="96"/></g>
+              <text x="280" y="180" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#475569">light shelf: shade + bounce</text>
+            </svg>
+            <figcaption><span class="pname">Missouri Dept. of Natural Resources</span> <span class="pmeta">— Lewis &amp; Clark State Office Building, Jefferson City.</span> External concrete light shelves shade the floor below in summer yet bounce daylight deep inside — the first LEED-Platinum state office in the US. <a class="src" href="https://www.bnim.com/projects/lewis-and-clark-state-office-building/" target="_blank" rel="noopener">Source ↗</a><span class="credit">BNIM</span></figcaption>
+          </figure>
+        </div>
       </div></section>
 
     <section class="block"><span class="tag class">● In Class</span>
@@ -954,6 +1197,22 @@ header.topbar{position:static;top:auto;box-shadow:none}
         <p>The <b>angle of visible sky</b> is measured from the window centre, between the obstruction opposite the window and the one above it — the slice of sky the window can actually “see”. <b>Balconies</b> sharply reduce it, especially in dense surroundings; painting external obstructions a light colour is worth roughly <b>+6°</b> of visible sky.</p>
         <p><b>Design criteria:</b> room depth ≈ <b>2–2.5×</b> the window head height; distribute windows across the wall for even light. Light can also come <b>from above</b> via skylights (horizontal glazing), <b>bulkhead lighting</b>, and <b>roof monitors</b>.</p>
         <p class="note">Studied example: Wayne L. Morse U.S. Courthouse.</p>
+        <figure class="projfig" style="max-width:480px">
+          <svg viewBox="0 0 480 200" role="img" aria-label="Schematic section: a shaded roof monitor delivering soft, even daylight deep into a tall courtroom">
+            <rect width="480" height="200" fill="#FBFAF4"/>
+            <circle cx="70" cy="30" r="12" fill="#F59E0B"/>
+            <g stroke="#F59E0B" stroke-width="3" stroke-linecap="round"><line x1="70" y1="12" x2="70" y2="18"/><line x1="50" y1="22" x2="54" y2="18"/></g>
+            <g stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" opacity=".75"><line x1="84" y1="40" x2="180" y2="60"/></g>
+            <polygon points="170,60 250,60 250,40 200,40" fill="#CDE6F2" stroke="#16202B" stroke-width="1.5"/>
+            <rect x="160" y="30" width="20" height="34" fill="#94A3B8" stroke="#16202B" stroke-width="1.5"/>
+            <path d="M60 60 L420 60 L420 70 L260 70 L250 60 L170 60 L160 70 L60 70 Z" fill="#C9C3B4" stroke="#16202B" stroke-width="1.5"/>
+            <rect x="60" y="70" width="360" height="120" fill="#fff" stroke="#16202B" stroke-width="2"/>
+            <polygon points="200,70 250,70 320,190 150,190" fill="#FCD34D" opacity=".4"/>
+            <g stroke="#FBBF24" stroke-width="1.5"><line x1="225" y1="70" x2="160" y2="180"/><line x1="225" y1="70" x2="300" y2="180"/></g>
+            <text x="240" y="160" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#475569">daylight reaches deep into the courtroom</text>
+          </svg>
+          <figcaption><span class="pname">Wayne L. Morse U.S. Courthouse</span> <span class="pmeta">— Eugene, Oregon.</span> Shaded toplighting and roof monitors push even daylight deep into tall courtrooms; with high-performance glazing and dimmable lighting, energy use fell ~40%. <a class="src" href="https://www.morphosis.com/architecture/2/" target="_blank" rel="noopener">Source ↗</a><span class="credit">Morphosis · also documented at AIA COTE Top Ten</span></figcaption>
+        </figure>
       </div></section>
 
     <section class="block"><span class="tag class">● In Class · Live tool</span>
@@ -1021,6 +1280,37 @@ header.topbar{position:static;top:auto;box-shadow:none}
         <div class="formula"><b>Stack:</b> Q = C<sub>d</sub>·A·√( 2·g·h·(T<sub>i</sub>−T<sub>e</sub>)/(T<sub>i</sub>+T<sub>e</sub>) )</div>
         <p>Worked example from class: 4 m/s wind through a 6 m² opening → Q = 24 m³/s; in a 100 m³ room that's a very high ACH. The stack example (T<sub>i</sub>=30°C, T<sub>e</sub>=20°C, A=2 m², h=6 m) shows buoyancy alone can ventilate when there is no wind.</p>
         <p class="note">Studied examples: KfW Frankfurt (among the most energy-efficient office towers) and Menara UMNO, Malaysia.</p>
+        <div class="projgrid">
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic section: a double-skin pressure-ring façade with pivoting flaps letting fresh air into offices regardless of wind">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <g fill="none" stroke="#94A3B8" stroke-width="2" opacity=".7"><path d="M20 50 q22 6 0 12"/><path d="M20 90 q22 6 0 12"/><path d="M20 130 q22 6 0 12"/></g>
+              <rect x="80" y="20" width="22" height="170" fill="#CDE6F2" stroke="#16202B" stroke-width="2"/>
+              <g stroke="#16202B" stroke-width="2.5" stroke-linecap="round"><line x1="80" y1="52" x2="100" y2="44"/><line x1="80" y1="92" x2="100" y2="84"/><line x1="80" y1="132" x2="100" y2="124"/><line x1="80" y1="172" x2="100" y2="164"/></g>
+              <rect x="102" y="20" width="34" height="170" fill="#EAF1F6"/>
+              <g fill="#16A34A"><polygon points="112,70 124,70 118,56"/><polygon points="112,150 124,150 118,164"/></g>
+              <rect x="136" y="20" width="220" height="170" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <g fill="#16A34A" opacity=".85"><polygon points="160,60 176,60 168,46"/><polygon points="220,60 236,60 228,46"/><polygon points="290,60 306,60 298,46"/></g>
+              <text x="119" y="205" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#475569">cavity</text>
+              <text x="250" y="120" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#475569">naturally ventilated office</text>
+            </svg>
+            <figcaption><span class="pname">KfW Westarkade</span> <span class="pmeta">— Frankfurt.</span> A streamlined double-skin "pressure ring" façade with pivoting flaps keeps cavity pressure even, so offices ventilate naturally about two-thirds of the year. <a class="src" href="https://www.sauerbruchhutton.de/en/project/kfw" target="_blank" rel="noopener">Source ↗</a><span class="credit">Sauerbruch Hutton</span></figcaption>
+          </figure>
+          <figure class="projfig">
+            <svg viewBox="0 0 400 210" role="img" aria-label="Schematic plan: angled wind-wing walls funnelling breeze into a balcony air-lock that ventilates each office floor">
+              <rect width="400" height="210" fill="#FBFAF4"/>
+              <g fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"><path d="M20 60 q26 6 0 12"/><path d="M20 100 q26 6 0 12"/><path d="M20 140 q26 6 0 12"/></g>
+              <polygon points="120,30 150,40 150,170 120,180" fill="#D9D3C4" stroke="#16202B" stroke-width="2"/>
+              <polygon points="280,40 250,50 250,160 280,170" fill="#D9D3C4" stroke="#16202B" stroke-width="2"/>
+              <rect x="150" y="55" width="100" height="100" fill="#fff" stroke="#16202B" stroke-width="2"/>
+              <rect x="150" y="40" width="100" height="15" fill="#EAF3E4" stroke="#16202B" stroke-width="1.5"/>
+              <g fill="#16A34A"><polygon points="160,90 176,90 168,76"/><polygon points="195,90 211,90 203,76"/><polygon points="230,90 246,90 238,76"/></g>
+              <text x="135" y="105" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#475569" transform="rotate(-90 135 105)">wing wall</text>
+              <text x="200" y="135" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#475569">balcony air-lock</text>
+            </svg>
+            <figcaption><span class="pname">Menara UMNO</span> <span class="pmeta">— Penang, Malaysia.</span> Angled "wind-wing" walls create a pressure zone that pulls breeze into balcony air-lock pockets, naturally ventilating each office floor of the tower. <a class="src" href="https://www.archnet.org/sites/4430" target="_blank" rel="noopener">Source ↗</a><span class="credit">T. R. Hamzah &amp; Yeang (Ken Yeang) · via Archnet</span></figcaption>
+          </figure>
+        </div>
       </div></section>
 
     <section class="block"><span class="tag read">◆ Further Readings</span>
