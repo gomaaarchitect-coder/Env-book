@@ -98,6 +98,9 @@ tbody tr:hover{background:#F8FBF9}
 .tl .t{color:var(--ink-soft);min-width:120px}
 .muted{color:var(--ink-soft);font-style:italic}
 .loading{padding:40px;text-align:center;color:var(--ink-soft)}
+.btn-del{border:1px solid #FCA5A5;background:#fff;color:#b91c1c;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:700}
+.btn-del:hover{background:#FEE2E2}
+.btn-del:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
@@ -158,8 +161,9 @@ tbody tr:hover{background:#F8FBF9}
         <th data-s="answers">Answers <span class="ar">⇅</span></th>
         <th data-s="reveals">Reveals</th>
         <th data-s="time">Time <span class="ar">⇅</span></th>
+        <th>Actions</th>
       </tr></thead>
-      <tbody id="tbody"><tr><td colspan="9" class="loading">Loading…</td></tr></tbody>
+      <tbody id="tbody"><tr><td colspan="10" class="loading">Loading…</td></tr></tbody>
       </table>
     </div>
     <p class="muted" style="margin-top:14px;font-size:.8rem">“Last active” and event timeline come from each student’s logged actions. Click any row to see their written answers and a detailed activity timeline. Times are approximate active reading time per chapter.</p>
@@ -208,7 +212,7 @@ function summarize(uid,data){
 }
 
 async function load(){
-  document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="loading">Loading…</td></tr>';
+  document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">Loading…</td></tr>';
   document.getElementById('authNotice').innerHTML='';
   try{
     const snap=await db.ref(`${APP_KEY}/users`).get();
@@ -216,7 +220,7 @@ async function load(){
     snap.forEach(ch=>{const v=ch.val();if(v&&v.data)rows.push(summarize(ch.key,v.data));});
     render();
   }catch(e){
-    document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="loading">No access.</td></tr>';
+    document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">No access.</td></tr>';
     document.getElementById('authNotice').innerHTML=
      `<div class="notice">⚠️ This account can’t read student data yet (<b>${e.message}</b>).<br>Add your instructor UID to the admin list in Firebase to grant access:<br><code>${APP_KEY}/admins/${me?me.uid:'YOUR_UID'} = true</code></div>`;
   }
@@ -236,7 +240,7 @@ function kpis(){
 function pill(pct){const c=pct>=70?'g':pct>=35?'y':pct>0?'r':'n';return `<span class="pill ${c}">${pct}%</span>`;}
 
 function render(){
-  if(!rows.length){document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="loading">No students have used the book yet.</td></tr>';kpis();return;}
+  if(!rows.length){document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">No students have used the book yet.</td></tr>';kpis();return;}
   kpis();
   const q=document.getElementById('search').value.trim().toLowerCase();
   const sb=document.getElementById('sortby').value;
@@ -253,8 +257,9 @@ function render(){
       <td>${r.answers}</td>
       <td>${r.reveals}</td>
       <td>${mins(r.time)} min</td>
+      <td><button class="btn-del" onclick="event.stopPropagation();deleteStudent('${r.uid}',this)">Delete</button></td>
     </tr>
-    <tr class="detail" id="d-${r.uid}" hidden><td colspan="9">${detailHtml(r)}</td></tr>`).join('');
+    <tr class="detail" id="d-${r.uid}" hidden><td colspan="10">${detailHtml(r)}</td></tr>`).join('');
 }
 
 function detailHtml(r){
@@ -277,6 +282,22 @@ function detailHtml(r){
   </div>`;
 }
 function toggleDetail(uid){const el=document.getElementById('d-'+uid);if(el)el.hidden=!el.hidden;}
+
+/* ===== Delete a student (removes ALL their records from the book) ===== */
+async function deleteStudent(uid,btn){
+  const r=rows.find(x=>x.uid===uid);
+  const label=r?`${r.name} (ID: ${r.studentId})`:'this student';
+  if(!confirm(`Permanently delete ${label}?\n\nThis removes ALL of their records — answers, chat logs, activity, and progress — from the book. This cannot be undone.`))return;
+  if(btn){btn.disabled=true;btn.textContent='Deleting…';}
+  try{
+    await db.ref(`${APP_KEY}/users/${uid}`).remove();
+    rows=rows.filter(x=>x.uid!==uid);
+    render();
+  }catch(e){
+    alert('Could not delete this student: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent='Delete';}
+  }
+}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
 /* ===== Export to Excel (multi-sheet) ===== */
