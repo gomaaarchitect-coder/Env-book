@@ -234,9 +234,9 @@ details.answers summary:hover{color:var(--accent)}
       <input type="text" id="cmpSubj" maxlength="150" required dir="auto">
       <label class="lbl" for="cmpBody">Message</label>
       <textarea id="cmpBody" maxlength="5000" required dir="auto"></textarea>
-      <label class="opt"><input type="checkbox" id="cmpEmail" checked> Email students a notification to check the book</label>
-      <p class="cmp-hint" id="cmpEmailHint" hidden>Email notifications are off until <code>NOTIFY_URL</code> is set in dashboard.html (see SETUP_GUIDE.md, Step 7).</p>
+      <label class="opt"><input type="checkbox" id="cmpEmail" checked> Notify students by email (opens a Gmail draft for you to send)</label>
       <div class="cmp-status" id="cmpStatus" role="status" aria-live="polite"></div>
+      <div id="cmpDraft" hidden></div>
       <div class="cmp-actions">
         <button type="button" class="btn btn-ghost" id="cmpCancel" onclick="closeComposer()">Cancel</button>
         <button type="button" class="btn btn-primary" id="cmpSend" onclick="sendMsg()">Send</button>
@@ -365,9 +365,6 @@ const firebaseConfig={
 };
 const APP_KEY='iedbook';
 const N_CHAPTERS=11, N_EXERCISES=25;
-/* Deploy notify/Code.gs (see notify/README.md) and paste its /exec URL here to enable email notifications */
-const NOTIFY_URL='PASTE_YOUR_APPS_SCRIPT_URL_HERE';
-const NOTIFY_READY=!!(NOTIFY_URL&&!NOTIFY_URL.startsWith('PASTE'));
 const FIREBASE_READY=!!(firebaseConfig.apiKey&&!firebaseConfig.apiKey.startsWith('PASTE'));
 let auth=null,db=null,me=null,rows=[];
 
@@ -799,7 +796,7 @@ document.querySelectorAll('th[data-s]').forEach(th=>th.addEventListener('click',
 /* ===== Instructor messages ===== */
 let sentMsgs=[],inboxAll={},cmpSel=new Set(),cmpBusy=false,cmpTrig=null;
 const gid=id=>document.getElementById(id);
-function emailTxt(e){if(!e||e.status==='off'||e.requested===false)return 'No email';const n=e.sent||0;
+function emailTxt(e){if(!e||e.status==='off'||e.requested===false)return 'No email';if(e.status==='draft')return 'Email via Gmail draft';const n=e.sent||0;
   if(e.status==='sent')return `Email sent to ${n}`;if(e.status==='partial')return `Email: ${n} sent, ${e.failed||0} failed`;
   if(e.status==='failed')return 'Email failed'+(e.error?' ('+e.error+')':'');return 'Email pending';}
 async function loadMessages(){
@@ -829,7 +826,7 @@ function openComposer(uid,trig){
   gid('cmpAudAll').checked=!uid;gid('cmpAudSel').checked=!!uid;
   gid('cmpAllLbl').textContent=`All students (${rows.length})`;
   gid('cmpSubj').value='';gid('cmpBody').value='';gid('cmpSearch').value='';
-  const em=gid('cmpEmail');em.checked=NOTIFY_READY;em.disabled=!NOTIFY_READY;gid('cmpEmailHint').hidden=NOTIFY_READY;
+  gid('cmpEmail').checked=true;gid('cmpDraft').hidden=true;gid('cmpDraft').innerHTML='';
   gid('cmpStatus').textContent='';gid('cmpStatus').className='cmp-status';
   gid('cmpSend').disabled=false;gid('cmpSend').textContent='Send';gid('cmpCancel').textContent='Cancel';
   cmpAudChange();
@@ -865,11 +862,11 @@ async function sendMsg(){
   if(!body){gid('cmpBody').focus();return cmpMsg('Enter a message.','bad');}
   if(!confirm(`Send "${subject}" to ${uids.length} student${uids.length===1?'':'s'}?`))return;
   cmpBusy=true;gid('cmpSend').disabled=true;gid('cmpCancel').disabled=true;cmpMsg('Sending…');
-  const wantEmail=gid('cmpEmail').checked&&NOTIFY_READY;
+  const wantEmail=gid('cmpEmail').checked;
   const id=db.ref().push().key,now=Date.now(),fromName=me.displayName||'Your instructor',recipients={};
   uids.forEach(u=>recipients[u]=true);
   const up={};
-  up[`messages/${id}`]={subject,body,sentAt:now,fromUid:me.uid,fromName,audience:all?'all':'selected',recipients,email:wantEmail?{requested:true,status:'pending'}:{requested:false,status:'off'}};
+  up[`messages/${id}`]={subject,body,sentAt:now,fromUid:me.uid,fromName,audience:all?'all':'selected',recipients,email:wantEmail?{requested:true,status:'draft'}:{requested:false,status:'off'}};
   uids.forEach(u=>up[`inbox/${u}/${id}`]={subject,body,sentAt:now,fromName});
   try{
     await db.ref(APP_KEY).update(up);
@@ -878,21 +875,23 @@ async function sendMsg(){
     return cmpMsg('Could not send: '+e.message,'bad');
   }
   let txt=`Delivered to ${uids.length} book${uids.length===1?'':'s'}.`,cls='good';
+  let link=null;
   if(wantEmail){
-    cmpMsg(txt+' Sending emails…');
-    try{
-      const idToken=await me.getIdToken();
-      const r=await fetch(NOTIFY_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({idToken,msgId:id})});
-      const j=await r.json();
-      if(j.ok)txt+=` ${j.sent} email${j.sent===1?'':'s'} sent`+(j.skipped?` (${j.skipped} skipped: no valid email)`:'')+'.';
-      else{cls='bad';txt+=` Email problem: ${j.error||('sent '+j.sent+', failed '+j.failed)}. The message is still in the students’ books.`;}
-    }catch(e){
-      cls='bad';txt+=` Emails could not be sent (${e.message}). The message is still in the students’ books.`;
-      try{await db.ref(`${APP_KEY}/messages/${id}/email`).update({status:'failed',failed:uids.length,at:Date.now(),error:String(e.message).slice(0,200)});}catch(_){}
-    }
+    const ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/,byUid={};rows.forEach(r=>byUid[r.uid]=r);
+    const emails=[];let skipped=0;
+    uids.forEach(u=>{const m=String((byUid[u]||{}).email||'').trim();if(ok.test(m)){if(!emails.includes(m))emails.push(m);}else skipped++;});
+    if(emails.length){
+      const bodyText=`You have a new message from your instructor in the EAR3301 book.\n\nSubject: ${subject}\n\nSign in to read it: https://gomaaarchitect-coder.github.io/Env-book/#messages`;
+      const href=`https://mail.google.com/mail/?authuser=${encodeURIComponent(me.email||'')}&view=cm&fs=1&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent('New message in your EAR3301 book: '+subject)}&body=${encodeURIComponent(bodyText)}`;
+      const n=emails.length;
+      gid('cmpDraft').innerHTML=`<a class="btn btn-primary" id="cmpDraftLink" style="display:inline-flex;align-items:center;min-height:44px;text-decoration:none" href="${esc(href)}" target="_blank" rel="noopener">✉ Open Gmail draft (${n} student${n===1?'':'s'})</a><p class="cmp-hint">Emails go out only when you press Send in Gmail.${skipped?` (${skipped} without an email ${skipped===1?'was':'were'} skipped)`:''}</p>`;
+      link=gid('cmpDraftLink');
+    }else gid('cmpDraft').innerHTML='<p class="cmp-hint">No student in this message has a valid email, so no Gmail draft was made.</p>';
+    gid('cmpDraft').hidden=false;
   }
   cmpBusy=false;gid('cmpCancel').disabled=false;gid('cmpCancel').textContent='Close';
   cmpMsg(txt,cls);
+  if(link)link.focus();
   loadMessages();
 }
 document.addEventListener('keydown',e=>{
