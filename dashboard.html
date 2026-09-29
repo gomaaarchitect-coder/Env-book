@@ -878,11 +878,11 @@ async function sendMsg(){
   let link=null;
   if(wantEmail){
     const ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/,byUid={};rows.forEach(r=>byUid[r.uid]=r);
-    const emails=[];let skipped=0;
-    uids.forEach(u=>{const m=String((byUid[u]||{}).email||'').trim();if(ok.test(m)){if(!emails.includes(m))emails.push(m);}else skipped++;});
+    const emails=[],bcc=[];let skipped=0;
+    uids.forEach(u=>{const m=String((byUid[u]||{}).email||'').trim();if(ok.test(m)){if(!emails.includes(m)){emails.push(m);const nm=String((byUid[u]||{}).name||'').replace(/["<>,;\\\r\n]/g,' ').replace(/\s+/g,' ').trim();bcc.push(nm&&nm!=='(no name)'?`"${nm}" <${m}>`:m);}}else skipped++;});
     if(emails.length){
       const bodyText=`You have a new message from your instructor in the EAR3301 book.\n\nSubject: ${subject}\n\nSign in to read it: https://gomaaarchitect-coder.github.io/Env-book/#messages`;
-      const href=`https://mail.google.com/mail/?authuser=${encodeURIComponent(me.email||'')}&view=cm&fs=1&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent('New message in your EAR3301 book: '+subject)}&body=${encodeURIComponent(bodyText)}`;
+      const href=`https://mail.google.com/mail/?authuser=${encodeURIComponent(me.email||'')}&view=cm&fs=1&bcc=${encodeURIComponent(bcc.join(','))}&su=${encodeURIComponent('New message in your EAR3301 book: '+subject)}&body=${encodeURIComponent(bodyText)}`;
       const n=emails.length;
       gid('cmpDraft').innerHTML=`<a class="btn btn-primary" id="cmpDraftLink" style="display:inline-flex;align-items:center;min-height:44px;text-decoration:none" href="${esc(href)}" target="_blank" rel="noopener">✉ Open Gmail draft (${n} student${n===1?'':'s'})</a><p class="cmp-hint">Emails go out only when you press Send in Gmail.${skipped?` (${skipped} without an email ${skipped===1?'was':'were'} skipped)`:''}</p>`;
       link=gid('cmpDraftLink');
