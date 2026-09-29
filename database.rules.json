@@ -8,6 +8,21 @@
           ".read": "$uid === auth.uid || root.child('iedbook/admins').child(auth.uid).exists()",
           ".write": "$uid === auth.uid || root.child('iedbook/admins').child(auth.uid).exists()"
         }
+      },
+      "messages": {
+        ".write": "root.child('iedbook/admins').child(auth.uid).exists()"
+      },
+      "inbox": {
+        "$uid": {
+          ".read": "$uid === auth.uid || root.child('iedbook/admins').child(auth.uid).exists()",
+          ".write": "root.child('iedbook/admins').child(auth.uid).exists()",
+          "$msgId": {
+            "readAt": {
+              ".write": "$uid === auth.uid && data.parent().exists()",
+              ".validate": "newData.isNumber()"
+            }
+          }
+        }
       }
     }
   }

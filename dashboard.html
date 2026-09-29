@@ -15,6 +15,8 @@
   --bg:#FFFDF7;--panel:#fff;--ink:#16202B;--ink-soft:#475569;--line:#E8E3D5;
   --accent:#0E7C5A;--accent2:#16A34A;--shadow:0 10px 30px -12px rgba(20,32,43,.18);
   --error:#b91c1c;--warn:#92400E;
+  --good:#0E7C5A;--good-bg:#E6F7F0;--warn-bg:#FEF3C7;--bad:#B91C1C;--bad-bg:#FEE2E2;
+  --rec2:#1D4ED8;--rec2-bg:#DBEAFE;--rec3-bg:#F2ECFE;--radius:16px;
 }
 *{box-sizing:border-box}
 /* Ensure the hidden attribute always wins over author display rules (e.g. .login{display:grid}) */
@@ -101,6 +103,97 @@ tbody tr:hover{background:#F8FBF9}
 .btn-del{border:1px solid #FCA5A5;background:#fff;color:#b91c1c;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:700}
 .btn-del:hover{background:#FEE2E2}
 .btn-del:disabled{opacity:.5;cursor:default}
+.btn-msg{border:1px solid var(--line);background:#fff;color:var(--accent);border-radius:8px;min-width:44px;min-height:44px;font-size:1rem;font-weight:700;margin-right:6px}
+.btn-msg:hover{background:var(--good-bg)}
+
+/* ===== Instructor messages ===== */
+.msg-item{border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:0 0 8px}
+.msg-item summary{cursor:pointer;min-height:44px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;font-size:.86rem}
+.msg-item summary b{font-family:'Space Grotesk';font-size:.95rem;flex:1 1 220px;min-width:0;overflow-wrap:anywhere}
+.msg-item .mi-meta{color:var(--ink-soft);font-size:.78rem}
+.msg-item .mi-body{padding:0 14px 14px;font-size:.86rem}
+.msg-item .mi-body p{white-space:pre-wrap;margin:0 0 10px;overflow-wrap:anywhere}
+.msg-item ul{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.msg-item li{font-size:.78rem;padding:3px 9px;border-radius:99px;background:var(--bad-bg);color:var(--bad);font-weight:600}
+.msg-item li.rd{background:var(--good-bg);color:var(--good)}
+.cmp-back{position:fixed;inset:0;z-index:90;background:rgba(15,23,42,.55);display:grid;place-items:center;padding:14px}
+.cmp{background:#fff;border-radius:18px;width:min(640px,100%);max-height:calc(100vh - 28px);overflow:auto;padding:22px;box-shadow:0 30px 70px -20px rgba(0,0,0,.5)}
+.cmp h2{margin:0 0 12px;font-size:1.3rem}
+.cmp fieldset{border:1px solid var(--line);border-radius:12px;margin:0 0 12px;padding:8px 12px}
+.cmp legend,.cmp label.lbl{font-weight:700;font-size:.84rem}
+.cmp label.lbl{display:block;margin:12px 0 5px}
+.cmp label.opt{display:flex;align-items:center;gap:10px;min-height:44px;font-size:.9rem}
+.cmp input[type=radio],.cmp input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--accent)}
+.cmp input[type=text],.cmp input[type=search],.cmp textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:11px;font-size:1rem;font-family:'Inter',system-ui,sans-serif}
+.cmp textarea{min-height:140px;resize:vertical}
+.cmp-list{max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.cmp-list label{display:flex;align-items:center;gap:10px;min-height:44px;padding:4px 10px;font-size:.86rem;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.cmp-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.cmp-tools .btn{min-height:44px}
+.cmp-hint{font-size:.8rem;color:var(--ink-soft);margin:4px 0 0}
+.cmp-status{min-height:1.2em;font-size:.86rem;font-weight:600;margin:10px 0 0}
+.cmp-status.bad{color:var(--bad)}.cmp-status.good{color:var(--good)}
+.cmp-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:14px}
+.cmp-actions .btn{min-height:44px;min-width:110px}
+.btn:disabled{opacity:.6;cursor:default}
+
+/* ===== Weekly analytics (Early-warning / Prep-quiz / Starter / Exit-ticket) ===== */
+.dash-sec{margin:34px 0 46px;scroll-margin-top:20px}
+.dash-sec h2{font-size:1.3rem;margin:0 0 6px}
+.dash-sec > p.lede{margin:0 0 16px;color:var(--ink-soft);max-width:760px;font-size:.9rem}
+.sec-eyebrow{display:inline-flex;align-items:center;gap:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;color:var(--accent);margin-bottom:6px}
+.sec-eyebrow .sn{width:22px;height:22px;border-radius:7px;background:var(--accent);color:#fff;display:inline-grid;place-items:center;font-family:'Space Grotesk';font-size:.74rem}
+.autolog-note{background:var(--rec3-bg);color:#4C1D95;border-radius:12px;padding:10px 14px;font-size:.82rem;font-weight:600;margin:0 0 16px;display:inline-flex;align-items:center;gap:8px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.78rem;color:var(--ink-soft);font-weight:600;margin:0 0 14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:4px;display:inline-block}
+.dash-scroll{overflow-x:auto;margin:0 0 12px;border-radius:16px;box-shadow:var(--shadow)}
+.dash-table{width:100%;border-collapse:collapse;font-size:.82rem;background:#fff;min-width:760px}
+.dash-table th,.dash-table td{border:1px solid var(--line);padding:9px 12px;text-align:left;white-space:nowrap}
+.dash-table th{background:var(--ink);color:#fff;font-family:'Space Grotesk';font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+.dash-table td.cell-good{background:var(--good-bg);color:var(--good);font-weight:700}
+.dash-table td.cell-warn{background:var(--warn-bg);color:var(--warn);font-weight:700}
+.dash-table td.cell-bad{background:var(--bad-bg);color:var(--bad);font-weight:700}
+.qrow{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 12px;background:#fff}
+.qrow .qrow-head{display:flex;justify-content:space-between;gap:14px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}
+.qrow .qrow-label{font-weight:700;max-width:640px;font-size:.9rem}
+.qrow .qrow-pct{font-family:'Space Grotesk';font-weight:700;font-size:1rem;flex:none}
+.errbar-track{height:12px;border-radius:99px;background:var(--line);overflow:hidden}
+.errbar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#F59E0B,#B91C1C)}
+.qrow-comment{margin-top:9px;font-size:.85rem;background:var(--rec2-bg);color:#1E3A8A;border-radius:10px;padding:9px 12px}
+.qrow-comment b{color:#1D4ED8}
+.starter-card{border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:0 0 16px;background:#fff}
+.starter-card .sc-q{font-weight:700;margin:0 0 4px;font-size:.92rem}
+.starter-card .sc-meta{font-size:.74rem;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin:0 0 12px}
+.distbar{display:flex;height:24px;border-radius:8px;overflow:hidden;margin:0 0 8px;box-shadow:inset 0 0 0 1px var(--line)}
+.distbar span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700}
+.distbar .d-wrong{background:var(--bad)}
+.distbar .d-partial{background:#D97706}
+.distbar .d-right{background:var(--good)}
+.dist-legend{display:flex;gap:14px;font-size:.74rem;color:var(--ink-soft);font-weight:600;margin:0 0 12px;flex-wrap:wrap}
+details.answers{border:1px dashed var(--line);border-radius:10px;padding:9px 13px;margin:0 0 10px;background:#FBFAF4}
+details.answers summary{cursor:pointer;font-weight:700;font-size:.82rem;color:var(--ink)}
+details.answers summary:hover{color:var(--accent)}
+.sample-ans{margin:9px 0 0;padding-left:0;list-style:none}
+.sample-ans li{border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin:0 0 7px;font-size:.8rem;background:#fff}
+.sample-ans li:last-child{margin-bottom:0}
+.sa-tag{display:inline-block;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:99px;margin-right:8px}
+.sa-tag.right{background:var(--good-bg);color:var(--good)}
+.sa-tag.partial{background:var(--warn-bg);color:var(--warn)}
+.sa-tag.wrong{background:var(--bad-bg);color:var(--bad)}
+.resolution{border-radius:10px;padding:9px 12px;font-size:.84rem;font-weight:600}
+.resolution.ok{background:var(--good-bg);color:var(--good)}
+.resolution.action{background:var(--warn-bg);color:var(--warn)}
+.res-kind{display:inline-block;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 9px;border-radius:99px;margin-right:8px;background:rgba(0,0,0,.08)}
+.theme-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:12px;padding:11px 15px;margin:0 0 9px;background:#fff}
+.theme-row .th-count{font-family:'Space Grotesk';font-weight:700;background:var(--ink);color:#fff;min-width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:.86rem}
+.theme-row .th-body{flex:1;min-width:0}
+.theme-row .th-title{font-weight:700;font-size:.86rem}
+.theme-row .th-sub{font-size:.76rem;color:var(--ink-soft)}
+.exit-item{border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin:0 0 8px;background:#fff;font-size:.84rem}
+.exit-item .ei-name{font-weight:700;font-family:'Space Grotesk';font-size:.8rem}
+.exit-item .ei-lbl{font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.04em;margin-top:6px}
+.exit-item p{margin:2px 0 0;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -120,6 +213,36 @@ tbody tr:hover{background:#F8FBF9}
 </div>
 
 <div id="app" hidden>
+  <div class="cmp-back" id="cmpBack" hidden>
+    <div class="cmp" role="dialog" aria-modal="true" aria-labelledby="cmpTitle">
+      <h2 id="cmpTitle">New message</h2>
+      <fieldset><legend>Recipients</legend>
+        <label class="opt"><input type="radio" name="cmpAud" id="cmpAudAll" value="all" checked onchange="cmpAudChange()"> <span id="cmpAllLbl">All students</span></label>
+        <label class="opt"><input type="radio" name="cmpAud" id="cmpAudSel" value="selected" onchange="cmpAudChange()"> Selected students</label>
+        <div id="cmpPick" hidden>
+          <label class="lbl" for="cmpSearch">Find a student</label>
+          <input type="search" id="cmpSearch" placeholder="Name, student ID or email" dir="auto" oninput="cmpList()">
+          <div class="cmp-tools">
+            <button type="button" class="btn btn-ghost" onclick="cmpAllShown()">Select all shown</button>
+            <button type="button" class="btn btn-ghost" onclick="cmpClear()">Clear</button>
+            <span id="cmpCount" aria-live="polite"></span>
+          </div>
+          <div class="cmp-list" id="cmpListBox" role="group" aria-label="Students"></div>
+        </div>
+      </fieldset>
+      <label class="lbl" for="cmpSubj">Subject</label>
+      <input type="text" id="cmpSubj" maxlength="150" required dir="auto">
+      <label class="lbl" for="cmpBody">Message</label>
+      <textarea id="cmpBody" maxlength="5000" required dir="auto"></textarea>
+      <label class="opt"><input type="checkbox" id="cmpEmail" checked> Email students a notification to check the book</label>
+      <p class="cmp-hint" id="cmpEmailHint" hidden>Email notifications are off until <code>NOTIFY_URL</code> is set in dashboard.html (see SETUP_GUIDE.md, Step 7).</p>
+      <div class="cmp-status" id="cmpStatus" role="status" aria-live="polite"></div>
+      <div class="cmp-actions">
+        <button type="button" class="btn btn-ghost" id="cmpCancel" onclick="closeComposer()">Cancel</button>
+        <button type="button" class="btn btn-primary" id="cmpSend" onclick="sendMsg()">Send</button>
+      </div>
+    </div>
+  </div>
   <div class="masthead">
     <div class="crest">AAST</div>
     <div class="mast-lines">
@@ -129,6 +252,7 @@ tbody tr:hover{background:#F8FBF9}
     </div>
     <div class="top-actions">
       <span class="who" id="who"></span>
+      <button class="btn btn-ghost" id="newMsgBtn" onclick="openComposer(null,this)">✉ New message</button>
       <button class="btn btn-ghost" onclick="load()">↻ Refresh</button>
       <button class="btn btn-ghost" onclick="signOut()">Sign out</button>
     </div>
@@ -167,6 +291,64 @@ tbody tr:hover{background:#F8FBF9}
       </table>
     </div>
     <p class="muted" style="margin-top:14px;font-size:.8rem">“Last active” and event timeline come from each student’s logged actions. Click any row to see their written answers and a detailed activity timeline. Times are approximate active reading time per chapter.</p>
+
+    <section class="dash-sec" id="sec-messages">
+      <h2>Messages</h2>
+      <p class="lede">Messages you sent to students’ books, newest first. Open one to see the text and who has read it.</p>
+      <div id="msgList"><p class="muted">Sign in to load data…</p></div>
+    </section>
+
+    <h2 style="margin:44px 0 4px;font-size:1.3rem">Weekly Analytics</h2>
+    <p class="muted" style="margin:0 0 16px;font-size:.85rem">Early-warning signals and question-level analytics, computed live from each student's logged prep-quiz, starter, hypothesis, exit-ticket and practice-set data.</p>
+    <div class="controls">
+      <label for="dashWeek" style="font-weight:700;font-size:.86rem;color:var(--ink-soft)">Week</label>
+      <select id="dashWeek" onchange="renderAnalytics()"></select>
+      <div class="spacer"></div>
+    </div>
+
+    <!-- ===== A. Early-warning table ===== -->
+    <section class="dash-sec" id="sec-earlywarning">
+      <span class="sec-eyebrow"><span class="sn">A</span>Section A</span>
+      <h2>Early-Warning Table</h2>
+      <p class="lede">One row per student for the selected week. Red and amber cells are the early-warning signal.</p>
+      <div class="legend">
+        <span><i style="background:var(--good)"></i> On track</span>
+        <span><i style="background:var(--warn)"></i> Watch</span>
+        <span><i style="background:var(--bad)"></i> At risk</span>
+      </div>
+      <div style="margin:0 0 12px"><button class="btn btn-ghost" onclick="exportEarlyWarningCSV()">⬇ Export early-warning CSV</button></div>
+      <div class="dash-scroll">
+        <table class="dash-table">
+          <thead><tr><th>Student</th><th>Prep quiz</th><th>Starter self-score</th><th>Hypothesis</th><th>Exit ticket</th><th>Practice set</th><th>Flag</th></tr></thead>
+          <tbody id="ewBody"><tr><td colspan="7" class="loading">Sign in to load data…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== B. Prep-quiz analytics ===== -->
+    <section class="dash-sec" id="sec-prepquiz">
+      <span class="sec-eyebrow"><span class="sn">B</span>Section B</span>
+      <h2>Prep-Quiz Analytics — <span id="prepWeekLabel"></span></h2>
+      <p class="lede">First-attempt error rate per question, from the 5-question prep quiz students complete before class.</p>
+      <div class="autolog-note">🔒 Every student's prep-quiz attempts are logged here automatically.</div>
+      <div id="prepAnalytics"><p class="muted">Sign in to load data…</p></div>
+    </section>
+
+    <!-- ===== C. Retrieval-starter analysis ===== -->
+    <section class="dash-sec" id="sec-starter">
+      <span class="sec-eyebrow"><span class="sn">C</span>Section C</span>
+      <h2>Retrieval-Starter Analysis — <span id="starterWeekLabel"></span></h2>
+      <p class="lede">Self-score distribution and the actual typed answers behind each starter question.</p>
+      <div id="starterAnalytics"><p class="muted">Sign in to load data…</p></div>
+    </section>
+
+    <!-- ===== D. Exit-ticket aggregation ===== -->
+    <section class="dash-sec" id="sec-exit">
+      <span class="sec-eyebrow"><span class="sn">D</span>Section D</span>
+      <h2>Exit Tickets — <span id="exitWeekLabel"></span></h2>
+      <p class="lede">Muddiest points and transfer answers, auto-grouped into recurring keyword themes.</p>
+      <div id="exitAnalytics"><p class="muted">Sign in to load data…</p></div>
+    </section>
   </div>
 </div>
 
@@ -183,10 +365,64 @@ const firebaseConfig={
 };
 const APP_KEY='iedbook';
 const N_CHAPTERS=11, N_EXERCISES=25;
+/* Deploy notify/Code.gs (see notify/README.md) and paste its /exec URL here to enable email notifications */
+const NOTIFY_URL='PASTE_YOUR_APPS_SCRIPT_URL_HERE';
+const NOTIFY_READY=!!(NOTIFY_URL&&!NOTIFY_URL.startsWith('PASTE'));
 const FIREBASE_READY=!!(firebaseConfig.apiKey&&!firebaseConfig.apiKey.startsWith('PASTE'));
 let auth=null,db=null,me=null,rows=[];
 
 const EVENT_LABEL={open_chapter:'Opened chapter',open_calculator:'Opened calculator',reveal_answer:'Revealed model answer',answer_attempt:'Wrote an answer',mark_done:'Marked exercise done',unmark_done:'Unmarked exercise',open_ai_panel:'Opened Live Assistant',open_ai_section:'Opened Live Assistant section',chat_started:'Started a chat',chat_message:'Sent a chat message',login:'Signed in'};
+
+/* ===== Weekly analytics: chapter/week map + minimal copies of question stems =====
+   (Full question content lives in index.html's COURSE_CONTENT; this dashboard is a
+   separate file, so only the small bits needed for labels are duplicated here.) */
+const WEEK_MAP=[
+ {n:1,label:'Week 1',chapters:['ch1'],starterKey:null,setKey:null},
+ {n:2,label:'Week 2',chapters:['ch2'],starterKey:'w2',setKey:'w2'},
+ {n:3,label:'Week 3',chapters:['ch3'],starterKey:'w3',setKey:'w3'},
+ {n:4,label:'Week 4',chapters:['ch4'],starterKey:'w4',setKey:null},
+ {n:5,label:'Week 5',chapters:['ch5'],starterKey:'w5',setKey:'w5'},
+ {n:6,label:'Week 6',chapters:['ch6'],starterKey:'w6',setKey:'w6'},
+ {n:7,label:'Week 7',chapters:['ch7','ch8'],starterKey:'w7',setKey:'w7'},
+ {n:8,label:'Week 8 — Midterm',chapters:[],starterKey:null,setKey:null},
+ {n:9,label:'Week 9',chapters:['ch9'],starterKey:'w9',setKey:'w9'},
+ {n:10,label:'Week 10',chapters:['ch10'],starterKey:'w10',setKey:'w10'},
+ {n:11,label:'Week 11',chapters:['ch11'],starterKey:'w11',setKey:'w11'},
+ {n:12,label:'Week 12',chapters:['ch11'],starterKey:'w12',setKey:'w12'},
+ {n:13,label:'Week 13 — Integration Studio',chapters:[],starterKey:'w13',setKey:null}
+];
+
+const PREP_STEMS={
+ ch1:["What is this course's approach to environmental design, per the primer?","In the sealed-building thought experiment, which of these is one of the things you must actively control to survive?","The built environment is described as a ______ of the relationship between people and nature.","Which of the four pillars involves calculating environmental forces with numbers?","Complete the course's one-line summary: 'Every line you draw is a(n) ______.'"],
+ ch2:["A design concept is best described as:","The concept equation is Design Intention + ____ + Spatial Strategy.","Why does 'my building is wavy' fail as a concept statement?","An environmental force in the concept equation can be:","According to this week's key takeaways, if you remove the concept from a building:"],
+ ch3:["Greening is best defined as:","Biodiversity design starts from which question?","Which of these is NOT one of the five environmental jobs living systems can perform, per this week's examples?","A roof planted only with imported ornamental flowers, chosen purely because they photograph well, is:","Architecture's impact on biodiversity is best described as:"],
+ ch4:["How many stakeholder perspectives argue the biodiversity motion in this week's debate?","Per this week's session, what makes an argument strong?","The debate motion concerns whether biodiversity requirements should be:","The recommended use of an LLM before the debate is to:","Per the grading criteria, which factor is weighted the most?"],
+ ch5:["The sun gives a building two things a designer must manage. What are they?","The altitude angle tells you:","The azimuth angle tells you:","The equinox (21 March / 21 September) is the day when:","In Alexandria, the winter sun stays low and tracks mainly across the:"],
+ ch6:["What is 'zonal orientation'?","The hot-climate orientation rule is to:","An east–west long-axis building has its LARGE faces pointing:","Two identical floor plates are rotated 90° relative to each other on the same site. Per the primer, what happens to their cooling energy needs?","Spatial (space) orientation is about resolving which set of conflicting factors at once?"],
+ ch7:["OTTV measures:","A U-value tells you:","Which statement about glazing vs. wall U-values is correct, per the primer?","WWR stands for ___, and is a powerful OTTV lever because ___","OTTV is calculated by:"],
+ ch8:["SA/V ratio is defined as:","Which statement matches the primer on compact form?","Two buildings enclose the same volume. The one with MORE external skin area has:","Why does the skin matter more than the core for heat exchange?","How do SA/V and OTTV relate?"],
+ ch9:["Architectural solar control is:","True or false, per the primer: the north facade needs the same shading device as the west facade.","A horizontal overhang is best matched to:","Vertical louvers (fins) are best matched to:","Before choosing a device, a designer must first decide:"],
+ ch10:["The key difference between sunlight and daylight (skylight) is:","ADF measures:","'More glass always means more daylight and a better room.' Per the primer, this is:","Which of these is NOT one of the four ADF levers named in the primer?","A healthy ADF range is:"],
+ ch11:["Natural ventilation is defined as:","'Ventilation is only about thermal comfort.' Per the primer, this is:","Wind-driven (pressure-induced) ventilation includes:","Buoyancy-driven (stack) ventilation needs:","ACH measures:"]
+};
+
+const STARTER_STEMS={
+ w2:[{q:"In the Week 1 sealed-building exercise, name at least one of the things you had to control to survive.",cov:"last week"},{q:"In one sentence, what did the sealed-building exercise teach about environmental architecture?",cov:"last week"},{q:"The built environment's relationship to nature is best described using which word from Week 1 — and why?",cov:"last week"},{q:"Name two of the course's four pillars.",cov:"last week"},{q:"Give one example of a design decision that is not environmentally neutral, and explain why in one line.",cov:"last week"}],
+ w3:[{q:"The concept equation is Design Intention + ___ + Spatial Strategy. What goes in the blank?",cov:"last week"},{q:"Why does 'my building is wavy' fail as a design concept statement?",cov:"last week"},{q:"True or false, with one line of reasoning: environmental architecture only cares about human comfort, not the natural environment.",cov:"2–3 weeks ago"},{q:"Name one of the four pillars of the course.",cov:"2–3 weeks ago"},{q:"A building blocks 100% of direct summer sun on its west window but also fully blocks the sea view. Using Week 1's framework, is this good or bad design, and why?",cov:"2–3 weeks ago"}],
+ w4:[{q:"A roof garden using randomly chosen ornamental plants, picked purely for looks, is best described as ___. Why?",cov:"last week"},{q:"Name one environmental 'job' a living system can do for a building, per Session 3.",cov:"last week"},{q:"'My building teaches people about the environment' fails as a concept statement for the same reason as 'my building is wavy.' Why?",cov:"2–3 weeks ago"},{q:"Give one example of an environmental force that could be man-made (not natural).",cov:"2–3 weeks ago"},{q:"A lecture claims 'this building is fully green because it has solar panels.' What is this argument missing, using Week 1's framing?",cov:"4+ weeks ago"}],
+ w5:[{q:"How many stakeholder perspectives argue the biodiversity motion in the Week 4 debate? Name them if you can.",cov:"last week"},{q:"What three ingredients make an argument strong, per Week 4?",cov:"last week"},{q:"Biodiversity design starts from which question (not 'what looks nice')?",cov:"2–3 weeks ago"},{q:"In one line, what is Urban Heat Island (UHI)?",cov:"2–3 weeks ago"},{q:"A hospital wing needs privacy from a busy road but also year-round daylight. Write a one-sentence concept statement for it (Intention + Force + Strategy).",cov:"4+ weeks ago"}],
+ w6:[{q:"On the equinox at solar noon in Alexandria (lat ~31°N), is the sun due south, due east, or overhead? Sketch the approximate altitude angle.",cov:"last week"},{q:"Which day has the longest daytime hours in Egypt, and what is the name of that day?",cov:"last week"},{q:"Give one argument a DEVELOPER used against mandatory biodiversity requirements, and the strongest one-line rebuttal from the ENVIRONMENTALIST side.",cov:"2–3 weeks ago"},{q:"A roof garden of randomly chosen ornamental species: biodiversity design or greening? Justify in one sentence.",cov:"2–3 weeks ago"},{q:"Write a one-sentence concept statement for a library on a site with strong western sun and a quiet park to the north, using the equation (Intention + Force + Strategy).",cov:"4+ weeks ago"}],
+ w7:[{q:"A floor plate is rotated 90° on the same site, same materials. Per Week 6, what happens to its cooling energy need, and why?",cov:"last week"},{q:"In one line, name the zonal-orientation move for placing heat-tolerant service spaces (stairs, stores) on a hot climate site.",cov:"last week"},{q:"Which statement about the equinox sun path is correct, per Week 5's sun-path diagram?",cov:"2–3 weeks ago"},{q:"At 4pm near the summer solstice in Alexandria, which facade of a north–south long-axis building catches the sun hardest, and why?",cov:"2–3 weeks ago"},{q:"Write a one-line design-concept statement (Intention + Force + Strategy) for a small office responding to Week 6's hot-climate orientation rule.",cov:"4+ weeks ago"}],
+ w9:[{q:"Per Week 7, which statement about fixing a failing OTTV is correct?",cov:"last week"},{q:"Two buildings enclose the same volume; Building A is a compact cube, Building B is a thin slab. Which has the higher SA/V, and what does that mean for heat exchange?",cov:"last week"},{q:"Which statement matches Week 6's hot-climate orientation rule?",cov:"2–3 weeks ago"},{q:"In one line, why does an east–west long-axis building generally outperform a north–south long-axis one in a hot climate?",cov:"2–3 weeks ago"},{q:"A west-facing facade is overheating. Propose ONE biodiversity-based (Week 3) intervention that could help, and name which of the five environmental jobs it performs.",cov:"4+ weeks ago"}],
+ w10:[{q:"Which statement is correct, per Week 9?",cov:"last week"},{q:"A 2 m tall south window needs shading when the solar altitude is 60°. Give the projection formula and the approximate depth.",cov:"last week"},{q:"Which statement about OTTV is correct, per Week 7?",cov:"2–3 weeks ago"},{q:"A wall is 30 m² with WWR 0.4. What is the glazing area and the opaque wall area?",cov:"2–3 weeks ago"},{q:"Using Week 5's sun-path idea, explain in one line why a west-facing window is the classic overheating problem even though a south window gets more overhead sun exposure at noon.",cov:"4+ weeks ago"}],
+ w11:[{q:"ADF of a room is 1.8%. Is this within the healthy range? If not, name the two variables in the ADF formula you would change first and why.",cov:"last week"},{q:"What is the difference between daylight and sunlight, and which one do we design work-lighting around?",cov:"last week"},{q:"An east window receives sun at altitude 70° and azimuth 90° at 9am in summer. Horizontal overhang or vertical louvers — which matters more here? One line of reasoning.",cov:"2–3 weeks ago"},{q:"Without calculating, rank for heat gain: 10 m² west glazing (U=5.0), 42 m² north wall (U=0.3), 96 m² roof (U=0.54). Reasoning in one line each.",cov:"4+ weeks ago"},{q:"In the OTTV exercise, your group's hypothesis was wrong about which surface dominated. Why is the roof often underestimated?",cov:"4+ weeks ago"}],
+ w12:[{q:"Which statement is correct, per Week 10?",cov:"last week"},{q:"A room's ADF comes out at 2.1%. Name two of the four ADF levers you could change first, and why.",cov:"last week"},{q:"Which device is best matched to a west-facing window, per Week 9?",cov:"2–3 weeks ago"},{q:"In one line, why does a shading device's required projection grow deeper as solar altitude drops?",cov:"2–3 weeks ago"},{q:"Write a one-line concept statement (Intention + Force + Strategy) that combines a daylight need (Week 10) with a shading need (Week 9) for a west-facing classroom.",cov:"4+ weeks ago"}],
+ w13:[{q:"Which statement is correct about natural ventilation, per Weeks 11–12?",cov:"last week"},{q:"A room has an airflow rate Q = 2 m³/s and a volume of 150 m³. Calculate the ACH.",cov:"last week"},{q:"Which is a healthy ADF range, per Week 10?",cov:"2–3 weeks ago"},{q:"In one line, why does painting an external obstruction white help daylight without adding any glazing?",cov:"2–3 weeks ago"},{q:"Your project's west facade must satisfy OTTV (Week 7), shading (Week 9) and ventilation (Weeks 11–12) at the same time. Name one design conflict between two of these systems and how you would resolve it.",cov:"4+ weeks ago"}]
+};
+
+const SET_TOTALS={"w2":6,"w3":6,"w5":6,"w6":6,"w7":6,"w9":6,"w10":6,"w11":6,"w12":6};
+
+const STOPWORDS=new Set(['this','that','with','from','have','still','really','because','which','about','what','when','where','their','there','they','them','then','than','were','would','could','should','into','only','also','just','some','more','most','very','much','many','does','doing','done','being','been','here','your','ours','mine','over','under','again','once','each','both','same','such','other','another','after','before','between','during','while','even','like','know','sure','think','trying','confused','maybe','kind','sort','part','make','makes','made','need','needs','wasn','isn','didn','don','won','cant','dont']);
 
 function err(m){const e=document.getElementById('loginErr');e.textContent=m;e.classList.add('show');}
 function gIn(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>err(e.message));}
@@ -219,6 +455,8 @@ async function load(){
     rows=[];
     snap.forEach(ch=>{const v=ch.val();if(v&&v.data)rows.push(summarize(ch.key,v.data));});
     render();
+    renderAnalytics();
+    loadMessages();
   }catch(e){
     document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">No access.</td></tr>';
     document.getElementById('authNotice').innerHTML=
@@ -257,7 +495,7 @@ function render(){
       <td>${r.answers}</td>
       <td>${r.reveals}</td>
       <td>${mins(r.time)} min</td>
-      <td><button class="btn-del" onclick="event.stopPropagation();deleteStudent('${r.uid}',this)">Delete</button></td>
+      <td><button class="btn-msg" aria-label="Message ${esc(r.name)}" onclick="event.stopPropagation();openComposer('${r.uid}',this)">✉</button><button class="btn-del" onclick="event.stopPropagation();deleteStudent('${r.uid}',this)">Delete</button></td>
     </tr>
     <tr class="detail" id="d-${r.uid}" hidden><td colspan="10">${detailHtml(r)}</td></tr>`).join('');
 }
@@ -283,6 +521,229 @@ function detailHtml(r){
 }
 function toggleDetail(uid){const el=document.getElementById('d-'+uid);if(el)el.hidden=!el.hidden;}
 
+/* ===== Weekly analytics ===== */
+function analyticsWeek(){
+  const sel=document.getElementById('dashWeek');
+  const n=sel?Number(sel.value):1;
+  return WEEK_MAP.find(w=>w.n===n)||WEEK_MAP[0];
+}
+
+/* One row per student for the selected week — shared by the table render + CSV export */
+function earlyWarningRows(){
+  const w=analyticsWeek();
+  const chId=w.chapters&&w.chapters[0];
+  return rows.map(r=>{
+    const d=r.data||{};
+    const prepD=chId&&d.prep&&d.prep[chId];
+    const starterD=w.starterKey&&d.starter&&d.starter[w.starterKey];
+    const hypD=chId&&d.hyp&&d.hyp[chId];
+    const exitD=chId&&d.exit&&d.exit[chId];
+    const setD=w.setKey&&d.setp&&d.setp[w.setKey];
+    const setTotal=w.setKey?(SET_TOTALS[w.setKey]||6):0;
+
+    const prep = !chId ? {txt:'—',cls:''}
+      : (!prepD||!prepD.attempts) ? {txt:'Not started',cls:'bad'}
+      : prepD.passed ? {txt:'Passed ('+prepD.attempts+'x)',cls:'good'}
+      : {txt:'Not passed ('+prepD.attempts+'x)',cls:'warn'};
+
+    const starterTotal = (starterD&&typeof starterD.total==='number') ? starterD.total : null;
+    const starter = !w.starterKey ? {txt:'—',cls:''}
+      : starterTotal===null ? {txt:'Not started',cls:'bad'}
+      : starterTotal>=10 ? {txt:starterTotal+'/15',cls:'good'}
+      : starterTotal>=6 ? {txt:starterTotal+'/15',cls:'warn'}
+      : {txt:starterTotal+'/15',cls:'bad'};
+
+    const hyp = !chId ? {txt:'—',cls:''}
+      : (hypD&&hypD.text) ? {txt:'Committed',cls:'good'}
+      : {txt:'Not committed',cls:'bad'};
+
+    const exit = !chId ? {txt:'—',cls:''}
+      : (exitD&&(exitD.transfer||exitD.muddiest)) ? {txt:'Done',cls:'good'}
+      : {txt:'Missing',cls:'bad'};
+
+    const setDone = setD ? (setD.attempted||[]).length : 0;
+    const setC = !w.setKey ? {txt:'—',cls:''}
+      : setDone>=setTotal ? {txt:setDone+'/'+setTotal,cls:'good'}
+      : setDone>0 ? {txt:setDone+'/'+setTotal,cls:'warn'}
+      : {txt:'0/'+setTotal,cls:'bad'};
+
+    const cells=[prep,starter,hyp,exit,setC];
+    const badCount=cells.filter(c=>c.cls==='bad').length;
+    let flag={txt:'—',cls:''};
+    if(badCount>=3) flag={txt:'⚠ '+badCount+' items missing/low — reach out',cls:'bad'};
+    else if(badCount===2) flag={txt:'Watch — 2 items',cls:'warn'};
+
+    return {name:r.name,studentId:r.studentId,prep,starter,hyp,exit,setC,flag};
+  });
+}
+
+function renderEarlyWarning(){
+  const tbody=document.getElementById('ewBody'); if(!tbody)return;
+  const list=earlyWarningRows();
+  if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="loading">No students have used the book yet.</td></tr>';return;}
+  tbody.innerHTML=list.map(r=>`
+    <tr>
+      <td><b>${esc(r.name)}</b>${r.studentId&&r.studentId!=='—'?' <span style="color:var(--ink-soft);font-weight:400">('+esc(r.studentId)+')</span>':''}</td>
+      <td class="${r.prep.cls?'cell-'+r.prep.cls:''}">${esc(r.prep.txt)}</td>
+      <td class="${r.starter.cls?'cell-'+r.starter.cls:''}">${esc(r.starter.txt)}</td>
+      <td class="${r.hyp.cls?'cell-'+r.hyp.cls:''}">${esc(r.hyp.txt)}</td>
+      <td class="${r.exit.cls?'cell-'+r.exit.cls:''}">${esc(r.exit.txt)}</td>
+      <td class="${r.setC.cls?'cell-'+r.setC.cls:''}">${esc(r.setC.txt)}</td>
+      <td class="${r.flag.cls?'cell-'+r.flag.cls:''}">${esc(r.flag.txt)}</td>
+    </tr>`).join('');
+}
+
+function exportEarlyWarningCSV(){
+  const w=analyticsWeek();
+  const list=earlyWarningRows();
+  if(!list.length){alert('No data to export yet.');return;}
+  const headers=['Student','Student ID','Prep quiz','Starter self-score','Hypothesis','Exit ticket','Practice set','Flag'];
+  const lines=[headers.join(',')];
+  list.forEach(r=>{
+    const vals=[r.name,r.studentId,r.prep.txt,r.starter.txt,r.hyp.txt,r.exit.txt,r.setC.txt,r.flag.txt]
+      .map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"');
+    lines.push(vals.join(','));
+  });
+  const csv=lines.join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='EAR3301_early_warning_'+w.label.replace(/[^\w]+/g,'_')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function renderPrepQuiz(){
+  const w=analyticsWeek();
+  const wrap=document.getElementById('prepAnalytics'); if(!wrap)return;
+  const lbl=document.getElementById('prepWeekLabel'); if(lbl)lbl.textContent=w.label;
+  const chId=w.chapters&&w.chapters[0];
+  const stems=chId&&PREP_STEMS[chId];
+  if(!chId||!stems){wrap.innerHTML='<p class="muted">No prep quiz for this week.</p>';return;}
+  const attemptedRows=rows.filter(r=>r.data&&r.data.prep&&r.data.prep[chId]&&r.data.prep[chId].attempts);
+  const n=attemptedRows.length;
+  if(!n){wrap.innerHTML='<p class="muted">No prep-quiz attempts logged yet for this chapter.</p>';return;}
+  const missCounts=[0,0,0,0,0];
+  attemptedRows.forEach(r=>{
+    const ftw=r.data.prep[chId].firstTryWrong||[];
+    ftw.forEach(qi=>{ if(qi>=0&&qi<5)missCounts[qi]++; });
+  });
+  const rowsHtml=stems.map((q,i)=>{
+    const pct=Math.round(missCounts[i]/n*100);
+    let comment;
+    if(pct>40) comment=`Missed by <b>${pct}%</b> on first attempt — open class with 3 minutes on this question's topic; add it to next week's starter.`;
+    else if(pct>=20) comment=`Missed by <b>${pct}%</b> on first attempt — address in the starter debrief.`;
+    else comment=`Missed by <b>${pct}%</b> on first attempt — on track, no action needed.`;
+    return `<div class="qrow">
+      <div class="qrow-head"><span class="qrow-label">Q${i+1} — "${esc(q)}"</span><span class="qrow-pct">${pct}%</span></div>
+      <div class="errbar-track"><div class="errbar-fill" style="width:${pct}%"></div></div>
+      <div class="qrow-comment">${comment}</div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=rowsHtml+`<p class="note">Based on ${n} student${n===1?'':'s'} who attempted this chapter's prep quiz.</p>`;
+}
+
+function renderStarterAnalysis(){
+  const w=analyticsWeek();
+  const wrap=document.getElementById('starterAnalytics'); if(!wrap)return;
+  const lbl=document.getElementById('starterWeekLabel'); if(lbl)lbl.textContent=w.label;
+  const wk=w.starterKey;
+  const stems=wk&&STARTER_STEMS[wk];
+  if(!wk||!stems){wrap.innerHTML='<p class="muted">No retrieval starter for this week.</p>';return;}
+  const submitted=rows.filter(r=>r.data&&r.data.starter&&r.data.starter[wk]);
+  if(!submitted.length){wrap.innerHTML='<p class="muted">No starters submitted yet for this week.</p>';return;}
+  wrap.innerHTML=stems.map((item,i)=>{
+    let wrongN=0,partN=0,rightN=0;
+    const sampleAnswers=[];
+    submitted.forEach(r=>{
+      const s=r.data.starter[wk];
+      const sc=s.scores&&s.scores[i];
+      const ans=(s.answers&&s.answers[i])||'';
+      if(sc===0){wrongN++; if(ans.trim())sampleAnswers.push({tag:'wrong',text:ans});}
+      else if(sc===1.5){partN++; if(ans.trim())sampleAnswers.push({tag:'partial',text:ans});}
+      else if(sc===3){rightN++; if(ans.trim())sampleAnswers.push({tag:'right',text:ans});}
+    });
+    const total=wrongN+partN+rightN;
+    const wp=total?wrongN/total*100:0, pp=total?partN/total*100:0, rp=total?rightN/total*100:0;
+    const distHtml = total ? `<div class="distbar">
+        ${wrongN?`<span class="d-wrong" style="width:${wp}%">${wrongN}</span>`:''}
+        ${partN?`<span class="d-partial" style="width:${pp}%">${partN}</span>`:''}
+        ${rightN?`<span class="d-right" style="width:${rp}%">${rightN}</span>`:''}
+      </div>` : '<p class="muted">No self-scores recorded yet.</p>';
+    const meanScore = total ? (0*wrongN+1.5*partN+3*rightN)/total : 0;
+    const errRate = total ? (wrongN+0.5*partN)/total*100 : 0;
+    let resolution='';
+    if(total){
+      if(errRate>40) resolution=`<div class="resolution action"><span class="res-kind">Reteach in debrief</span>Weakest item this week (mean self-score ${meanScore.toFixed(1)}/3) — walk through this live before moving on.</div>`;
+      else if(errRate>=20) resolution=`<div class="resolution action"><span class="res-kind">Address in debrief</span>Mean self-score ${meanScore.toFixed(1)}/3 — worth a quick pass in the debrief.</div>`;
+      else resolution=`<div class="resolution ok"><span class="res-kind">On track</span>Mean self-score ${meanScore.toFixed(1)}/3 — no action needed.</div>`;
+    }
+    const sampleN=Math.min(3,sampleAnswers.length);
+    const sampleHtml = sampleN ? `<details class="answers"><summary>View ${sampleN} sample typed answer${sampleN===1?'':'s'}</summary>
+      <ul class="sample-ans">${sampleAnswers.slice(0,3).map(a=>`<li><span class="sa-tag ${a.tag}">${a.tag}</span>${esc(a.text)}</li>`).join('')}</ul>
+    </details>` : '';
+    return `<div class="starter-card">
+      <p class="sc-q">Q${i+1}. ${esc(item.q)} <span style="font-weight:400;color:var(--ink-soft)">— ${esc(item.cov)}</span></p>
+      <p class="sc-meta">Self-score distribution (n=${total})</p>
+      ${distHtml}
+      <div class="dist-legend"><span>✗ Wrong · ${wrongN}</span><span>◔ Partial · ${partN}</span><span>✓ Right · ${rightN}</span></div>
+      ${sampleHtml}
+      ${resolution}
+    </div>`;
+  }).join('');
+}
+
+function renderExitTickets(){
+  const w=analyticsWeek();
+  const wrap=document.getElementById('exitAnalytics'); if(!wrap)return;
+  const lbl=document.getElementById('exitWeekLabel'); if(lbl)lbl.textContent=w.label;
+  const chId=w.chapters&&w.chapters[0];
+  if(!chId){wrap.innerHTML='<p class="muted">No exit ticket for this week (no taught chapter).</p>';return;}
+  const submitted=rows.filter(r=>r.data&&r.data.exit&&r.data.exit[chId]&&(r.data.exit[chId].transfer||r.data.exit[chId].muddiest));
+  if(!submitted.length){wrap.innerHTML='<p class="muted">No exit tickets submitted yet for this chapter.</p>';return;}
+
+  const wordCounts={};
+  submitted.forEach(r=>{
+    const e=r.data.exit[chId];
+    const text=((e.muddiest||'')+' '+(e.transfer||'')).toLowerCase();
+    const words=text.match(/[a-z]{4,}/g)||[];
+    const seen=new Set();
+    words.forEach(wd=>{
+      if(STOPWORDS.has(wd))return;
+      if(seen.has(wd))return; // count once per student so one long answer can't dominate
+      seen.add(wd);
+      wordCounts[wd]=(wordCounts[wd]||0)+1;
+    });
+  });
+  const top=Object.entries(wordCounts).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const themesHtml = top.length ? top.map(([wd,c])=>`
+    <div class="theme-row"><div class="th-count">${c}</div><div class="th-body"><div class="th-title">"${esc(wd)}"</div><div class="th-sub">appears across ${c} student submission${c===1?'':'s'} this week</div></div></div>
+  `).join('') : '<p class="muted">Not enough text yet to detect themes.</p>';
+
+  const listHtml=submitted.slice().reverse().map(r=>{
+    const e=r.data.exit[chId];
+    return `<div class="exit-item"><div class="ei-name">${esc(r.name)}</div>
+      ${e.muddiest?`<div class="ei-lbl">Muddiest point</div><p>${esc(e.muddiest)}</p>`:''}
+      ${e.transfer?`<div class="ei-lbl">Transfer answer</div><p>${esc(e.transfer)}</p>`:''}
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML=`<h3 style="margin:0 0 10px;font-size:1rem">Recurring themes (top ${top.length})</h3>${themesHtml}
+    <h3 style="margin:22px 0 10px;font-size:1rem">All submissions (${submitted.length})</h3>${listHtml}`;
+}
+
+function renderAnalytics(){
+  renderEarlyWarning();
+  renderPrepQuiz();
+  renderStarterAnalysis();
+  renderExitTickets();
+}
+
+(function initWeekSelect(){
+  const sel=document.getElementById('dashWeek');
+  if(sel)sel.innerHTML=WEEK_MAP.map(w=>`<option value="${w.n}">${w.label}</option>`).join('');
+})();
+
 /* ===== Delete a student (removes ALL their records from the book) ===== */
 async function deleteStudent(uid,btn){
   const r=rows.find(x=>x.uid===uid);
@@ -293,6 +754,7 @@ async function deleteStudent(uid,btn){
     await db.ref(`${APP_KEY}/users/${uid}`).remove();
     rows=rows.filter(x=>x.uid!==uid);
     render();
+    renderAnalytics();
   }catch(e){
     alert('Could not delete this student: '+e.message);
     if(btn){btn.disabled=false;btn.textContent='Delete';}
@@ -333,6 +795,116 @@ function exportExcel(){
 
 /* table header sort */
 document.querySelectorAll('th[data-s]').forEach(th=>th.addEventListener('click',()=>{document.getElementById('sortby').value=th.dataset.s;render();}));
+
+/* ===== Instructor messages ===== */
+let sentMsgs=[],inboxAll={},cmpSel=new Set(),cmpBusy=false,cmpTrig=null;
+const gid=id=>document.getElementById(id);
+function emailTxt(e){if(!e||e.status==='off'||e.requested===false)return 'No email';const n=e.sent||0;
+  if(e.status==='sent')return `Email sent to ${n}`;if(e.status==='partial')return `Email: ${n} sent, ${e.failed||0} failed`;
+  if(e.status==='failed')return 'Email failed'+(e.error?' ('+e.error+')':'');return 'Email pending';}
+async function loadMessages(){
+  try{
+    const [m,i]=await Promise.all([db.ref(`${APP_KEY}/messages`).get(),db.ref(`${APP_KEY}/inbox`).get()]);
+    sentMsgs=[];m.forEach(ch=>{const v=ch.val();if(v)sentMsgs.push({id:ch.key,...v});});
+    sentMsgs.sort((a,b)=>(b.sentAt||0)-(a.sentAt||0));inboxAll=i.val()||{};
+    renderMsgs();
+  }catch(e){gid('msgList').innerHTML=`<p class="muted">Could not load messages (${esc(e.message)}).</p>`;}
+}
+function renderMsgs(){
+  const w=gid('msgList');
+  if(!sentMsgs.length){w.innerHTML='<p class="muted">No messages sent yet.</p>';return;}
+  const nm={};rows.forEach(r=>nm[r.uid]=r.name);
+  w.innerHTML=sentMsgs.map(m=>{
+    const rec=Object.keys(m.recipients||{});
+    const rd=rec.filter(u=>inboxAll[u]&&inboxAll[u][m.id]&&inboxAll[u][m.id].readAt).length;
+    const aud=m.audience==='all'?'All students':`${rec.length} selected`;
+    const chips=rec.map(u=>{const r=!!(inboxAll[u]&&inboxAll[u][m.id]&&inboxAll[u][m.id].readAt);return `<li class="${r?'rd':''}"><bdi>${esc(nm[u]||u)}</bdi> · ${r?'read':'unread'}</li>`;}).join('');
+    return `<details class="msg-item"><summary><b dir="auto">${esc(m.subject)}</b><span class="mi-meta">${fmtDate(m.sentAt)}</span><span class="mi-meta">${aud}</span><span class="mi-meta">${rd} / ${rec.length} read</span><span class="mi-meta">${esc(emailTxt(m.email))}</span></summary>
+      <div class="mi-body"><p dir="auto">${esc(m.body)}</p><ul aria-label="Recipients">${chips}</ul></div></details>`;
+  }).join('');
+}
+function openComposer(uid,trig){
+  if(cmpBusy)return;
+  cmpTrig=trig||null;cmpSel=new Set(uid?[uid]:[]);
+  gid('cmpAudAll').checked=!uid;gid('cmpAudSel').checked=!!uid;
+  gid('cmpAllLbl').textContent=`All students (${rows.length})`;
+  gid('cmpSubj').value='';gid('cmpBody').value='';gid('cmpSearch').value='';
+  const em=gid('cmpEmail');em.checked=NOTIFY_READY;em.disabled=!NOTIFY_READY;gid('cmpEmailHint').hidden=NOTIFY_READY;
+  gid('cmpStatus').textContent='';gid('cmpStatus').className='cmp-status';
+  gid('cmpSend').disabled=false;gid('cmpSend').textContent='Send';gid('cmpCancel').textContent='Cancel';
+  cmpAudChange();
+  gid('cmpBack').hidden=false;gid('cmpSubj').focus();
+}
+function closeComposer(){
+  if(cmpBusy)return;
+  gid('cmpBack').hidden=true;
+  const t=cmpTrig&&cmpTrig.isConnected?cmpTrig:gid('newMsgBtn');if(t)t.focus();
+}
+function cmpAudChange(){const sel=gid('cmpAudSel').checked;gid('cmpPick').hidden=!sel;if(sel)cmpList();}
+function cmpShown(){
+  const q=gid('cmpSearch').value.trim().toLowerCase();
+  return rows.filter(r=>!q||r.name.toLowerCase().includes(q)||String(r.studentId).toLowerCase().includes(q)||r.email.toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function cmpList(){
+  const l=cmpShown();
+  gid('cmpListBox').innerHTML=l.length?l.map(r=>`<label><input type="checkbox" value="${r.uid}" ${cmpSel.has(r.uid)?'checked':''} onchange="cmpToggle(this)"><span><bdi>${esc(r.name)}</bdi> · ${esc(r.studentId)} · ${esc(r.email)}</span></label>`).join(''):'<p class="muted" style="padding:10px">No matching students.</p>';
+  cmpCount();
+}
+function cmpToggle(cb){if(cb.checked)cmpSel.add(cb.value);else cmpSel.delete(cb.value);cmpCount();}
+function cmpCount(){gid('cmpCount').textContent=`${cmpSel.size} selected`;}
+function cmpAllShown(){cmpShown().forEach(r=>cmpSel.add(r.uid));cmpList();}
+function cmpClear(){cmpSel.clear();cmpList();}
+function cmpMsg(t,c){const s=gid('cmpStatus');s.textContent=t;s.className='cmp-status'+(c?' '+c:'');}
+async function sendMsg(){
+  if(cmpBusy)return;
+  const subject=gid('cmpSubj').value.trim(),body=gid('cmpBody').value.trim();
+  const all=gid('cmpAudAll').checked,uids=all?rows.map(r=>r.uid):[...cmpSel];
+  if(!rows.length)return cmpMsg('There are no students to message yet.','bad');
+  if(!uids.length)return cmpMsg('Select at least one student.','bad');
+  if(!subject){gid('cmpSubj').focus();return cmpMsg('Enter a subject.','bad');}
+  if(!body){gid('cmpBody').focus();return cmpMsg('Enter a message.','bad');}
+  if(!confirm(`Send "${subject}" to ${uids.length} student${uids.length===1?'':'s'}?`))return;
+  cmpBusy=true;gid('cmpSend').disabled=true;gid('cmpCancel').disabled=true;cmpMsg('Sending…');
+  const wantEmail=gid('cmpEmail').checked&&NOTIFY_READY;
+  const id=db.ref().push().key,now=Date.now(),fromName=me.displayName||'Your instructor',recipients={};
+  uids.forEach(u=>recipients[u]=true);
+  const up={};
+  up[`messages/${id}`]={subject,body,sentAt:now,fromUid:me.uid,fromName,audience:all?'all':'selected',recipients,email:wantEmail?{requested:true,status:'pending'}:{requested:false,status:'off'}};
+  uids.forEach(u=>up[`inbox/${u}/${id}`]={subject,body,sentAt:now,fromName});
+  try{
+    await db.ref(APP_KEY).update(up);
+  }catch(e){
+    cmpBusy=false;gid('cmpSend').disabled=false;gid('cmpCancel').disabled=false;
+    return cmpMsg('Could not send: '+e.message,'bad');
+  }
+  let txt=`Delivered to ${uids.length} book${uids.length===1?'':'s'}.`,cls='good';
+  if(wantEmail){
+    cmpMsg(txt+' Sending emails…');
+    try{
+      const idToken=await me.getIdToken();
+      const r=await fetch(NOTIFY_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({idToken,msgId:id})});
+      const j=await r.json();
+      if(j.ok)txt+=` ${j.sent} email${j.sent===1?'':'s'} sent`+(j.skipped?` (${j.skipped} skipped: no valid email)`:'')+'.';
+      else{cls='bad';txt+=` Email problem: ${j.error||('sent '+j.sent+', failed '+j.failed)}. The message is still in the students’ books.`;}
+    }catch(e){
+      cls='bad';txt+=` Emails could not be sent (${e.message}). The message is still in the students’ books.`;
+      try{await db.ref(`${APP_KEY}/messages/${id}/email`).update({status:'failed',failed:uids.length,at:Date.now(),error:String(e.message).slice(0,200)});}catch(_){}
+    }
+  }
+  cmpBusy=false;gid('cmpCancel').disabled=false;gid('cmpCancel').textContent='Close';
+  cmpMsg(txt,cls);
+  loadMessages();
+}
+document.addEventListener('keydown',e=>{
+  if(gid('cmpBack').hidden)return;
+  if(e.key==='Escape'){closeComposer();return;}
+  if(e.key==='Tab'){
+    const f=[...gid('cmpBack').querySelectorAll('button,input,textarea,[href]')].filter(x=>!x.disabled&&!x.closest('[hidden]'));
+    if(!f.length)return;const a=f[0],z=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}
+    else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}
+  }
+});
 
 /* ===== Boot ===== */
 if(FIREBASE_READY){
