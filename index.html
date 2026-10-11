@@ -357,6 +357,9 @@ header.topbar{position:static;top:auto;box-shadow:none}
 .phase-divider{display:flex;align-items:center;gap:16px;margin:46px 0 24px;padding:18px 22px;border-radius:16px;background:color-mix(in srgb,var(--pd-color,var(--accent)) 9%,#fff);border:1px solid color-mix(in srgb,var(--pd-color,var(--accent)) 35%,var(--line));box-shadow:var(--shadow)}
 .phase-divider .pd-num{width:46px;height:46px;flex:none;border-radius:13px;background:var(--pd-color,var(--accent));color:#fff;font-family:'Space Grotesk';font-weight:700;font-size:1.35rem;display:grid;place-items:center}
 .phase-divider .pd-body{min-width:0}
+.phase-divider.pd-toggle{cursor:pointer;width:100%;text-align:left;font:inherit;color:inherit}
+.phase-divider .pd-chev{margin-left:auto;font-size:1.3rem;transition:transform .2s;flex:none}
+.phase-divider[aria-expanded="false"] .pd-chev{transform:rotate(-90deg)}
 .phase-divider .pd-title{font-family:'Space Grotesk';font-weight:700;font-size:1.15rem;color:var(--pd-color,var(--accent));text-transform:uppercase;letter-spacing:.04em}
 .phase-divider .pd-sub{font-size:.86rem;color:var(--ink-soft);font-weight:600;margin-top:2px}
 
@@ -4056,6 +4059,22 @@ function submitExit(chId){
   logEvent('submit_exit',chId);
   scheduleSave();
 }
+/* ---------- Collapsible phases: each phase-divider toggles everything up to the next divider ---------- */
+(function initPhaseToggles(){
+  document.querySelectorAll('.view .phase-divider').forEach((pd,i)=>{
+    const body=document.createElement('div'); body.className='pd-content'; body.id='pdc-'+i;
+    let n=pd.nextElementSibling;
+    while(n&&!n.classList.contains('phase-divider')&&!n.classList.contains('pager')){const nx=n.nextElementSibling; body.appendChild(n); n=nx;}
+    pd.after(body);
+    pd.classList.add('pd-toggle'); pd.setAttribute('role','button'); pd.tabIndex=0;
+    pd.setAttribute('aria-expanded','true'); pd.setAttribute('aria-controls',body.id);
+    pd.insertAdjacentHTML('beforeend','<span class="pd-chev" aria-hidden="true">▾</span>');
+    const tog=()=>{const o=pd.getAttribute('aria-expanded')!=='true'; pd.setAttribute('aria-expanded',o); body.hidden=!o;};
+    pd.addEventListener('click',tog);
+    pd.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  });
+})();
+
 /* ---------- My Submissions (read-only view of the student's own saved work) ---------- */
 function renderMySubs(){
   const wrap=document.getElementById('mysubsWrap'); if(!wrap)return;
