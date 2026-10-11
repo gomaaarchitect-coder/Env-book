@@ -327,6 +327,12 @@ header.topbar{position:static;top:auto;box-shadow:none}
 .weekgroup a{margin:2px 0}
 .toc a.event{border:1px dashed var(--line)}
 .toc a.locked{opacity:.55}
+.ms-week{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 22px;margin:0 0 18px;box-shadow:var(--shadow)}
+.ms-week h3{margin:0 0 6px;font-family:'Space Grotesk'}
+.ms-week h4{margin:16px 0 4px;font-size:.92rem}
+.ms-ts{font-weight:400;color:var(--ink-soft);font-size:.8rem}
+.ms-lbl{margin:10px 0 2px;font-size:.8rem;font-weight:700;color:var(--ink-soft)}
+.ms-txt{margin:0;white-space:pre-wrap;background:#F8FAF9;border-radius:10px;padding:8px 12px}
 .toc a.locked::after{content:'🔒';margin-left:6px}
 .toc a.event .num{background:var(--ink)!important;font-size:.95rem}
 .toc a.event .t{color:var(--ink-soft);font-style:italic}
@@ -339,6 +345,7 @@ header.topbar{position:static;top:auto;box-shadow:none}
 .pagehead.ai{background:linear-gradient(135deg,#7C3AED,#2563EB)}
 .pagehead.hub{background:linear-gradient(135deg,#2563EB,#0F3E8F)}
 .pagehead.event{background:linear-gradient(135deg,#475569,#1F2937)}
+.pagehead.mysubs{background:linear-gradient(135deg,#0E7C5A,#0B5A42)}
 .pagehead.thisweek{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#000))}
 
 /* ---------- Chapter head extras: week badge + deck reference ---------- */
@@ -610,6 +617,7 @@ header.topbar{position:static;top:auto;box-shadow:none}
     <h2>Your course</h2>
     <a data-go="home" onclick="navTo('home')"><span class="num" style="background:#14202B">★</span> Cover &amp; Contents</a>
     <a data-go="thisweek" onclick="navTo('thisweek')"><span class="num" style="background:var(--accent)">◷</span> This Week</a>
+    <a data-go="mysubs" onclick="navTo('mysubs')"><span class="num" style="background:#0E7C5A">✔</span> My Submissions</a>
     <a data-go="aipolicy" onclick="navTo('aipolicy')"><span class="num" style="background:linear-gradient(135deg,#7C3AED,#2563EB)">✦</span> AI Policy</a>
     <a data-go="projecthub" onclick="navTo('projecthub')"><span class="num" style="background:#2563EB">⌂</span> Project Hub</a>
 
@@ -2607,6 +2615,15 @@ header.topbar{position:static;top:auto;box-shadow:none}
 
   
   <!-- ================= THIS WEEK (landing) ================= -->
+  <div class="view" id="view-mysubs" data-accent="#0E7C5A">
+    <div class="pagehead mysubs">
+      <div class="lbl">My Submissions</div>
+      <h1>Everything you have submitted</h1>
+      <p>A read-only record of your work, week by week. To change an answer, go back to that chapter.</p>
+    </div>
+    <div id="mysubsWrap"></div>
+  </div>
+
   <div class="view" id="view-thisweek" data-accent="#F59E0B">
     <div class="pagehead thisweek">
       <div class="lbl">This Week</div>
@@ -3956,6 +3973,7 @@ function navTo(id){
     logEvent('open_chapter',id);
   } else if(id==='ai'){ logEvent('open_ai_section',''); }
   else if(id==='thisweek'){ renderThisWeek(); }
+  else if(id==='mysubs'){ renderMySubs(); }
   document.querySelectorAll('#view-'+id+' iframe[data-src]').forEach(f=>{ if(!f.src){f.src=f.dataset.src; logEvent('open_calculator',f.dataset.src);} });
   renderProgress();
   document.getElementById('toc').classList.remove('open');
@@ -4037,6 +4055,47 @@ function submitExit(chId){
   if(c)c.classList.add('show');
   logEvent('submit_exit',chId);
   scheduleSave();
+}
+/* ---------- My Submissions (read-only view of the student's own saved work) ---------- */
+function renderMySubs(){
+  const wrap=document.getElementById('mysubsWrap'); if(!wrap)return;
+  const e=x=>String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const when=ts=>ts?' <span class="ms-ts">· '+new Date(ts).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</span>':'';
+  const txt=t=>'<p class="ms-txt" dir="auto">'+e(t)+'</p>';
+  const cards=WEEKS.map(w=>{
+    const out=[], chs=w.chapters||[];
+    const wkeys=w.id==='W11'?['w11','w12']:[w.id.toLowerCase()];
+    chs.forEach(ch=>{
+      const pr=appData.prep&&appData.prep[ch];
+      if(pr&&pr.attempts)out.push('<h4>Prep quiz</h4><p>'+(pr.passed?'✓ Passed 5/5':'Not yet 5/5')+' — '+pr.attempts+' attempt'+(pr.attempts===1?'':'s')+when(pr.ts)+'</p>');
+      const hy=appData.hyp&&appData.hyp[ch];
+      if(hy&&hy.text)out.push('<h4>Opening-challenge hypothesis'+when(hy.ts)+'</h4>'+txt(hy.text));
+      Object.keys(appData.answers||{}).filter(k=>k.startsWith(ch+'-')).sort().forEach(k=>{
+        const a=appData.answers[k]; if(a&&(a.text||'').trim())out.push('<h4>Exercise '+e(k.slice(ch.length+1))+when(a.updated)+'</h4>'+txt(a.text));
+      });
+      const ex=appData.exit&&appData.exit[ch];
+      if(ex&&(ex.transfer||ex.muddiest))out.push('<h4>Exit ticket'+when(ex.ts)+'</h4>'+(ex.transfer?'<p class="ms-lbl">Transfer</p>'+txt(ex.transfer):'')+(ex.muddiest?'<p class="ms-lbl">Muddiest point</p>'+txt(ex.muddiest):''));
+    });
+    wkeys.forEach(wk=>{
+      const st=appData.starter&&appData.starter[wk], qs=COURSE_CONTENT.starters[wk];
+      if(st&&(st.answers||[]).some(a=>a&&String(a).trim())){
+        out.push('<h4>Retrieval starter'+(wkeys.length>1?' ('+wk.toUpperCase()+')':'')+(typeof st.total==='number'?' — self-score '+st.total+'/15':'')+when(st.ts)+'</h4>'+
+          (st.answers||[]).map((a,i)=>a&&String(a).trim()?'<p class="ms-lbl">Q'+(i+1)+(qs&&qs[i]?': '+e(qs[i].q):'')+'</p>'+txt(a):'').join(''));
+      }
+      const sp=appData.setp&&appData.setp[wk], set=COURSE_CONTENT.sets[wk];
+      if(sp&&set){
+        const items=set.problems.map(p=>{
+          const a=(sp.answers||[])[p.n], done=(sp.attempted||[]).includes(p.n);
+          if(a==null&&!done)return '';
+          const shown=p.type==='mcq'&&p.opts?(typeof a==='number'?p.opts[a]:''):(p.type==='handwritten'?'Marked as submitted (handwritten)':a);
+          return '<p class="ms-lbl">Problem '+p.n+': '+e(p.q)+'</p>'+txt(shown||'—');
+        }).join('');
+        if(items)out.push('<h4>Practice set'+(wkeys.length>1?' ('+wk.toUpperCase()+')':'')+' — '+(sp.attempted||[]).length+'/'+set.problems.length+when(sp.ts)+'</h4>'+items);
+      }
+    });
+    return out.length?'<section class="ms-week"><h3>'+e(w.label)+' · '+e(w.title)+'</h3>'+out.join('')+'</section>':'';
+  }).join('');
+  wrap.innerHTML=cards||'<p>You haven\'t submitted anything yet. Your work will appear here as soon as you save it.</p>';
 }
 function applyHypExit(){
   Object.entries(appData.hyp||{}).forEach(([k,v])=>{
