@@ -84,7 +84,17 @@ tbody tr:hover{background:#F8FBF9}
 .detail{background:#FAFCFB}
 .detail td{white-space:normal;padding:0}
 .detail-inner{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media(max-width:760px){.detail-inner{grid-template-columns:1fr}}
+@media(max-width:760px){.detail-inner{grid-template-columns:1fr}
+  .masthead{position:static;flex-wrap:wrap;padding:10px 14px;gap:10px}
+  .crest{width:36px;height:36px;font-size:.9rem}
+  .mast-lines .l1,.mast-lines .l2{display:none}
+  .top-actions{flex-wrap:wrap;width:100%;gap:6px}
+  .top-actions .who{flex-basis:100%;max-width:none}
+  .top-actions .btn{padding:9px 12px;min-height:44px}}
+.lock-grid{display:flex;flex-wrap:wrap;gap:8px}
+.lock-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:11px;padding:10px 14px;font-weight:700;font-size:.84rem;min-height:44px}
+.lock-btn[aria-pressed="true"]{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.wk-work{font-size:.82rem;margin:0 0 6px}
 .detail h3{margin:0 0 8px;font-size:1rem}
 .ans{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;background:#fff}
 .ans .k{font-weight:700;font-size:.78rem;color:var(--accent)}
@@ -299,6 +309,13 @@ details.answers summary:hover{color:var(--accent)}
       <div id="msgList"><p class="muted">Sign in to load data…</p></div>
     </section>
 
+    <section class="dash-sec" id="sec-locks">
+      <h2>Lock / unlock weeks</h2>
+      <p class="lede">Locked weeks are hidden from students in the book (they see a 🔒 notice). Tap a week to toggle. Locking never deletes any student work.</p>
+      <div class="lock-grid" id="lockGrid"><p class="muted">Sign in to load…</p></div>
+      <div class="cmp-status" id="lockStatus" role="status" aria-live="polite"></div>
+    </section>
+
     <h2 style="margin:44px 0 4px;font-size:1.3rem">Weekly Analytics</h2>
     <p class="muted" style="margin:0 0 16px;font-size:.85rem">Early-warning signals and question-level analytics, computed live from each student's logged prep-quiz, starter, hypothesis, exit-ticket and practice-set data.</p>
     <div class="controls">
@@ -453,8 +470,10 @@ async function load(){
     rows=[];
     snap.forEach(ch=>{const v=ch.val();if(v&&v.data)rows.push(summarize(ch.key,v.data));});
     render();
+    pickLatestWeek();
     renderAnalytics();
     loadMessages();
+    loadLocks();
   }catch(e){
     document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">No access.</td></tr>';
     document.getElementById('authNotice').innerHTML=
@@ -511,8 +530,17 @@ function detailHtml(r){
   const chatHtml=msgs.length?msgs.map(m=>m.role==='divider'
       ?`<div class="who" style="text-align:center;margin:6px 0;opacity:.6">— new conversation · ${fmtDate(m.ts)} —</div>`
       :`<div class="bubble ${m.role==='user'?'u':'a'}"><div class="who">${m.role==='user'?'Student':'Assistant'} · ${fmtDate(m.ts)}</div>${esc(m.content)}</div>`).join(''):'<p class="muted">No conversations yet.</p>';
+  const wk=WEEK_MAP.map(w=>{
+    const ch=w.chapters[0], bits=[];
+    const pr=ch&&d.prep&&d.prep[ch]; if(pr)bits.push('Prep quiz: '+(pr.passed?'passed':'not passed')+' ('+(pr.attempts||0)+'x)');
+    const st=w.starterKey&&d.starter&&d.starter[w.starterKey]; if(st&&typeof st.total==='number')bits.push('Starter: '+st.total+'/15');
+    const hy=ch&&d.hyp&&d.hyp[ch]; if(hy&&hy.text)bits.push('Hypothesis: “'+esc(hy.text)+'”');
+    const ex=ch&&d.exit&&d.exit[ch]; if(ex&&(ex.transfer||ex.muddiest))bits.push('Exit ticket: done');
+    const sp=w.setKey&&d.setp&&d.setp[w.setKey]; if(sp)bits.push('Practice set: '+(sp.attempted||[]).length+'/'+(SET_TOTALS[w.setKey]||6));
+    return bits.length?`<p class="wk-work"><b>${esc(w.label)}</b> — ${bits.join(' · ')}</p>`:'';
+  }).join('')||'<p class="muted">No weekly work yet.</p>';
   return `<div class="detail-inner">
-    <div><h3>✍ Written answers (${ans.length})</h3>${ansHtml}<h3 style="margin-top:14px">Chapter activity</h3><p class="muted" style="font-size:.8rem">${cs}</p></div>
+    <div><h3>📅 Weekly work</h3>${wk}<h3 style="margin-top:14px">✍ Written answers (${ans.length})</h3>${ansHtml}<h3 style="margin-top:14px">Chapter activity</h3><p class="muted" style="font-size:.8rem">${cs}</p></div>
     <div><h3>✦ Live Assistant chat (${userCount} student message${userCount===1?'':'s'})</h3><div class="chatlog">${chatHtml}</div>
     <h3 style="margin-top:14px">🕑 Activity timeline</h3><div class="tl">${evHtml}</div></div>
   </div>`;
@@ -741,6 +769,38 @@ function renderAnalytics(){
   const sel=document.getElementById('dashWeek');
   if(sel)sel.innerHTML=WEEK_MAP.map(w=>`<option value="${w.n}">${w.label}</option>`).join('');
 })();
+
+/* Open Weekly Analytics on the latest week that has any student work (not always Week 1) */
+let weekPicked=false;
+function pickLatestWeek(){
+  if(weekPicked)return; const sel=document.getElementById('dashWeek'); if(!sel)return;
+  let best=1;
+  WEEK_MAP.forEach(w=>{const ch=w.chapters[0];
+    if(rows.some(r=>{const d=r.data||{};return (ch&&((d.prep&&d.prep[ch])||(d.hyp&&d.hyp[ch])||(d.exit&&d.exit[ch])))||(w.starterKey&&d.starter&&d.starter[w.starterKey])||(w.setKey&&d.setp&&d.setp[w.setKey]);}))best=w.n;});
+  sel.value=String(best); weekPicked=true;
+}
+
+/* ===== Week locks: iedbook/settings/locked/$chId = true ===== */
+let locked={};
+async function loadLocks(){
+  try{ locked=(await db.ref(`${APP_KEY}/settings/locked`).get()).val()||{}; renderLocks(); }
+  catch(e){ document.getElementById('lockGrid').innerHTML='<p class="muted">Could not load locks: '+esc(e.message)+'</p>'; }
+}
+function renderLocks(){
+  document.getElementById('lockGrid').innerHTML=WEEK_MAP.filter(w=>w.chapters.length).map(w=>{
+    const on=w.chapters.every(c=>locked[c]);
+    return `<button type="button" class="lock-btn" aria-pressed="${on}" onclick="toggleLock(${w.n},this)">${on?'🔒':'🔓'} ${esc(w.label)}</button>`;
+  }).join('');
+}
+async function toggleLock(n,btn){
+  const w=WEEK_MAP.find(x=>x.n===n); const lock=!w.chapters.every(c=>locked[c]);
+  const st=document.getElementById('lockStatus'); btn.disabled=true;
+  const upd={}; w.chapters.forEach(c=>upd[c]=lock?true:null);
+  try{ await db.ref(`${APP_KEY}/settings/locked`).update(upd);
+    w.chapters.forEach(c=>{if(lock)locked[c]=true; else delete locked[c];});
+    renderLocks(); st.textContent=w.label+(lock?' locked.':' unlocked.');
+  }catch(e){ st.textContent='Could not save: '+e.message; btn.disabled=false; }
+}
 
 /* ===== Delete a student (removes ALL their records from the book) ===== */
 async function deleteStudent(uid,btn){

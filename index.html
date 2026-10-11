@@ -326,6 +326,8 @@ header.topbar{position:static;top:auto;box-shadow:none}
 .weekgroup .grouplbl{display:flex;align-items:center;gap:8px;font-size:.66rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.1em;padding:2px 4px 6px}
 .weekgroup a{margin:2px 0}
 .toc a.event{border:1px dashed var(--line)}
+.toc a.locked{opacity:.55}
+.toc a.locked::after{content:'🔒';margin-left:6px}
 .toc a.event .num{background:var(--ink)!important;font-size:.95rem}
 .toc a.event .t{color:var(--ink-soft);font-style:italic}
 
@@ -3936,6 +3938,7 @@ CH.forEach(c=>{
 
 /* ---------- Navigation ---------- */
 function navTo(id){
+  if(lockedCh[id]){ showLockedNotice(id); return; }
   const v=document.getElementById('view-'+id); if(!v)return;
   leaveChapter();
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('show'));
@@ -4356,6 +4359,7 @@ function showLogin(){document.getElementById('loginScreen').hidden=false;documen
 function showApp(user){
   document.getElementById('loginScreen').hidden=true;
   startInbox(user.uid);
+  startLocks();
   const chip=document.getElementById('userChip'); chip.hidden=false;
   document.getElementById('userName').textContent=(appData.profile&&appData.profile.name)||user.displayName||user.email||'Student';
 }
@@ -4376,6 +4380,26 @@ async function signUpWithEmail(){
   if(!em||pw.length<6){showLoginError('Enter your email and a password of at least 6 characters.');return;}
   try{ await auth.createUserWithEmailAndPassword(em,pw); }catch(err){ showLoginError(err.message); }
 }
+/* ---------- Instructor week locks (iedbook/settings/locked/$chId = true; set from the dashboard) ---------- */
+let lockedCh={}, lockRef=null;
+function startLocks(){
+  if(!db||lockRef)return;
+  lockRef=db.ref(`${APP_KEY}/settings/locked`);
+  lockRef.on('value',snap=>{
+    lockedCh=snap.val()||{};
+    document.querySelectorAll('.toc a[data-go]').forEach(a=>{
+      const l=!!lockedCh[a.dataset.go]; a.classList.toggle('locked',l);
+      if(l)a.setAttribute('aria-disabled','true'); else a.removeAttribute('aria-disabled');
+    });
+    if(curChapter&&lockedCh[curChapter])navTo('thisweek');
+  },()=>{});
+}
+function stopLocks(){ if(lockRef){lockRef.off();lockRef=null;} lockedCh={}; }
+function showLockedNotice(id){
+  const meta=CH.find(x=>x.id===id);
+  alert('🔒 '+(meta?('Chapter '+meta.n+' — '+meta.t):'This chapter')+' is not open yet. Your instructor will unlock it when the class reaches it.');
+}
+
 /* ---------- Instructor messages (inbox lives at iedbook/inbox/$uid — never inside appData) ---------- */
 let inboxData={}, inboxRef=null, msgOpen=new Set(), msgLastFocus=null;
 function startInbox(uid){
@@ -4469,7 +4493,7 @@ if(FIREBASE_READY){
         logEvent('login','');
         showApp(user); applyData(); navTo('thisweek'); checkMsgHash();
       }
-    } else { stopInbox(); showLogin(); }
+    } else { stopInbox(); stopLocks(); showLogin(); }
   });
 }else{
   /* Local-only mode until Firebase is configured */

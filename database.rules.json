@@ -2,7 +2,9 @@
   "rules": {
     "iedbook": {
       ".read": "root.child('iedbook/admins').child(auth.uid).exists()",
-      "admins": { ".read": "auth != null" },
+      "admins": {
+        ".read": "auth != null"
+      },
       "users": {
         "$uid": {
           ".read": "$uid === auth.uid || root.child('iedbook/admins').child(auth.uid).exists()",
@@ -23,6 +25,10 @@
             }
           }
         }
+      },
+      "settings": {
+        ".read": "auth != null",
+        ".write": "root.child('iedbook/admins').child(auth.uid).exists()"
       }
     }
   }
