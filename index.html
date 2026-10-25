@@ -3916,21 +3916,28 @@ function loadLocal(){try{return JSON.parse(localStorage.getItem(cacheKey())||'nu
 /* ---------- Cloud sync (skill patterns) ---------- */
 let saveTimer=null;
 function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveToCloud,800);}
+let cloudLoaded=false;   // never write the whole record until the cloud copy has actually been read
 async function saveToCloud(){
   saveLocal();
-  if(!FIREBASE_READY||!currentUid)return;
+  if(!FIREBASE_READY||!currentUid||!cloudLoaded)return;
   try{ await db.ref(`${APP_KEY}/users/${currentUid}/data`).set(appData); showSync('synced'); }
   catch(err){ showSync('error',err.message); }
 }
 async function loadFromCloud(uid){           // called ONLY from onAuthStateChanged
+  cloudLoaded=false;
   showSync('loading');
-  const to=setTimeout(()=>showSync('offline'),8000);
-  try{
-    const snap=await db.ref(`${APP_KEY}/users/${uid}/data`).get();
-    clearTimeout(to);
-    appData = snap.exists() ? Object.assign(defaultData(),snap.val()) : (loadLocal()||defaultData());
-    showSync('synced');
-  }catch(err){ clearTimeout(to); appData=loadLocal()||defaultData(); showSync('error',err.message); }
+  for(let attempt=1;;attempt++){
+    try{
+      // once('value') waits for the connection, unlike get() which can fail with "client is offline" right after sign-in
+      const snap=await Promise.race([db.ref(`${APP_KEY}/users/${uid}/data`).once('value'),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),15000))]);
+      appData = snap.exists() ? Object.assign(defaultData(),snap.val()) : (loadLocal()||defaultData());
+      cloudLoaded=true; showSync('synced'); return;
+    }catch(err){
+      showSync('error','Could not load your saved work — retrying… ('+err.message+')');
+      await new Promise(r=>setTimeout(r,Math.min(2000*attempt,10000)));
+    }
+  }
 }
 function showSync(state,msg=''){
   const el=document.getElementById('sync-status'); if(!el)return;
@@ -4682,7 +4689,7 @@ if(FIREBASE_READY){
         logEvent('login','');
         showApp(user); applyData(); navTo('thisweek'); checkMsgHash();
       }
-    } else { stopInbox(); stopLocks(); stopTaskLocks(); showLogin(); }
+    } else { cloudLoaded=false; stopInbox(); stopLocks(); stopTaskLocks(); showLogin(); }
   });
 }else{
   /* Local-only mode until Firebase is configured */
