@@ -204,6 +204,15 @@ details.answers summary:hover{color:var(--accent)}
 .exit-item .ei-name{font-weight:700;font-family:'Space Grotesk';font-size:.8rem}
 .exit-item .ei-lbl{font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.04em;margin-top:6px}
 .exit-item p{margin:2px 0 0;white-space:pre-wrap}
+.tl-table{width:100%;border-collapse:collapse;font-size:.84rem}
+.tl-table th,.tl-table td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+.tl-cell{display:flex;flex-direction:column;gap:6px;min-width:150px}
+.tl-cell input[type=datetime-local]{min-height:44px;border:1px solid var(--line);border-radius:9px;padding:6px 8px;font:inherit;font-size:.8rem}
+.wl-item{border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin:0 0 8px;background:#fff}
+.wl-flag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.74rem;font-weight:700;background:var(--bad-bg);color:var(--bad)}
+.wl-ok{background:var(--good-bg);color:var(--good)}
+.wl-replay{white-space:pre-wrap;background:#FBFAF4;border:1px dashed var(--line);border-radius:8px;padding:8px;margin-top:6px;max-height:200px;overflow:auto;font-size:.84rem}
+.wl-item input[type=range]{width:100%;min-height:44px}
 </style>
 </head>
 <body>
@@ -314,6 +323,13 @@ details.answers summary:hover{color:var(--accent)}
       <p class="lede">Locked weeks are hidden from students in the book (they see a 🔒 notice). Tap a week to toggle. Locking never deletes any student work.</p>
       <div class="lock-grid" id="lockGrid"><p class="muted">Sign in to load…</p></div>
       <div class="cmp-status" id="lockStatus" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="dash-sec" id="sec-tasklocks">
+      <h2>Lock / unlock tasks &amp; deadlines</h2>
+      <p class="lede">Close any single task in a chapter, or set a deadline after which it closes automatically. Students keep their saved work and see a 🔒 or ⏰ notice. Times are your local time.</p>
+      <div style="overflow-x:auto"><table class="tl-table" id="taskLockTable"><tbody><tr><td class="muted">Sign in to load…</td></tr></tbody></table></div>
+      <div class="cmp-status" id="taskLockStatus" role="status" aria-live="polite"></div>
     </section>
 
     <h2 style="margin:44px 0 4px;font-size:1.3rem">Weekly Analytics</h2>
@@ -474,6 +490,7 @@ async function load(){
     renderAnalytics();
     loadMessages();
     loadLocks();
+    loadTaskLocks();
   }catch(e){
     document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">No access.</td></tr>';
     document.getElementById('authNotice').innerHTML=
@@ -540,7 +557,7 @@ function detailHtml(r){
     return bits.length?`<p class="wk-work"><b>${esc(w.label)}</b> — ${bits.join(' · ')}</p>`:'';
   }).join('')||'<p class="muted">No weekly work yet.</p>';
   return `<div class="detail-inner">
-    <div><h3>📅 Weekly work</h3>${wk}<h3 style="margin-top:14px">✍ Written answers (${ans.length})</h3>${ansHtml}<h3 style="margin-top:14px">Chapter activity</h3><p class="muted" style="font-size:.8rem">${cs}</p></div>
+    <div><h3>📅 Weekly work</h3>${wk}<h3 style="margin-top:14px">✍ Written answers (${ans.length})</h3>${ansHtml}<h3 style="margin-top:14px">⌨ Writing activity</h3>${wlHtml(r)}<h3 style="margin-top:14px">Chapter activity</h3><p class="muted" style="font-size:.8rem">${cs}</p></div>
     <div><h3>✦ Live Assistant chat (${userCount} student message${userCount===1?'':'s'})</h3><div class="chatlog">${chatHtml}</div>
     <h3 style="margin-top:14px">🕑 Activity timeline</h3><div class="tl">${evHtml}</div></div>
   </div>`;
@@ -800,6 +817,87 @@ async function toggleLock(n,btn){
     w.chapters.forEach(c=>{if(lock)locked[c]=true; else delete locked[c];});
     renderLocks(); st.textContent=w.label+(lock?' locked.':' unlocked.');
   }catch(e){ st.textContent='Could not save: '+e.message; btn.disabled=false; }
+}
+
+/* ===== Task locks + deadlines: iedbook/settings/taskLocks/{chId}_{task} = {closed:true} | {due:ms} ===== */
+let taskLocks={};
+const TASKS=[['prep','Prep quiz'],['starter','Starter'],['hyp','Opening challenge'],['ex','Exercises'],['exit','Exit ticket'],['set','Practice set']];
+const TL_CHAPTERS=[...new Set(WEEK_MAP.flatMap(w=>w.chapters))];
+function chWeeks(ch){return WEEK_MAP.filter(w=>w.chapters.includes(ch));}
+function tlLocalVal(ms){if(!ms)return'';const d=new Date(ms-new Date(ms).getTimezoneOffset()*60000);return d.toISOString().slice(0,16);}
+async function loadTaskLocks(){
+  try{ taskLocks=(await db.ref(`${APP_KEY}/settings/taskLocks`).get()).val()||{}; renderTaskLocks(); }
+  catch(e){ document.getElementById('taskLockTable').innerHTML='<tbody><tr><td class="muted">Could not load task locks: '+esc(e.message)+'</td></tr></tbody>'; }
+}
+function renderTaskLocks(){
+  const now=Date.now();
+  const head='<thead><tr><th scope="col">Chapter</th>'+TASKS.map(t=>'<th scope="col">'+t[1]+'</th>').join('')+'</tr></thead>';
+  const body=TL_CHAPTERS.map(ch=>{
+    const ws=chWeeks(ch);
+    return '<tr><th scope="row">'+esc(ch.toUpperCase())+'<div class="muted" style="font-weight:400;font-size:.75rem">'+esc(ws.map(w=>w.label).join(', '))+'</div></th>'+TASKS.map(([t,label])=>{
+      if(t==='starter'&&!ws.some(w=>w.starterKey))return'<td class="muted">—</td>';
+      if(t==='set'&&!ws.some(w=>w.setKey))return'<td class="muted">—</td>';
+      const k=ch+'_'+t, v=taskLocks[k]||{}, past=v.due&&now>=v.due, on=!!v.closed;
+      const state=on?'🔒 Closed':(past?'⌛ Deadline passed':(v.due?'⏰ Due':'🔓 Open'));
+      return `<td><div class="tl-cell"><button type="button" class="lock-btn" aria-pressed="${on}" aria-label="${esc(label)} ${esc(ch)}: ${on?'closed, tap to reopen':'open, tap to close'}" onclick="toggleTaskLock('${k}',this)">${state}</button>
+        <label class="muted" style="font-size:.74rem" for="due-${k}">Deadline</label>
+        <input type="datetime-local" id="due-${k}" value="${tlLocalVal(v.due)}" onchange="setTaskDue('${k}',this)"></div></td>`;
+    }).join('')+'</tr>';
+  }).join('');
+  document.getElementById('taskLockTable').innerHTML=head+'<tbody>'+body+'</tbody>';
+}
+async function saveTaskLock(k,v,msg){
+  const st=document.getElementById('taskLockStatus');
+  const clean=(v.closed||v.due)?v:null;
+  try{ await db.ref(`${APP_KEY}/settings/taskLocks/${k}`).set(clean);
+    if(clean)taskLocks[k]=clean; else delete taskLocks[k];
+    renderTaskLocks(); st.className='cmp-status good'; st.textContent=msg;
+  }catch(e){ st.className='cmp-status bad'; st.textContent='Could not save: '+e.message; }
+}
+function toggleTaskLock(k,btn){
+  const v=Object.assign({},taskLocks[k]||{}); btn.disabled=true;
+  if(v.closed)delete v.closed; else v.closed=true;
+  saveTaskLock(k,v,k.replace('_',' · ')+(v.closed?' closed.':' reopened.'));
+}
+function setTaskDue(k,inp){
+  const v=Object.assign({},taskLocks[k]||{});
+  if(inp.value)v.due=new Date(inp.value).getTime(); else delete v.due;
+  saveTaskLock(k,v,k.replace('_',' · ')+(v.due?' deadline set to '+new Date(v.due).toLocaleString()+'.':' deadline removed.'));
+}
+
+/* ===== Writing activity (appData.writeLog) shown in each student's detail panel ===== */
+const WL_STORE={};
+function wlLabel(id){
+  let m;
+  if((m=id.match(/^ans-(.+)$/)))return'Exercise '+m[1];
+  if((m=id.match(/^hyp-(.+)$/)))return m[1]+' · Opening challenge';
+  if((m=id.match(/^exitTransfer-(.+)$/)))return m[1]+' · Exit ticket (transfer)';
+  if((m=id.match(/^exitMuddy-(.+)$/)))return m[1]+' · Exit ticket (muddiest point)';
+  if((m=id.match(/^stA-(.+)-(\d+)$/)))return m[1]+' · Starter Q'+(Number(m[2])+1);
+  if((m=id.match(/^setIn-(.+)-(\d+)$/)))return m[1]+' · Practice set P'+m[2];
+  return id;
+}
+function wlHtml(r){
+  const log=r.data.writeLog||{}, ids=Object.keys(log).sort();
+  if(!ids.length)return'<p class="muted">No writing activity recorded yet (recording started 25 Oct 2026).</p>';
+  WL_STORE[r.uid]=log;
+  return ids.map((id,i)=>{
+    const w=log[id], tot=(w.typed||0)+(w.pasted||0), pct=tot?Math.round(100*(w.pasted||0)/tot):0;
+    const flag=(w.pastes||[]).length?`<span class="wl-flag">${pct}% pasted · ${(w.pastes||[]).length} paste${w.pastes.length===1?'':'s'}</span>`:'<span class="wl-flag wl-ok">typed only</span>';
+    const pastes=(w.pastes||[]).map(p=>`<div class="meta">${fmtDate(p.t)} · ${p.n} chars</div><div class="wl-replay">${esc(p.s)}${p.n>300?'…':''}</div>`).join('');
+    const sn=w.snaps||[], rid='wl-'+r.uid+'-'+i;
+    const replay=sn.length?`<label class="muted" style="font-size:.78rem" for="${rid}">Draft replay (${sn.length} snapshots)</label>
+      <input type="range" id="${rid}" min="0" max="${sn.length-1}" value="${sn.length-1}" oninput="wlShow('${r.uid}','${esc(id)}',this)">
+      <div class="meta" id="${rid}-t">${fmtDate(sn[sn.length-1].t)}</div><div class="wl-replay" id="${rid}-v">${esc(sn[sn.length-1].v)}</div>`:'';
+    return `<details class="wl-item"><summary><b>${esc(wlLabel(id))}</b> ${flag}</summary>
+      <p class="meta">Typed ${w.typed||0} chars · pasted ${w.pasted||0} chars · ~${Math.round((w.activeMs||0)/60000)} min active · ${fmtDate(w.start)} → ${fmtDate(w.last)}</p>
+      ${pastes?'<h4 style="margin:8px 0 4px;font-size:.8rem">Pasted text</h4>'+pastes:''}${replay}</details>`;
+  }).join('');
+}
+function wlShow(uid,id,inp){
+  const s=(WL_STORE[uid][id].snaps||[])[Number(inp.value)]; if(!s)return;
+  document.getElementById(inp.id+'-t').textContent=fmtDate(s.t);
+  document.getElementById(inp.id+'-v').textContent=s.v;
 }
 
 /* ===== Delete a student (removes ALL their records from the book) ===== */

@@ -545,6 +545,9 @@ header.topbar{position:static;top:auto;box-shadow:none}
 .event-list li{margin:8px 0}
 
 @media (max-width:880px){.your-answer,.reveal,.done-row,.struggle-zone,.exit-panel{margin-left:0}}
+.task-lock-banner{margin:10px 0;padding:12px 16px;border-radius:12px;font-weight:700;font-size:.9rem;background:#FEE2E2;color:#7F1D1D;border:1px solid #B91C1C}
+.task-lock-banner.due{background:#FEF3C7;color:#78350F;border-color:#92400E}
+.task-closed{opacity:.55;filter:grayscale(.4)}
 </style>
 </head>
 <body>
@@ -4027,6 +4030,7 @@ function applyData(){
   renderThisWeek();
   renderProgress();
   renderConflictLog();
+  applyTaskLocks();
 }
 
 /* ---------- Opening Challenge hypotheses + Exit tickets (per-user, same doc as exercises) ---------- */
@@ -4438,6 +4442,7 @@ function showApp(user){
   document.getElementById('loginScreen').hidden=true;
   startInbox(user.uid);
   startLocks();
+  startTaskLocks();
   const chip=document.getElementById('userChip'); chip.hidden=false;
   document.getElementById('userName').textContent=(appData.profile&&appData.profile.name)||user.displayName||user.email||'Student';
 }
@@ -4473,6 +4478,80 @@ function startLocks(){
   },()=>{});
 }
 function stopLocks(){ if(lockRef){lockRef.off();lockRef=null;} lockedCh={}; }
+/* ---------- Instructor task locks + deadlines (iedbook/settings/taskLocks/{chId}_{task} = {closed:true} | {due:ms}) ---------- */
+let taskLocks={}, taskLockRef=null, taskLockTimer=null;
+const TASK_LABEL={prep:'Prep quiz',starter:'Starter',hyp:'Opening challenge',ex:'Exercises',exit:'Exit ticket',set:'Practice set'};
+function taskEls(ch,t){
+  if(t==='prep'||t==='starter'||t==='set'){const e=document.getElementById(t+'-'+ch);return e?[e]:[];}
+  if(t==='hyp'){const e=document.querySelector('#block-challenge-'+ch+' .struggle-zone');return e?[e]:[];}
+  if(t==='exit'){const e=document.getElementById('exitTransfer-'+ch);return e&&e.closest('.exit-panel')?[e.closest('.exit-panel')]:[];}
+  if(t==='ex')return[...document.querySelectorAll('[data-ex^="'+ch+'-"]')].map(c=>c.closest('.ex')).filter(Boolean);
+  return[];
+}
+function applyTaskLocks(){
+  document.querySelectorAll('.task-lock-banner').forEach(b=>b.remove());
+  document.querySelectorAll('.task-closed').forEach(e=>{e.classList.remove('task-closed');e.inert=false;});
+  const now=Date.now();
+  Object.entries(taskLocks).forEach(([key,v])=>{
+    if(!v)return; const i=key.lastIndexOf('_'), ch=key.slice(0,i), t=key.slice(i+1);
+    const closed=!!v.closed||(v.due&&now>=v.due);
+    if(!closed&&!v.due)return;
+    taskEls(ch,t).forEach((el,n)=>{
+      if(closed){el.inert=true;el.classList.add('task-closed');}
+      if(n>0)return;
+      const b=document.createElement('div'); b.className='task-lock-banner'+(closed?'':' due'); b.setAttribute('role','note');
+      b.textContent=closed
+        ?('🔒 '+TASK_LABEL[t]+' is closed'+(v.closed?' by your instructor.':' — the deadline ('+fmtTs(v.due)+') has passed.')+' Your saved work is kept.')
+        :('⏰ '+TASK_LABEL[t]+' is due '+fmtTs(v.due)+'. It will close automatically after that.');
+      el.parentNode.insertBefore(b,el);
+    });
+  });
+}
+function startTaskLocks(){
+  if(!db||taskLockRef)return;
+  taskLockRef=db.ref(`${APP_KEY}/settings/taskLocks`);
+  taskLockRef.on('value',snap=>{taskLocks=snap.val()||{};applyTaskLocks();},()=>{});
+  taskLockTimer=setInterval(applyTaskLocks,30000);
+}
+function stopTaskLocks(){ if(taskLockRef){taskLockRef.off();taskLockRef=null;} clearInterval(taskLockTimer); taskLocks={}; applyTaskLocks(); }
+
+/* ---------- Writing activity log: typed vs pasted characters + timed draft snapshots (appData.writeLog[fieldId]) ---------- */
+let wlPend=0;
+const WL_FIELD=/^(ans-|hyp-|exitTransfer-|exitMuddy-|stA-|setIn-)/;
+function wlEntry(el){
+  appData.writeLog=appData.writeLog||{};
+  return appData.writeLog[el.id]=appData.writeLog[el.id]||{typed:0,pasted:0,pastes:[],snaps:[],start:Date.now(),last:0,activeMs:0};
+}
+function wlSnap(el,w,force){
+  const now=Date.now(), last=w.snaps[w.snaps.length-1];
+  if(last&&last.v===el.value)return;
+  if(!force&&last&&now-last.t<15000)return;
+  w.snaps.push({t:now,v:el.value.slice(0,4000)});
+  if(w.snaps.length>40)w.snaps=w.snaps.filter((x,i,a)=>i===0||i===a.length-1||i%2===1);
+}
+document.addEventListener('paste',e=>{
+  const el=e.target; if(!el.id||!WL_FIELD.test(el.id))return;
+  const txt=(e.clipboardData&&e.clipboardData.getData('text'))||'';
+  const w=wlEntry(el); w.pastes.push({t:Date.now(),n:txt.length,s:txt.slice(0,300)});
+  if(w.pastes.length>20)w.pastes.shift();
+  wlPend=txt.length;
+},true);
+document.addEventListener('input',e=>{
+  const el=e.target; if(!el.id||!WL_FIELD.test(el.id))return;
+  const w=wlEntry(el), now=Date.now(), it=e.inputType||'';
+  if(it==='insertFromPaste'||it==='insertFromDrop'){
+    w.pasted+=wlPend; wlPend=0;
+    wlSnap(el,w,true);
+  }else if(it.startsWith('insert')){ w.typed+=(e.data||'').length||1; wlSnap(el,w,false); }
+  else wlSnap(el,w,false);
+  if(w.last&&now-w.last<60000)w.activeMs+=now-w.last;
+  w.last=now; scheduleSave();
+},true);
+document.addEventListener('focusout',e=>{
+  const el=e.target; if(!el.id||!WL_FIELD.test(el.id)||!appData.writeLog||!appData.writeLog[el.id])return;
+  wlSnap(el,appData.writeLog[el.id],true); scheduleSave();
+},true);
+
 function showLockedNotice(id){
   const meta=CH.find(x=>x.id===id);
   alert('🔒 '+(meta?('Chapter '+meta.n+' — '+meta.t):'This chapter')+' is not open yet. Your instructor will unlock it when the class reaches it.');
@@ -4571,7 +4650,7 @@ if(FIREBASE_READY){
         logEvent('login','');
         showApp(user); applyData(); navTo('thisweek'); checkMsgHash();
       }
-    } else { stopInbox(); stopLocks(); showLogin(); }
+    } else { stopInbox(); stopLocks(); stopTaskLocks(); showLogin(); }
   });
 }else{
   /* Local-only mode until Firebase is configured */
