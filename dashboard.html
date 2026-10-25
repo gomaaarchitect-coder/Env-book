@@ -273,6 +273,7 @@ details.answers summary:hover{color:var(--accent)}
       <span class="who" id="who"></span>
       <a class="btn btn-ghost" href="./" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none" aria-label="Open the student book in a new tab">📖 Open book</a>
       <button class="btn btn-ghost" id="newMsgBtn" onclick="openComposer(null,this)">✉ New message</button>
+      <span id="liveStatus" class="muted" role="status" aria-live="off" style="font-size:.8rem;align-self:center"></span>
       <button class="btn btn-ghost" onclick="load()">↻ Refresh</button>
       <button class="btn btn-ghost" onclick="signOut()">Sign out</button>
     </div>
@@ -459,7 +460,7 @@ function err(m){const e=document.getElementById('loginErr');e.textContent=m;e.cl
 function gIn(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>err(e.message));}
 function eIn(){const a=em.value.trim(),p=pw.value;if(!a||!p)return err('Enter email and password.');auth.signInWithEmailAndPassword(a,p).catch(e=>err(e.message));}
 function eUp(){const a=em.value.trim(),p=pw.value;if(!a||p.length<6)return err('Enter email and a 6+ char password.');auth.createUserWithEmailAndPassword(a,p).catch(e=>err(e.message));}
-function signOut(){auth.signOut();}
+function signOut(){if(usersRef){usersRef.off();usersRef=null;}auth.signOut();}
 
 function fmtDate(ts){if(!ts)return '—';const d=new Date(ts);return d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
 function ago(ts){if(!ts)return '—';const s=(Date.now()-ts)/1000;if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
@@ -478,24 +479,34 @@ function summarize(uid,data){
     lastSeen:p.lastSeen||0,firstSeen:p.firstSeen||0,chapters:visited,done,answers,reveals,time,completion,data};
 }
 
-async function load(){
+/* Live: re-render whenever any student's data changes (throttled to once every 5 s; open detail panels stay open) */
+let usersRef=null, liveTimer=null, liveSnap=null;
+function applyUsers(snap){
+  const open=[...document.querySelectorAll('tr.detail:not([hidden])')].map(e=>e.id);
+  rows=[];
+  snap.forEach(ch=>{const v=ch.val();if(v&&v.data)rows.push(summarize(ch.key,v.data));});
+  render();
+  open.forEach(id=>{const e=document.getElementById(id);if(e)e.hidden=false;});
+  pickLatestWeek();
+  renderAnalytics();
+  const st=document.getElementById('liveStatus'); if(st)st.textContent='● Live · updated '+new Date().toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+function load(){
   document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">Loading…</td></tr>';
   document.getElementById('authNotice').innerHTML='';
-  try{
-    const snap=await db.ref(`${APP_KEY}/users`).get();
-    rows=[];
-    snap.forEach(ch=>{const v=ch.val();if(v&&v.data)rows.push(summarize(ch.key,v.data));});
-    render();
-    pickLatestWeek();
-    renderAnalytics();
-    loadMessages();
-    loadLocks();
-    loadTaskLocks();
-  }catch(e){
+  if(usersRef)usersRef.off();
+  clearTimeout(liveTimer); liveTimer=null;
+  let first=true;
+  usersRef=db.ref(`${APP_KEY}/users`);
+  usersRef.on('value',snap=>{
+    if(first){ first=false; applyUsers(snap); loadMessages(); loadLocks(); loadTaskLocks(); return; }
+    liveSnap=snap;
+    if(!liveTimer)liveTimer=setTimeout(()=>{liveTimer=null;applyUsers(liveSnap);},5000);
+  },e=>{
     document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">No access.</td></tr>';
     document.getElementById('authNotice').innerHTML=
      `<div class="notice">⚠️ This account can’t read student data yet (<b>${e.message}</b>).<br>Add your instructor UID to the admin list in Firebase to grant access:<br><code>${APP_KEY}/admins/${me?me.uid:'YOUR_UID'} = true</code></div>`;
-  }
+  });
 }
 
 function kpis(){
