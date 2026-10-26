@@ -8,7 +8,10 @@
       "users": {
         "$uid": {
           ".read": "$uid === auth.uid || root.child('iedbook/admins').child(auth.uid).exists()",
-          ".write": "$uid === auth.uid || root.child('iedbook/admins').child(auth.uid).exists()"
+          ".write": "$uid === auth.uid || root.child('iedbook/admins').child(auth.uid).exists()",
+          "data": {
+            ".validate": "(!data.child('starter/w2').exists() || newData.child('starter/w2').exists()) && (!data.child('starter/w3').exists() || newData.child('starter/w3').exists()) && (!data.child('starter/w4').exists() || newData.child('starter/w4').exists()) && (!data.child('starter/w5').exists() || newData.child('starter/w5').exists()) && (!data.child('starter/w6').exists() || newData.child('starter/w6').exists()) && (!data.child('starter/w7').exists() || newData.child('starter/w7').exists()) && (!data.child('starter/w8').exists() || newData.child('starter/w8').exists()) && (!data.child('starter/w9').exists() || newData.child('starter/w9').exists()) && (!data.child('starter/w10').exists() || newData.child('starter/w10').exists()) && (!data.child('starter/w11').exists() || newData.child('starter/w11').exists()) && (!data.child('starter/w12').exists() || newData.child('starter/w12').exists()) && (!data.child('starter/w13').exists() || newData.child('starter/w13').exists()) && (!data.child('exit/ch1').exists() || newData.child('exit/ch1').exists()) && (!data.child('exit/ch2').exists() || newData.child('exit/ch2').exists()) && (!data.child('exit/ch3').exists() || newData.child('exit/ch3').exists()) && (!data.child('exit/ch4').exists() || newData.child('exit/ch4').exists()) && (!data.child('exit/ch5').exists() || newData.child('exit/ch5').exists()) && (!data.child('exit/ch6').exists() || newData.child('exit/ch6').exists()) && (!data.child('exit/ch7').exists() || newData.child('exit/ch7').exists()) && (!data.child('exit/ch8').exists() || newData.child('exit/ch8').exists()) && (!data.child('exit/ch9').exists() || newData.child('exit/ch9').exists()) && (!data.child('exit/ch10').exists() || newData.child('exit/ch10').exists()) && (!data.child('exit/ch11').exists() || newData.child('exit/ch11').exists())"
+          }
         }
       },
       "messages": {
